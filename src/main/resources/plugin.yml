@@ -1,7 +1,7 @@
 name: NoteBlockAPI
 
 main: com.xxmicloxx.NoteBlockAPI.NoteBlockPlayerMain
-version: 1.2.0
+version: 1.1.2
 
 description: a developer interface to play nbs-files ingame
-authors: [xxmicloxx, michidk]
+authors: [xxmicloxx, michidk, koca2000]

@@ -12,6 +12,7 @@ import org.bukkit.entity.Player;
  */
 public class NoteBlockSongPlayer extends SongPlayer {
     private Block noteBlock;
+    private int distance = 16;
 
     public NoteBlockSongPlayer(Song song) {
         super(song);
@@ -45,8 +46,20 @@ public class NoteBlockSongPlayer extends SongPlayer {
                     new org.bukkit.Note(note.getKey() - 33));
             p.playSound(noteBlock.getLocation(),
                     Instrument.getInstrument(note.getInstrument()),
-                    (l.getVolume() * (int) volume * (int) playerVolume) / 1000000f,
+                    ((l.getVolume() * (int) volume * (int) playerVolume) / 1000000f) * ((1f/16f) * distance),
                     NotePitch.getPitch(note.getKey() - 33));
         }
+    }
+    
+    /**
+     * Sets distance in blocks where would be player able to hear sound. 
+     * @param distance (Default 16 blocks)
+     */
+    public void setDistance(int distance){
+    	this.distance = distance;
+    }
+    
+    public int getDistance(){
+    	return distance;
     }
 }

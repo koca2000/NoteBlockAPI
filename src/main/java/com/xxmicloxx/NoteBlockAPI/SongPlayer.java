@@ -73,7 +73,7 @@ public abstract class SongPlayer {
             return; // no fade today
         }
         double targetVolume = Interpolator.interpLinear(new double[]{0, fadeStart, fadeDuration, fadeTarget}, fadeDone);
-        setVolume((byte) targetVolume);
+        setVolume((byte)targetVolume);
         fadeDone++;
     }
 
