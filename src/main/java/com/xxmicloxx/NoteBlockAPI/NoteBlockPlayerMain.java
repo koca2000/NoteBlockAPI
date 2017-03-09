@@ -13,6 +13,8 @@ public class NoteBlockPlayerMain extends JavaPlugin {
     public HashMap<String, ArrayList<SongPlayer>> playingSongs = new HashMap<String, ArrayList<SongPlayer>>();
     public HashMap<String, Byte> playerVolume = new HashMap<String, Byte>();
 
+    public boolean disabling = false;
+    
     public static boolean isReceivingSong(Player p) {
         return ((plugin.playingSongs.get(p.getName()) != null) && (!plugin.playingSongs.get(p.getName()).isEmpty()));
     }
@@ -46,6 +48,7 @@ public class NoteBlockPlayerMain extends JavaPlugin {
 
     @Override
     public void onDisable() {
+    	disabling = true;
         Bukkit.getScheduler().cancelTasks(this);
     }
 }

@@ -6,6 +6,7 @@ import org.bukkit.entity.Player;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 public abstract class SongPlayer {
 
@@ -78,12 +79,12 @@ public abstract class SongPlayer {
     }
 
     protected void createThread() {
-        playerThread = new Thread(new Runnable() {
+    	playerThread = new Thread(new Runnable() {
             @Override
             public void run() {
                 while (!destroyed) {
                     long startTime = System.currentTimeMillis();
-                    synchronized (SongPlayer.this) {
+                    /*synchronized (SongPlayer.this) {
                         if (playing) {
                             calculateFade();
                             tick++;
@@ -107,7 +108,50 @@ public abstract class SongPlayer {
                                 playTick(p, tick);
                             }
                         }
+                    }*/
+                    
+                    try {
+                        synchronized (Bukkit.getScheduler()) {
+                        	if (destroyed || NoteBlockPlayerMain.plugin.disabling){
+                            	break;
+                            }
+                            Bukkit.getScheduler().callSyncMethod(NoteBlockPlayerMain.plugin, new Callable<Boolean>() {
+                                public Boolean call() {
+                                	if (playing) {
+                                        calculateFade();
+                                        tick++;
+                                        if (tick > song.getLength()) {
+                                            playing = false;
+                                            tick = -1;
+                                            SongEndEvent event = new SongEndEvent(SongPlayer.this);
+                                            Bukkit.getPluginManager().callEvent(event);
+                                            if (autoDestroy) {
+                                                destroy();
+                                                return false;
+                                            }
+                                        }
+                                        for (String s : playerList) {
+                                            @SuppressWarnings("deprecation")
+            								Player p = Bukkit.getPlayerExact(s);
+                                            if (p == null) {
+                                                // offline...
+                                                continue;
+                                            }
+                                            playTick(p, tick);
+                                        }
+                                    }
+                                    return true;
+                                }
+                            });
+                        }
+                    } catch (java.lang.IllegalStateException e) {
+                        e.printStackTrace();
                     }
+                    
+                    if (destroyed){
+                    	break;
+                    }
+                    
                     long duration = System.currentTimeMillis() - startTime;
                     float delayMillis = song.getDelay() * 50;
                     if (duration < delayMillis) {
