@@ -1,19 +1,21 @@
 package com.xxmicloxx.NoteBlockAPI;
 
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Callable;
+
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 
 public abstract class SongPlayer {
 
     protected Song song;
     protected boolean playing = false;
     protected short tick = -1;
-    protected ArrayList<String> playerList = new ArrayList<String>();
+    //protected ArrayList<String> playerList = new ArrayList<String>();
+    protected HashMap<String, Boolean> playerList = new HashMap<String, Boolean>();
     protected boolean autoDestroy = false;
     protected boolean destroyed = false;
     protected Thread playerThread;
@@ -130,7 +132,7 @@ public abstract class SongPlayer {
                                                 return false;
                                             }
                                         }
-                                        for (String s : playerList) {
+                                        for (String s : playerList.keySet()) {
                                             @SuppressWarnings("deprecation")
             								Player p = Bukkit.getPlayerExact(s);
                                             if (p == null) {
@@ -169,13 +171,15 @@ public abstract class SongPlayer {
     }
 
     public List<String> getPlayerList() {
-        return Collections.unmodifiableList(playerList);
+    	List<String> list = new ArrayList<String>();
+    	list.addAll(playerList.keySet());
+        return Collections.unmodifiableList(list);
     }
 
     public void addPlayer(Player p) {
         synchronized (this) {
-            if (!playerList.contains(p.getName())) {
-                playerList.add(p.getName());
+            if (!playerList.containsKey(p.getName())) {
+                playerList.put(p.getName(), false);
                 ArrayList<SongPlayer> songs = NoteBlockPlayerMain.plugin.playingSongs
                         .get(p.getName());
                 if (songs == null) {
@@ -187,6 +191,8 @@ public abstract class SongPlayer {
         }
     }
 
+    
+    
     public boolean getAutoDestroy() {
         synchronized (this) {
             return autoDestroy;

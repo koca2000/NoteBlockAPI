@@ -1,15 +1,10 @@
 package com.xxmicloxx.NoteBlockAPI;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
-/**
- * Created with IntelliJ IDEA.
- * User: ml
- * Date: 07.12.13
- * Time: 12:56
- */
 public class NoteBlockSongPlayer extends SongPlayer {
     private Block noteBlock;
     private int distance = 16;
@@ -48,6 +43,19 @@ public class NoteBlockSongPlayer extends SongPlayer {
                     Instrument.getInstrument(note.getInstrument()),
                     ((l.getVolume() * (int) volume * (int) playerVolume) / 1000000f) * ((1f/16f) * distance),
                     NotePitch.getPitch(note.getKey() - 33));
+            if (isPlayerInRange(p)){
+            	if (!this.playerList.get(p.getName())){
+            		playerList.put(p.getName(), true);
+            		PlayerRangeStateChangeEvent event = new PlayerRangeStateChangeEvent(this, p, true);
+            		Bukkit.getPluginManager().callEvent(event);
+            	}
+            } else {
+            	if (this.playerList.get(p.getName())){
+            		playerList.put(p.getName(), false);
+            		PlayerRangeStateChangeEvent event = new PlayerRangeStateChangeEvent(this, p, false);
+            		Bukkit.getPluginManager().callEvent(event);
+            	}
+            }
         }
     }
     
@@ -61,5 +69,13 @@ public class NoteBlockSongPlayer extends SongPlayer {
     
     public int getDistance(){
     	return distance;
+    }
+    
+    public boolean isPlayerInRange(Player p){
+    	if (p.getLocation().distance(noteBlock.getLocation()) > distance){
+    		return false;
+    	} else {
+    		return true;
+    	}
     }
 }
