@@ -5,21 +5,38 @@ import org.bukkit.Sound;
 public class Instrument {
 
     public static Sound getInstrument(byte instrument) {
-        switch (instrument) {
-            case 0:
-                return Sound.BLOCK_NOTE_HARP;
+    	if (!NoteBlockPlayerMain.plugin.isPre1_9()){
+	    	switch (instrument) {
+	            case 0:
+	                return Sound.valueOf("BLOCK_NOTE_HARP");
+	            case 1:
+	                return Sound.valueOf("BLOCK_NOTE_BASS");
+	            case 2:
+	                return Sound.valueOf("BLOCK_NOTE_BASEDRUM");
+	            case 3:
+	                return Sound.valueOf("BLOCK_NOTE_SNARE");
+	            case 4:
+	                return Sound.valueOf("BLOCK_NOTE_HAT");
+	            default:
+	                return Sound.valueOf("BLOCK_NOTE_HARP");
+	                
+	        }
+    	} else {
+    		switch (instrument) {
+    		case 0:
+                return Sound.valueOf("NOTE_PIANO");
             case 1:
-                return Sound.BLOCK_NOTE_BASS;
+                return Sound.valueOf("NOTE_BASS_GUITAR");
             case 2:
-                return Sound.BLOCK_NOTE_BASEDRUM;
+                return Sound.valueOf("NOTE_BASS_DRUM");
             case 3:
-                return Sound.BLOCK_NOTE_SNARE;
+                return Sound.valueOf("NOTE_SNARE_DRUM");
             case 4:
-                return Sound.BLOCK_NOTE_HAT;
+                return Sound.valueOf("NOTE_STICKS");
             default:
-                return Sound.BLOCK_NOTE_HARP;
-                
-        }
+                return Sound.valueOf("NOTE_PIANO");
+    		}
+    	}
     }
 
     public static org.bukkit.Instrument getBukkitInstrument(byte instrument) {

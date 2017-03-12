@@ -51,4 +51,16 @@ public class NoteBlockPlayerMain extends JavaPlugin {
     	disabling = true;
         Bukkit.getScheduler().cancelTasks(this);
     }
+    
+    public boolean isPre1_9(){
+    	if (Bukkit.getVersion().contains("1.8")) {
+    		   return true;
+    	}
+    	
+    	if (Bukkit.getVersion().contains("1.7")) {
+ 		   return true;
+    	}
+    	
+		return false;
+    }
 }
