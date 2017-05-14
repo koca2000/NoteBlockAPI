@@ -1,5 +1,7 @@
 package com.xxmicloxx.NoteBlockAPI;
 
+import com.xxmicloxx.NoteBlockAPI.NoteBlockPlayerMain.NoteBlockCompatibility;
+
 public enum NotePitch {
 
 	NOTE_0(0, 0.5F, 0.50000F),
@@ -41,7 +43,7 @@ public enum NotePitch {
     public static float getPitch(int note) {
         for (NotePitch notePitch : values()) {
             if (notePitch.note == note) {
-                return NoteBlockPlayerMain.isPre1_9() ? notePitch.pitchPre1_9 : notePitch.pitchPost1_9;
+                return NoteBlockPlayerMain.getCompatibility() == NoteBlockCompatibility.pre1_9 ? notePitch.pitchPre1_9 : notePitch.pitchPost1_9;
             }
         }
 

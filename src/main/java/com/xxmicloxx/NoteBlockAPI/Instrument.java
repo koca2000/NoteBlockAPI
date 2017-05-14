@@ -2,11 +2,28 @@ package com.xxmicloxx.NoteBlockAPI;
 
 import org.bukkit.Sound;
 
+import com.xxmicloxx.NoteBlockAPI.NoteBlockPlayerMain.NoteBlockCompatibility;
+
 public class Instrument {
 
     public static Sound getInstrument(byte instrument) {
-    	if (!NoteBlockPlayerMain.isPre1_9()){
-	    	switch (instrument) {
+    	if (NoteBlockPlayerMain.getCompatibility() == NoteBlockCompatibility.pre1_9){
+			switch (instrument) {
+        		case 0:
+                    return Sound.valueOf("NOTE_PIANO");
+                case 1:
+                    return Sound.valueOf("NOTE_BASS_GUITAR");
+                case 2:
+                    return Sound.valueOf("NOTE_BASS_DRUM");
+                case 3:
+                    return Sound.valueOf("NOTE_SNARE_DRUM");
+                case 4:
+                    return Sound.valueOf("NOTE_STICKS");
+                default:
+                    return Sound.valueOf("NOTE_PIANO");
+    		}
+    	} else {
+			switch (instrument) {
 	            case 0:
 	                return Sound.valueOf("BLOCK_NOTE_HARP");
 	            case 1:
@@ -17,25 +34,25 @@ public class Instrument {
 	                return Sound.valueOf("BLOCK_NOTE_SNARE");
 	            case 4:
 	                return Sound.valueOf("BLOCK_NOTE_HAT");
-	            default:
-	                return Sound.valueOf("BLOCK_NOTE_HARP");
-	                
-	        }
-    	} else {
-    		switch (instrument) {
-    		case 0:
-                return Sound.valueOf("NOTE_PIANO");
-            case 1:
-                return Sound.valueOf("NOTE_BASS_GUITAR");
-            case 2:
-                return Sound.valueOf("NOTE_BASS_DRUM");
-            case 3:
-                return Sound.valueOf("NOTE_SNARE_DRUM");
-            case 4:
-                return Sound.valueOf("NOTE_STICKS");
-            default:
-                return Sound.valueOf("NOTE_PIANO");
-    		}
+			}
+			
+			if (NoteBlockPlayerMain.getCompatibility() == NoteBlockCompatibility.post1_12){
+				switch (instrument) {
+		            case 5:
+		                return Sound.valueOf("BLOCK_NOTE_FLUTE");
+		            case 6:
+		                return Sound.valueOf("BLOCK_NOTE_BELL");
+		            case 7:
+		                return Sound.valueOf("BLOCK_NOTE_GUITAR");
+		            case 8:
+		                return Sound.valueOf("BLOCK_NOTE_CHIME");
+		            case 9:
+		                return Sound.valueOf("BLOCK_NOTE_XYLOPHONE");
+				}
+			}
+			
+			return Sound.valueOf("BLOCK_NOTE_HARP");
+			
     	}
     }
 
