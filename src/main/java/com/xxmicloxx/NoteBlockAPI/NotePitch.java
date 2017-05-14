@@ -41,7 +41,7 @@ public enum NotePitch {
     public static float getPitch(int note) {
         for (NotePitch notePitch : values()) {
             if (notePitch.note == note) {
-                return NoteBlockPlayerMain.plugin.isPre1_9() ? notePitch.pitchPre1_9 : notePitch.pitchPost1_9;
+                return NoteBlockPlayerMain.isPre1_9() ? notePitch.pitchPre1_9 : notePitch.pitchPost1_9;
             }
         }
 

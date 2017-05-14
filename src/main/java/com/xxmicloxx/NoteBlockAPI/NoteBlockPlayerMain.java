@@ -1,19 +1,22 @@
 package com.xxmicloxx.NoteBlockAPI;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
 public class NoteBlockPlayerMain extends JavaPlugin {
 
     public static NoteBlockPlayerMain plugin;
-    public HashMap<String, ArrayList<SongPlayer>> playingSongs = new HashMap<String, ArrayList<SongPlayer>>();
-    public HashMap<String, Byte> playerVolume = new HashMap<String, Byte>();
+    
+    public Map<String, ArrayList<SongPlayer>> playingSongs = Collections.synchronizedMap(new HashMap<String, ArrayList<SongPlayer>>());
+    public Map<String, Byte> playerVolume = Collections.synchronizedMap(new HashMap<String, Byte>());
 
-    public boolean disabling = false;
+    private boolean disabling = false;
     
     public static boolean isReceivingSong(Player p) {
         return ((plugin.playingSongs.get(p.getName()) != null) && (!plugin.playingSongs.get(p.getName()).isEmpty()));
@@ -47,20 +50,24 @@ public class NoteBlockPlayerMain extends JavaPlugin {
     }
 
     @Override
-    public void onDisable() {
+    public void onDisable() {    	
     	disabling = true;
         Bukkit.getScheduler().cancelTasks(this);
     }
     
-    public boolean isPre1_9(){
-    	if (Bukkit.getVersion().contains("1.8")) {
-    		   return true;
-    	}
-    	
-    	if (Bukkit.getVersion().contains("1.7")) {
- 		   return true;
-    	}
-    	
-		return false;
+    public static boolean isPre1_9(){
+    	return Bukkit.getVersion().contains("1.8") || Bukkit.getVersion().contains("1.7");
+    }
+    
+    public void doSync(Runnable r) {
+        getServer().getScheduler().runTask(this, r);
+    }
+
+    public void doAsync(Runnable r) {
+        getServer().getScheduler().runTaskAsynchronously(this, r);
+    }
+    
+    protected boolean isDisabling(){
+    	return disabling;
     }
 }

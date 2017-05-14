@@ -5,7 +5,7 @@ import org.bukkit.Sound;
 public class Instrument {
 
     public static Sound getInstrument(byte instrument) {
-    	if (!NoteBlockPlayerMain.plugin.isPre1_9()){
+    	if (!NoteBlockPlayerMain.isPre1_9()){
 	    	switch (instrument) {
 	            case 0:
 	                return Sound.valueOf("BLOCK_NOTE_HARP");
