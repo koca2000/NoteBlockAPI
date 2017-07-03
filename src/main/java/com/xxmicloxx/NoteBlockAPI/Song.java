@@ -14,23 +14,20 @@ public class Song {
     private String description;
     private float speed;
     private float delay;
+    private CustomInstrument[] customInstrument;
 
     public Song(Song other) {
-        this.speed = other.getSpeed();
-        delay = 20 / speed;
-        this.layerHashMap = other.getLayerHashMap();
-        this.songHeight = other.getSongHeight();
-        this.length = other.getLength();
-        this.title = other.getTitle();
-        this.author = other.getAuthor();
-        this.description = other.getDescription();
-        this.path = other.getPath();
+        this(other.getSpeed(), other.getLayerHashMap(), other.getSongHeight(), other.getLength(), other.getTitle(), other.getAuthor(), other.getDescription(), other.getPath());
     }
-
+    
     public Song(float speed, HashMap<Integer, Layer> layerHashMap,
                 short songHeight, final short length, String title, String author,
                 String description, File path) {
-        this.speed = speed;
+        this(speed, layerHashMap, songHeight, length, title, author, description, path, new CustomInstrument[0]);
+    }
+
+	public Song(float speed, HashMap<Integer, Layer> layerHashMap, short songHeight, final short length, String title, String author, String description, File path, CustomInstrument[] customInstrument) {
+    	this.speed = speed;
         delay = 20 / speed;
         this.layerHashMap = layerHashMap;
         this.songHeight = songHeight;
@@ -39,6 +36,7 @@ public class Song {
         this.author = author;
         this.description = description;
         this.path = path;
+        this.customInstrument = customInstrument;
     }
 
     public HashMap<Integer, Layer> getLayerHashMap() {
@@ -75,5 +73,9 @@ public class Song {
 
     public float getDelay() {
         return delay;
+    }
+    
+    public CustomInstrument[] getCustomInstruments(){
+    	return customInstrument;
     }
 }

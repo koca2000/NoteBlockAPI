@@ -39,10 +39,27 @@ public class NoteBlockSongPlayer extends SongPlayer {
             }
             p.playNote(noteBlock.getLocation(), Instrument.getBukkitInstrument(note.getInstrument()),
                     new org.bukkit.Note(note.getKey() - 33));
-            p.playSound(noteBlock.getLocation(),
+            
+            if (Instrument.isCustomInstrument(note.getInstrument())){
+            	if (song.getCustomInstruments()[note.getInstrument() - Instrument.getCustomInstrumentFirstIndex()].getSound() != null){
+            		p.playSound(noteBlock.getLocation(),
+                            song.getCustomInstruments()[note.getInstrument() - Instrument.getCustomInstrumentFirstIndex()].getSound(),
+                            ((l.getVolume() * (int) volume * (int) playerVolume) / 1000000f) * ((1f/16f) * distance),
+                            NotePitch.getPitch(note.getKey() - 33));
+            	}else {
+            		p.playSound(noteBlock.getLocation(),
+                            song.getCustomInstruments()[note.getInstrument() - Instrument.getCustomInstrumentFirstIndex()].getSoundfile(),
+                            ((l.getVolume() * (int) volume * (int) playerVolume) / 1000000f) * ((1f/16f) * distance),
+                            NotePitch.getPitch(note.getKey() - 33));
+            	}
+            	
+            }else {
+            	p.playSound(noteBlock.getLocation(),
                     Instrument.getInstrument(note.getInstrument()),
                     ((l.getVolume() * (int) volume * (int) playerVolume) / 1000000f) * ((1f/16f) * distance),
                     NotePitch.getPitch(note.getKey() - 33));
+            }
+            
             if (isPlayerInRange(p)){
             	if (!this.playerList.get(p.getName())){
             		playerList.put(p.getName(), true);

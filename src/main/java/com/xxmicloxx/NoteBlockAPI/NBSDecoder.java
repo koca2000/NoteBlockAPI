@@ -1,6 +1,11 @@
 package com.xxmicloxx.NoteBlockAPI;
 
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 
 public class NBSDecoder {
@@ -60,12 +65,22 @@ public class NBSDecoder {
             }
             for (int i = 0; i < songHeight; i++) {
                 Layer l = layerHashMap.get(i);
+                
+            	String name = readString(dis);
+            	byte volume = dis.readByte();
                 if (l != null) {
-                    l.setName(readString(dis));
-                    l.setVolume(dis.readByte());
+                    l.setName(name);
+                    l.setVolume(volume);
                 }
             }
-            return new Song(speed, layerHashMap, songHeight, length, title, author, description, decodeFile);
+            //count of custom instruments
+            byte custom = dis.readByte();
+            CustomInstrument[] customInstruments = new CustomInstrument[custom];
+
+            for (int i = 0; i < custom; i++) {
+                customInstruments[i] = new CustomInstrument((byte)i, readString(dis), readString(dis), dis.readByte(), dis.readByte());
+            }
+            return new Song(speed, layerHashMap, songHeight, length, title, author, description, decodeFile, customInstruments);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {

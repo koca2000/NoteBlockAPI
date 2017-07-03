@@ -17,10 +17,25 @@ public class RadioSongPlayer extends SongPlayer {
             if (note == null) {
                 continue;
             }
-            p.playSound(p.getEyeLocation(),
+            if (Instrument.isCustomInstrument(note.getInstrument())){
+            	if (song.getCustomInstruments()[note.getInstrument() - Instrument.getCustomInstrumentFirstIndex()].getSound() != null){
+            		p.playSound(p.getEyeLocation(),
+                            song.getCustomInstruments()[note.getInstrument() - Instrument.getCustomInstrumentFirstIndex()].getSound(),
+                            (l.getVolume() * (int) volume * (int) playerVolume) / 1000000f,
+                            NotePitch.getPitch(note.getKey() - 33));
+            	}else {
+            		p.playSound(p.getEyeLocation(),
+                            song.getCustomInstruments()[note.getInstrument() - Instrument.getCustomInstrumentFirstIndex()].getSoundfile(),
+                            (l.getVolume() * (int) volume * (int) playerVolume) / 1000000f,
+                            NotePitch.getPitch(note.getKey() - 33));
+            	}
+            	
+            }else {
+            	p.playSound(p.getEyeLocation(),
                     Instrument.getInstrument(note.getInstrument()),
                     (l.getVolume() * (int) volume * (int) playerVolume) / 1000000f,
                     NotePitch.getPitch(note.getKey() - 33));
+            }
         }
     }
 }

@@ -39,11 +39,11 @@ public class Instrument {
 			if (NoteBlockPlayerMain.getCompatibility() == NoteBlockCompatibility.post1_12){
 				switch (instrument) {
 		            case 5:
-		                return Sound.valueOf("BLOCK_NOTE_FLUTE");
+		            	return Sound.valueOf("BLOCK_NOTE_GUITAR");
 		            case 6:
-		                return Sound.valueOf("BLOCK_NOTE_BELL");
+		            	return Sound.valueOf("BLOCK_NOTE_FLUTE");
 		            case 7:
-		                return Sound.valueOf("BLOCK_NOTE_GUITAR");
+		            	return Sound.valueOf("BLOCK_NOTE_BELL");
 		            case 8:
 		                return Sound.valueOf("BLOCK_NOTE_CHIME");
 		            case 9:
@@ -71,5 +71,27 @@ public class Instrument {
             default:
                 return org.bukkit.Instrument.PIANO;
         }
+    }
+    
+    public static boolean isCustomInstrument(byte instrument){
+    	if (NoteBlockPlayerMain.getCompatibility() != NoteBlockCompatibility.post1_12){
+    		if (instrument > 4){
+    			return true;
+    		}
+    		return false;
+    	} else {
+    		if (instrument > 9){
+    			return true;
+    		}
+    		return false;
+    	}
+    }
+    
+    public static byte getCustomInstrumentFirstIndex(){
+    	if (NoteBlockPlayerMain.getCompatibility() != NoteBlockCompatibility.post1_12){
+    		return 5;
+    	} else {
+    		return 10;
+    	}
     }
 }

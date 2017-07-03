@@ -34,10 +34,27 @@ public class PositionSongPlayer extends SongPlayer {
             if (note == null) {
                 continue;
             }
-            p.playSound(targetLocation,
+            
+            if (Instrument.isCustomInstrument(note.getInstrument())){
+            	if (song.getCustomInstruments()[note.getInstrument() - Instrument.getCustomInstrumentFirstIndex()].getSound() != null){
+            		p.playSound(targetLocation,
+                            song.getCustomInstruments()[note.getInstrument() - Instrument.getCustomInstrumentFirstIndex()].getSound(),
+                            ((l.getVolume() * (int) volume * (int) playerVolume) / 1000000f) * ((1f/16f) * distance),
+                            NotePitch.getPitch(note.getKey() - 33));
+            	}else {
+            		p.playSound(targetLocation,
+                            song.getCustomInstruments()[note.getInstrument() - Instrument.getCustomInstrumentFirstIndex()].getSoundfile(),
+                            ((l.getVolume() * (int) volume * (int) playerVolume) / 1000000f) * ((1f/16f) * distance),
+                            NotePitch.getPitch(note.getKey() - 33));
+            	}
+            	
+            }else {
+            	p.playSound(targetLocation,
                     Instrument.getInstrument(note.getInstrument()),
                     ((l.getVolume() * (int) volume * (int) playerVolume) / 1000000f) * ((1f/16f) * distance),
                     NotePitch.getPitch(note.getKey() - 33));
+            }
+            
             if (isPlayerInRange(p)){
             	if (!this.playerList.get(p.getName())){
             		playerList.put(p.getName(), true);
