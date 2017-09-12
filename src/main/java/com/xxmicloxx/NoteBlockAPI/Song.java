@@ -17,7 +17,7 @@ public class Song {
     private CustomInstrument[] customInstrument;
 
     public Song(Song other) {
-        this(other.getSpeed(), other.getLayerHashMap(), other.getSongHeight(), other.getLength(), other.getTitle(), other.getAuthor(), other.getDescription(), other.getPath());
+        this(other.getSpeed(), other.getLayerHashMap(), other.getSongHeight(), other.getLength(), other.getTitle(), other.getAuthor(), other.getDescription(), other.getPath(), other.getCustomInstruments());
     }
     
     public Song(float speed, HashMap<Integer, Layer> layerHashMap,
