@@ -14,6 +14,10 @@ public class PositionSongPlayer extends SongPlayer {
         super(song);
     }
 
+    public PositionSongPlayer(Song song, SoundCategory soundCategory) {
+        super(song, soundCategory);
+    }
+
     public Location getTargetLocation() {
         return targetLocation;
     }
@@ -40,19 +44,19 @@ public class PositionSongPlayer extends SongPlayer {
             	if (song.getCustomInstruments()[note.getInstrument() - Instrument.getCustomInstrumentFirstIndex()].getSound() != null){
             		p.playSound(targetLocation,
                             song.getCustomInstruments()[note.getInstrument() - Instrument.getCustomInstrumentFirstIndex()].getSound(),
-                            SoundCategory.MUSIC,((l.getVolume() * (int) volume * (int) playerVolume) / 1000000f) * ((1f/16f) * distance),
+                            this.soundCategory,((l.getVolume() * (int) volume * (int) playerVolume) / 1000000f) * ((1f/16f) * distance),
                             NotePitch.getPitch(note.getKey() - 33));
             	}else {
             		p.playSound(targetLocation,
                             song.getCustomInstruments()[note.getInstrument() - Instrument.getCustomInstrumentFirstIndex()].getSoundfile(),
-                            SoundCategory.MUSIC,((l.getVolume() * (int) volume * (int) playerVolume) / 1000000f) * ((1f/16f) * distance),
+                            this.soundCategory,((l.getVolume() * (int) volume * (int) playerVolume) / 1000000f) * ((1f/16f) * distance),
                             NotePitch.getPitch(note.getKey() - 33));
             	}
             	
             }else {
             	p.playSound(targetLocation,
                     Instrument.getInstrument(note.getInstrument()),
-                    SoundCategory.MUSIC,((l.getVolume() * (int) volume * (int) playerVolume) / 1000000f) * ((1f/16f) * distance),
+                    this.soundCategory,((l.getVolume() * (int) volume * (int) playerVolume) / 1000000f) * ((1f/16f) * distance),
                     NotePitch.getPitch(note.getKey() - 33));
             }
             

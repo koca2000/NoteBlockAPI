@@ -9,6 +9,10 @@ public class RadioSongPlayer extends SongPlayer {
         super(song);
     }
 
+    public RadioSongPlayer(Song song, SoundCategory soundCategory) {
+    	super(song, soundCategory);
+    }
+
     @Override
     public void playTick(Player p, int tick) {
         byte playerVolume = NoteBlockPlayerMain.getPlayerVolume(p);
@@ -22,19 +26,19 @@ public class RadioSongPlayer extends SongPlayer {
             	if (song.getCustomInstruments()[note.getInstrument() - Instrument.getCustomInstrumentFirstIndex()].getSound() != null){
             		p.playSound(p.getEyeLocation(),
                             song.getCustomInstruments()[note.getInstrument() - Instrument.getCustomInstrumentFirstIndex()].getSound(),
-                            SoundCategory.MUSIC,(l.getVolume() * (int) volume * (int) playerVolume) / 1000000f,
+                            this.soundCategory,(l.getVolume() * (int) volume * (int) playerVolume) / 1000000f,
                             NotePitch.getPitch(note.getKey() - 33));
             	}else {
             		p.playSound(p.getEyeLocation(),
                             song.getCustomInstruments()[note.getInstrument() - Instrument.getCustomInstrumentFirstIndex()].getSoundfile(),
-                            SoundCategory.MUSIC,(l.getVolume() * (int) volume * (int) playerVolume) / 1000000f,
+                            this.soundCategory,(l.getVolume() * (int) volume * (int) playerVolume) / 1000000f,
                             NotePitch.getPitch(note.getKey() - 33));
             	}
             	
             }else {
             	p.playSound(p.getEyeLocation(),
                     Instrument.getInstrument(note.getInstrument()),
-                    SoundCategory.MUSIC,(l.getVolume() * (int) volume * (int) playerVolume) / 1000000f,
+                    this.soundCategory,(l.getVolume() * (int) volume * (int) playerVolume) / 1000000f,
                     NotePitch.getPitch(note.getKey() - 33));
             }
         }
