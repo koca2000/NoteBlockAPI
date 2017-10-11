@@ -9,6 +9,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.bukkit.Bukkit;
+import org.bukkit.SoundCategory;
 import org.bukkit.entity.Player;
 
 public abstract class SongPlayer {
@@ -28,9 +29,15 @@ public abstract class SongPlayer {
     protected FadeType fadeType = FadeType.FADE_LINEAR;
     private final Lock lock = new ReentrantLock();
     protected NoteBlockPlayerMain plugin;
+    protected SoundCategory soundCategory;
     
     public SongPlayer(Song song) {
+    	this(song, SoundCategory.MASTER);
+    }
+
+    public SongPlayer(Song song, SoundCategory soundCategory) {
         this.song = song;
+        this.soundCategory = soundCategory;
         plugin = NoteBlockPlayerMain.plugin;
         start();
     }
@@ -257,5 +264,13 @@ public abstract class SongPlayer {
 
     public Song getSong() {
         return song;
+    }
+
+    public SoundCategory getCategory() {
+    	return soundCategory;
+    }
+
+    public void setCategory(SoundCategory soundCategory) {
+    	this.soundCategory = soundCategory;
     }
 }

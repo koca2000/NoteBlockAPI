@@ -2,6 +2,7 @@ package com.xxmicloxx.NoteBlockAPI;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.SoundCategory;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
@@ -11,6 +12,10 @@ public class NoteBlockSongPlayer extends SongPlayer {
 
     public NoteBlockSongPlayer(Song song) {
         super(song);
+    }
+
+    public NoteBlockSongPlayer(Song song, SoundCategory soundCategory) {
+        super(song, soundCategory);
     }
 
     public Block getNoteBlock() {
@@ -44,7 +49,7 @@ public class NoteBlockSongPlayer extends SongPlayer {
             	if (song.getCustomInstruments()[note.getInstrument() - Instrument.getCustomInstrumentFirstIndex()].getSound() != null){
             		p.playSound(noteBlock.getLocation(),
                             song.getCustomInstruments()[note.getInstrument() - Instrument.getCustomInstrumentFirstIndex()].getSound(),
-                            ((l.getVolume() * (int) volume * (int) playerVolume) / 1000000f) * ((1f/16f) * distance),
+                            this.soundCategory,((l.getVolume() * (int) volume * (int) playerVolume) / 1000000f) * ((1f/16f) * distance),
                             NotePitch.getPitch(note.getKey() - 33));
             	}else {
             		p.playSound(noteBlock.getLocation(),
@@ -56,7 +61,7 @@ public class NoteBlockSongPlayer extends SongPlayer {
             }else {
             	p.playSound(noteBlock.getLocation(),
                     Instrument.getInstrument(note.getInstrument()),
-                    ((l.getVolume() * (int) volume * (int) playerVolume) / 1000000f) * ((1f/16f) * distance),
+                    this.soundCategory,((l.getVolume() * (int) volume * (int) playerVolume) / 1000000f) * ((1f/16f) * distance),
                     NotePitch.getPitch(note.getKey() - 33));
             }
             
