@@ -1,12 +1,16 @@
 package com.xxmicloxx.NoteBlockAPI;
 
 import java.io.DataInputStream;
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 
 public class NBSDecoder {
 
@@ -83,6 +87,12 @@ public class NBSDecoder {
             return new Song(speed, layerHashMap, songHeight, length, title, author, description, decodeFile, customInstruments);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+        } catch (EOFException e){
+        	String file = "";
+        	if (decodeFile != null){
+        		file = decodeFile.getName();
+        	}
+        	Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.RED + "Song is corrupted " + file);
         } catch (IOException e) {
             e.printStackTrace();
         }

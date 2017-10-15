@@ -6,7 +6,7 @@
 	
     <groupId>com.xxmicloxx</groupId>
     <artifactId>NoteBlockAPI</artifactId>
-    <version>1.1.8</version>
+    <version>1.1.9</version>
     
 	<properties>
 		<maven.compiler.source>1.8</maven.compiler.source>
