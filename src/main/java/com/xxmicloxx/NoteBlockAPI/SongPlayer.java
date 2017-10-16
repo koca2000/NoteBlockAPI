@@ -9,7 +9,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.bukkit.Bukkit;
-import org.bukkit.SoundCategory;
 import org.bukkit.entity.Player;
 
 public abstract class SongPlayer {

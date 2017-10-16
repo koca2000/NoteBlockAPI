@@ -57,16 +57,6 @@ public class NoteBlockPlayerMain extends JavaPlugin {
         Bukkit.getScheduler().cancelTasks(this);
     }
     
-    protected static int getCompatibility(){
-    	if (Bukkit.getVersion().contains("1.8") || Bukkit.getVersion().contains("1.7")){
-    		return NoteBlockCompatibility.pre1_9;
-    	} else if (Bukkit.getVersion().contains("1.9") || Bukkit.getVersion().contains("1.10") || Bukkit.getVersion().contains("1.11")){
-    		return NoteBlockCompatibility.pre1_12;
-    	} else {
-    		return NoteBlockCompatibility.post1_12;
-    	}
-    }
-    
     public void doSync(Runnable r) {
         getServer().getScheduler().runTask(this, r);
     }
@@ -78,10 +68,5 @@ public class NoteBlockPlayerMain extends JavaPlugin {
     protected boolean isDisabling(){
     	return disabling;
     }
-    
-    public class NoteBlockCompatibility{
-    	public static final int pre1_9 = 0;
-    	public static final int pre1_12 = 1;
-    	public static final int post1_12 = 2;
-    }
+     
 }

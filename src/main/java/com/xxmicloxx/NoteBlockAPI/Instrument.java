@@ -2,12 +2,12 @@ package com.xxmicloxx.NoteBlockAPI;
 
 import org.bukkit.Sound;
 
-import com.xxmicloxx.NoteBlockAPI.NoteBlockPlayerMain.NoteBlockCompatibility;
+import com.xxmicloxx.NoteBlockAPI.CompatibilityUtils.NoteBlockCompatibility;
 
 public class Instrument {
 
     public static Sound getInstrument(byte instrument) {
-    	if (NoteBlockPlayerMain.getCompatibility() == NoteBlockCompatibility.pre1_9){
+    	if (CompatibilityUtils.getCompatibility() == NoteBlockCompatibility.pre1_9){
 			switch (instrument) {
         		case 0:
                     return Sound.valueOf("NOTE_PIANO");
@@ -36,7 +36,7 @@ public class Instrument {
 	                return Sound.valueOf("BLOCK_NOTE_HAT");
 			}
 			
-			if (NoteBlockPlayerMain.getCompatibility() == NoteBlockCompatibility.post1_12){
+			if (CompatibilityUtils.getCompatibility() == NoteBlockCompatibility.post1_12){
 				switch (instrument) {
 		            case 5:
 		            	return Sound.valueOf("BLOCK_NOTE_GUITAR");
@@ -74,7 +74,7 @@ public class Instrument {
     }
     
     public static boolean isCustomInstrument(byte instrument){
-    	if (NoteBlockPlayerMain.getCompatibility() != NoteBlockCompatibility.post1_12){
+    	if (CompatibilityUtils.getCompatibility() != NoteBlockCompatibility.post1_12){
     		if (instrument > 4){
     			return true;
     		}
@@ -88,7 +88,7 @@ public class Instrument {
     }
     
     public static byte getCustomInstrumentFirstIndex(){
-    	if (NoteBlockPlayerMain.getCompatibility() != NoteBlockCompatibility.post1_12){
+    	if (CompatibilityUtils.getCompatibility() != NoteBlockCompatibility.post1_12){
     		return 5;
     	} else {
     		return 10;
