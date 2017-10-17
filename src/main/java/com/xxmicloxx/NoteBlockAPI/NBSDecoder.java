@@ -7,6 +7,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import org.bukkit.Bukkit;
@@ -29,6 +31,7 @@ public class NBSDecoder {
 
     private static Song parse(InputStream inputStream, File decodeFile) {
         HashMap<Integer, Layer> layerHashMap = new HashMap<Integer, Layer>();
+        byte biggestInstrumentIndex = -1;
         try {
             DataInputStream dis = new DataInputStream(inputStream);
             short length = readShort(dis);
@@ -64,7 +67,11 @@ public class NBSDecoder {
                     }
                     layer += jumpLayers;
                     //System.out.println("Layer: " + layer);
-                    setNote(layer, tick, dis.readByte() /* instrument */, dis.readByte() /* note */, layerHashMap);
+                    byte instrument = dis.readByte();
+                    if (instrument > biggestInstrumentIndex){
+                    	biggestInstrumentIndex = instrument;
+                    }
+                    setNote(layer, tick, instrument /* instrument */, dis.readByte() /* note */, layerHashMap);
                 }
             }
             for (int i = 0; i < songHeight; i++) {
@@ -84,6 +91,13 @@ public class NBSDecoder {
             for (int i = 0; i < custom; i++) {
                 customInstruments[i] = new CustomInstrument((byte)i, readString(dis), readString(dis), dis.readByte(), dis.readByte());
             }
+            
+            if (Instrument.isCustomInstrument((byte) (biggestInstrumentIndex - custom))){
+            	ArrayList<CustomInstrument> ci = CompatibilityUtils.get1_12Instruments();
+            	ci.addAll(Arrays.asList(customInstruments));
+            	customInstruments = ci.toArray(customInstruments);
+            }
+            
             return new Song(speed, layerHashMap, songHeight, length, title, author, description, decodeFile, customInstruments);
         } catch (FileNotFoundException e) {
             e.printStackTrace();

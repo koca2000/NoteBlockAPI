@@ -2,6 +2,7 @@ package com.xxmicloxx.NoteBlockAPI;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -110,5 +111,15 @@ public class CompatibilityUtils {
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public static ArrayList<CustomInstrument> get1_12Instruments(){
+		ArrayList<CustomInstrument> instruments = new ArrayList<>();
+		instruments.add(new CustomInstrument((byte) 0, "Guitar", "guitar.ogg", (byte) 0, (byte) 0));
+		instruments.add(new CustomInstrument((byte) 0, "Flute", "flute.ogg", (byte) 0, (byte) 0));
+		instruments.add(new CustomInstrument((byte) 0, "Bell", "bell.ogg", (byte) 0, (byte) 0));
+		instruments.add(new CustomInstrument((byte) 0, "Chime", "icechime.ogg", (byte) 0, (byte) 0));
+		instruments.add(new CustomInstrument((byte) 0, "Xylophone", "xylobone.ogg", (byte) 0, (byte) 0));
+		return instruments;
 	}
 }
