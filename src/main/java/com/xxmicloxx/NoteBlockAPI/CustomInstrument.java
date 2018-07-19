@@ -1,23 +1,29 @@
 package com.xxmicloxx.NoteBlockAPI;
 
 public class CustomInstrument {
-	
+
 	private byte index;
 	private String name;
-	private String soundfile;
-	private byte pitch;
-	private byte press;
+	private String soundFileName;
 	private org.bukkit.Sound sound;
-	
-	public CustomInstrument(byte index, String name, String soundfile, byte pitch, byte press){
+
+	@Deprecated
+	public CustomInstrument(byte index, String name, String soundFileName, byte pitch, byte press) {
 		this.index = index;
 		this.name = name;
-		this.soundfile = soundfile.replaceAll(".ogg", "");
-		if (this.soundfile.equalsIgnoreCase("pling")){
+		this.soundFileName = soundFileName.replaceAll(".ogg", "");
+		if (this.soundFileName.equalsIgnoreCase("pling")){
 			this.sound = Sound.getFromBukkitName("BLOCK_NOTE_PLING");
 		}
-		this.pitch = pitch;
-		this.press = press;
+	}
+
+	public CustomInstrument(byte index, String name, String soundFileName) {
+		this.index = index;
+		this.name = name;
+		this.soundFileName = soundFileName.replaceAll(".ogg", "");
+		if (this.soundFileName.equalsIgnoreCase("pling")){
+			this.sound = Sound.getFromBukkitName("BLOCK_NOTE_PLING");
+		}
 	}
 
 	public byte getIndex() {
@@ -28,11 +34,17 @@ public class CustomInstrument {
 		return name;
 	}
 
+	@Deprecated
 	public String getSoundfile() {
-		return soundfile;
+		return getSoundFileName();
 	}
-	
+
+	public String getSoundFileName() {
+		return soundFileName;
+	}
+
 	public org.bukkit.Sound getSound() {
 		return sound;
 	}
+
 }

@@ -6,97 +6,102 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
 public class NoteBlockSongPlayer extends SongPlayer {
-    private Block noteBlock;
-    private int distance = 16;
 
-    public NoteBlockSongPlayer(Song song) {
-        super(song);
-    }
+	private Block noteBlock;
+	private int distance = 16;
 
-    public NoteBlockSongPlayer(Song song, SoundCategory soundCategory) {
-        super(song, soundCategory);
-    }
+	public NoteBlockSongPlayer(Song song) {
+		super(song);
+	}
 
-    public Block getNoteBlock() {
-        return noteBlock;
-    }
+	public NoteBlockSongPlayer(Song song, SoundCategory soundCategory) {
+		super(song, soundCategory);
+	}
 
-    public void setNoteBlock(Block noteBlock) {
-        this.noteBlock = noteBlock;
-    }
+	public Block getNoteBlock() {
+		return noteBlock;
+	}
 
-    @Override
-    public void playTick(Player p, int tick) {
-        if (noteBlock.getType() != Material.NOTE_BLOCK) {
-            return;
-        }
-        if (!p.getWorld().getName().equals(noteBlock.getWorld().getName())) {
-            // not in same world
-            return;
-        }
-        byte playerVolume = NoteBlockPlayerMain.getPlayerVolume(p);
+	public void setNoteBlock(Block noteBlock) {
+		this.noteBlock = noteBlock;
+	}
 
-        for (Layer l : song.getLayerHashMap().values()) {
-            Note note = l.getNote(tick);
-            if (note == null) {
-                continue;
-            }
-            p.playNote(noteBlock.getLocation(), Instrument.getBukkitInstrument(note.getInstrument()),
-                    new org.bukkit.Note(note.getKey() - 33));
-            
-            if (Instrument.isCustomInstrument(note.getInstrument())){
-            	if (song.getCustomInstruments()[note.getInstrument() - Instrument.getCustomInstrumentFirstIndex()].getSound() != null){
-            		CompatibilityUtils.playSound(p, noteBlock.getLocation(),
-                            song.getCustomInstruments()[note.getInstrument() - Instrument.getCustomInstrumentFirstIndex()].getSound(),
-                            this.soundCategory,((l.getVolume() * (int) volume * (int) playerVolume) / 1000000f) * ((1f/16f) * distance),
-                            NotePitch.getPitch(note.getKey() - 33));
-            	}else {
-            		CompatibilityUtils.playSound(p, noteBlock.getLocation(),
-                            song.getCustomInstruments()[note.getInstrument() - Instrument.getCustomInstrumentFirstIndex()].getSoundfile(),
-                            this.soundCategory,((l.getVolume() * (int) volume * (int) playerVolume) / 1000000f) * ((1f/16f) * distance),
-                            NotePitch.getPitch(note.getKey() - 33));
-            	}
-            	
-            }else {
-            	CompatibilityUtils.playSound(p, noteBlock.getLocation(),
-                    Instrument.getInstrument(note.getInstrument()),
-                    this.soundCategory,((l.getVolume() * (int) volume * (int) playerVolume) / 1000000f) * ((1f/16f) * distance),
-                    NotePitch.getPitch(note.getKey() - 33));
-            }
-            
-            if (isPlayerInRange(p)){
-            	if (!this.playerList.get(p.getName())){
-            		playerList.put(p.getName(), true);
-            		PlayerRangeStateChangeEvent event = new PlayerRangeStateChangeEvent(this, p, true);
-            		Bukkit.getPluginManager().callEvent(event);
-            	}
-            } else {
-            	if (this.playerList.get(p.getName())){
-            		playerList.put(p.getName(), false);
-            		PlayerRangeStateChangeEvent event = new PlayerRangeStateChangeEvent(this, p, false);
-            		Bukkit.getPluginManager().callEvent(event);
-            	}
-            }
-        }
-    }
-    
-    /**
-     * Sets distance in blocks where would be player able to hear sound. 
-     * @param distance (Default 16 blocks)
-     */
-    public void setDistance(int distance){
-    	this.distance = distance;
-    }
-    
-    public int getDistance(){
-    	return distance;
-    }
-    
-    public boolean isPlayerInRange(Player p){
-    	if (p.getLocation().distance(noteBlock.getLocation()) > distance){
-    		return false;
-    	} else {
-    		return true;
-    	}
-    }
+	@Override
+	public void playTick(Player player, int tick) {
+		if (noteBlock.getType() != Material.NOTE_BLOCK) {
+			return;
+		}
+		if (!player.getWorld().getName().equals(noteBlock.getWorld().getName())) {
+			// not in same world
+			return;
+		}
+		byte playerVolume = NoteBlockPlayerMain.getPlayerVolume(player);
+
+		for (Layer layer : song.getLayerHashMap().values()) {
+			Note note = layer.getNote(tick);
+			if (note == null) {
+				continue;
+			}
+			player.playNote(noteBlock.getLocation(), Instrument.getBukkitInstrument(note.getInstrument()),
+					new org.bukkit.Note(note.getKey() - 33));
+
+			float volume = ((layer.getVolume() * (int) this.volume * (int) playerVolume) / 1000000F) 
+					* ((1F / 16F) * distance);
+			float pitch = NotePitch.getPitch(note.getKey() - 33);
+
+			if (Instrument.isCustomInstrument(note.getInstrument())) {
+				CustomInstrument instrument = song.getCustomInstruments()
+						[note.getInstrument() - Instrument.getCustomInstrumentFirstIndex()];
+
+				if (instrument.getSound() != null) {
+					CompatibilityUtils.playSound(player, noteBlock.getLocation(), 
+							instrument.getSound(), this.soundCategory, volume, pitch);
+				} else {
+					CompatibilityUtils.playSound(player, noteBlock.getLocation(), 
+							instrument.getSoundFileName(), this.soundCategory, volume, pitch);
+				}
+			} else {
+				CompatibilityUtils.playSound(player, noteBlock.getLocation(),
+						Instrument.getInstrument(note.getInstrument()), this.soundCategory, volume, pitch);
+			}
+
+			if (isInRange(player)) {
+				if (!this.playerList.get(player.getName())) {
+					playerList.put(player.getName(), true);
+					Bukkit.getPluginManager().callEvent(new PlayerRangeStateChangeEvent(this, player, true));
+				}
+			} else {
+				if (this.playerList.get(player.getName())) {
+					playerList.put(player.getName(), false);
+					Bukkit.getPluginManager().callEvent(new PlayerRangeStateChangeEvent(this, player, false));
+				}
+			}
+		}
+	}
+
+	/**
+	 * Sets distance in blocks where would be player able to hear sound. 
+	 * @param distance (Default 16 blocks)
+	 */
+	public void setDistance(int distance) {
+		this.distance = distance;
+	}
+
+	public int getDistance() {
+		return distance;
+	}
+
+	@Deprecated
+	public boolean isPlayerInRange(Player player) {
+		return isInRange(player);
+	}
+
+	public boolean isInRange(Player player) {
+		if (player.getLocation().distance(noteBlock.getLocation()) > distance) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+
 }

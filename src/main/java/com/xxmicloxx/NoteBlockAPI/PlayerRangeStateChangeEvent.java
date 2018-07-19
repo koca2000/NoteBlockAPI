@@ -4,37 +4,38 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
-public class PlayerRangeStateChangeEvent extends Event{
-	
+public class PlayerRangeStateChangeEvent extends Event {
+
 	private static final HandlerList handlers = new HandlerList();
 	private SongPlayer song;
-	private Player p;
-	private Boolean state;
+	private Player player;
+	private boolean state;
 
-    public PlayerRangeStateChangeEvent(SongPlayer song, Player p, Boolean state) {
-        this.song = song;
-        this.p = p;
-        this.state = state;
-    }
+	public PlayerRangeStateChangeEvent(SongPlayer song, Player player, boolean state) {
+		this.song = song;
+		this.player = player;
+		this.state = state;
+	}
 
-    public static HandlerList getHandlerList() {
-        return handlers;
-    }
+	public static HandlerList getHandlerList() {
+		return handlers;
+	}
 
-    public SongPlayer getSongPlayer() {
-        return song;
-    }
-    
-    @Override
-    public HandlerList getHandlers() {
-        return handlers;
-    }
+	@Override
+	public HandlerList getHandlers() {
+		return handlers;
+	}
+
+	public SongPlayer getSongPlayer() {
+		return song;
+	}
 
 	public Player getPlayer() {
-		return p;
+		return player;
 	}
-	
-	public Boolean isInRange() {
+
+	public boolean isInRange() {
 		return state;
 	}
+
 }

@@ -5,22 +5,23 @@ import org.bukkit.event.HandlerList;
 
 public class SongStoppedEvent extends Event {
 
-    private static final HandlerList handlers = new HandlerList();
-    private SongPlayer song;
+	private static final HandlerList handlers = new HandlerList();
+	private SongPlayer songPlayer;
 
-    public SongStoppedEvent(SongPlayer song) {
-        this.song = song;
-    }
+	public SongStoppedEvent(SongPlayer songPlayer) {
+		this.songPlayer = songPlayer;
+	}
 
-    public static HandlerList getHandlerList() {
-        return handlers;
-    }
+	public static HandlerList getHandlerList() {
+		return handlers;
+	}
 
-    public SongPlayer getSongPlayer() {
-        return song;
-    }
+	public SongPlayer getSongPlayer() {
+		return songPlayer;
+	}
 
-    public HandlerList getHandlers() {
-        return handlers;
-    }
+	public HandlerList getHandlers() {
+		return handlers;
+	}
+
 }
