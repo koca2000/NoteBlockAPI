@@ -22,7 +22,9 @@ public class Instrument {
                 default:
                     return Sound.valueOf("NOTE_PIANO");
     		}
-    	} else {
+
+    	} else if (CompatibilityUtils.getCompatibility() == NoteBlockCompatibility.pre1_12 || 
+    			CompatibilityUtils.getCompatibility() == NoteBlockCompatibility.v1_12){
 			switch (instrument) {
 	            case 0:
 	                return Sound.valueOf("BLOCK_NOTE_HARP");
@@ -35,8 +37,7 @@ public class Instrument {
 	            case 4:
 	                return Sound.valueOf("BLOCK_NOTE_HAT");
 			}
-			
-			if (CompatibilityUtils.getCompatibility() == NoteBlockCompatibility.post1_12){
+			if (CompatibilityUtils.getCompatibility() == NoteBlockCompatibility.v1_12){
 				switch (instrument) {
 		            case 5:
 		            	return Sound.valueOf("BLOCK_NOTE_GUITAR");
@@ -50,10 +51,33 @@ public class Instrument {
 		                return Sound.valueOf("BLOCK_NOTE_XYLOPHONE");
 				}
 			}
-			
-			return Sound.valueOf("BLOCK_NOTE_HARP");
-			
+
+    	} else if (CompatibilityUtils.getCompatibility() == NoteBlockCompatibility.post1_13) {
+    		switch (instrument) {
+    		    case 0:
+                    return Sound.valueOf("BLOCK_NOTE_BLOCK_HARP");
+                case 1:
+                    return Sound.valueOf("BLOCK_NOTE_BLOCK_BASS");
+                case 2:
+                    return Sound.valueOf("BLOCK_NOTE_BLOCK_BASEDRUM");
+                case 3:
+                    return Sound.valueOf("BLOCK_NOTE_BLOCK_SNARE");
+                case 4:
+                    return Sound.valueOf("BLOCK_NOTE_BLOCK_HAT");
+                case 5:
+            	    return Sound.valueOf("BLOCK_NOTE_BLOCK_GUITAR");
+                case 6:
+            	    return Sound.valueOf("BLOCK_NOTE_BLOCK_FLUTE");
+                case 7:
+            	    return Sound.valueOf("BLOCK_NOTE_BLOCK_BELL");
+                case 8:
+                    return Sound.valueOf("BLOCK_NOTE_BLOCK_CHIME");
+                case 9:
+                    return Sound.valueOf("BLOCK_NOTE_BLOCK_XYLOPHONE");
+    	    }
     	}
+
+    	return Sound.valueOf("BLOCK_NOTE_BLOCK_HARP");
     }
 
     public static org.bukkit.Instrument getBukkitInstrument(byte instrument) {

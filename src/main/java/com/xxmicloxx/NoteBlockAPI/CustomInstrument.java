@@ -23,8 +23,11 @@ public class CustomInstrument {
 					this.sound = Sound.valueOf("NOTE_PLING");
 					break;
 				case CompatibilityUtils.NoteBlockCompatibility.pre1_12:
-				case NoteBlockCompatibility.post1_12:
+				case NoteBlockCompatibility.v1_12:
 					this.sound = Sound.valueOf("BLOCK_NOTE_PLING");
+					break;
+				case NoteBlockCompatibility.post1_13:
+					this.sound = Sound.valueOf("BLOCK_NOTE_BLOCK_PLING");
 					break;
 			}
 		}
