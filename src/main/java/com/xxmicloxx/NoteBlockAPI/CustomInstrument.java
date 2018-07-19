@@ -1,9 +1,5 @@
 package com.xxmicloxx.NoteBlockAPI;
 
-import org.bukkit.Sound;
-
-import com.xxmicloxx.NoteBlockAPI.CompatibilityUtils.NoteBlockCompatibility;
-
 public class CustomInstrument {
 	
 	private byte index;
@@ -11,25 +7,14 @@ public class CustomInstrument {
 	private String soundfile;
 	private byte pitch;
 	private byte press;
-	private Sound sound;
+	private org.bukkit.Sound sound;
 	
 	public CustomInstrument(byte index, String name, String soundfile, byte pitch, byte press){
 		this.index = index;
 		this.name = name;
 		this.soundfile = soundfile.replaceAll(".ogg", "");
 		if (this.soundfile.equalsIgnoreCase("pling")){
-			switch (CompatibilityUtils.getCompatibility()){
-				case NoteBlockCompatibility.pre1_9:
-					this.sound = Sound.valueOf("NOTE_PLING");
-					break;
-				case CompatibilityUtils.NoteBlockCompatibility.pre1_12:
-				case NoteBlockCompatibility.v1_12:
-					this.sound = Sound.valueOf("BLOCK_NOTE_PLING");
-					break;
-				case NoteBlockCompatibility.post1_13:
-					this.sound = Sound.valueOf("BLOCK_NOTE_BLOCK_PLING");
-					break;
-			}
+			this.sound = Sound.getFromBukkitName("BLOCK_NOTE_PLING");
 		}
 		this.pitch = pitch;
 		this.press = press;
@@ -47,7 +32,7 @@ public class CustomInstrument {
 		return soundfile;
 	}
 	
-	public Sound getSound(){
+	public org.bukkit.Sound getSound() {
 		return sound;
 	}
 }

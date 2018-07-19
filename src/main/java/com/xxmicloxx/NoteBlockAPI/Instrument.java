@@ -1,83 +1,38 @@
 package com.xxmicloxx.NoteBlockAPI;
 
-import org.bukkit.Sound;
-
 import com.xxmicloxx.NoteBlockAPI.CompatibilityUtils.NoteBlockCompatibility;
 
 public class Instrument {
 
-    public static Sound getInstrument(byte instrument) {
-    	if (CompatibilityUtils.getCompatibility() == NoteBlockCompatibility.pre1_9){
-			switch (instrument) {
-        		case 0:
-                    return Sound.valueOf("NOTE_PIANO");
-                case 1:
-                    return Sound.valueOf("NOTE_BASS_GUITAR");
-                case 2:
-                    return Sound.valueOf("NOTE_BASS_DRUM");
-                case 3:
-                    return Sound.valueOf("NOTE_SNARE_DRUM");
-                case 4:
-                    return Sound.valueOf("NOTE_STICKS");
-                default:
-                    return Sound.valueOf("NOTE_PIANO");
-    		}
+    public static org.bukkit.Sound getInstrument(byte instrument) {
+	    return org.bukkit.Sound.valueOf(getInstrumentName(instrument));
+    }
 
-    	} else if (CompatibilityUtils.getCompatibility() == NoteBlockCompatibility.pre1_12 || 
-    			CompatibilityUtils.getCompatibility() == NoteBlockCompatibility.v1_12){
-			switch (instrument) {
-	            case 0:
-	                return Sound.valueOf("BLOCK_NOTE_HARP");
-	            case 1:
-	                return Sound.valueOf("BLOCK_NOTE_BASS");
-	            case 2:
-	                return Sound.valueOf("BLOCK_NOTE_BASEDRUM");
-	            case 3:
-	                return Sound.valueOf("BLOCK_NOTE_SNARE");
-	            case 4:
-	                return Sound.valueOf("BLOCK_NOTE_HAT");
-			}
-			if (CompatibilityUtils.getCompatibility() == NoteBlockCompatibility.v1_12){
-				switch (instrument) {
-		            case 5:
-		            	return Sound.valueOf("BLOCK_NOTE_GUITAR");
-		            case 6:
-		            	return Sound.valueOf("BLOCK_NOTE_FLUTE");
-		            case 7:
-		            	return Sound.valueOf("BLOCK_NOTE_BELL");
-		            case 8:
-		                return Sound.valueOf("BLOCK_NOTE_CHIME");
-		            case 9:
-		                return Sound.valueOf("BLOCK_NOTE_XYLOPHONE");
-				}
-			}
-
-    	} else if (CompatibilityUtils.getCompatibility() == NoteBlockCompatibility.post1_13) {
-    		switch (instrument) {
-    		    case 0:
-                    return Sound.valueOf("BLOCK_NOTE_BLOCK_HARP");
-                case 1:
-                    return Sound.valueOf("BLOCK_NOTE_BLOCK_BASS");
-                case 2:
-                    return Sound.valueOf("BLOCK_NOTE_BLOCK_BASEDRUM");
-                case 3:
-                    return Sound.valueOf("BLOCK_NOTE_BLOCK_SNARE");
-                case 4:
-                    return Sound.valueOf("BLOCK_NOTE_BLOCK_HAT");
-                case 5:
-            	    return Sound.valueOf("BLOCK_NOTE_BLOCK_GUITAR");
-                case 6:
-            	    return Sound.valueOf("BLOCK_NOTE_BLOCK_FLUTE");
-                case 7:
-            	    return Sound.valueOf("BLOCK_NOTE_BLOCK_BELL");
-                case 8:
-                    return Sound.valueOf("BLOCK_NOTE_BLOCK_CHIME");
-                case 9:
-                    return Sound.valueOf("BLOCK_NOTE_BLOCK_XYLOPHONE");
-    	    }
-    	}
-
-    	return Sound.valueOf("BLOCK_NOTE_BLOCK_HARP");
+    public static String getInstrumentName(byte instrument) {
+    	switch (instrument) {
+		    case 0:
+	            return Sound.getFromBukkitName("BLOCK_NOTE_BLOCK_HARP").name();
+	        case 1:
+	            return Sound.getFromBukkitName("BLOCK_NOTE_BLOCK_BASS").name();
+	        case 2:
+	            return Sound.getFromBukkitName("BLOCK_NOTE_BLOCK_BASEDRUM").name();
+	        case 3:
+	            return Sound.getFromBukkitName("BLOCK_NOTE_BLOCK_SNARE").name();
+	        case 4:
+	            return Sound.getFromBukkitName("BLOCK_NOTE_BLOCK_HAT").name();
+	        case 5:
+	    	    return Sound.getFromBukkitName("BLOCK_NOTE_BLOCK_GUITAR").name();
+	        case 6:
+	    	    return Sound.getFromBukkitName("BLOCK_NOTE_BLOCK_FLUTE").name();
+	        case 7:
+	    	    return Sound.getFromBukkitName("BLOCK_NOTE_BLOCK_BELL").name();
+	        case 8:
+	            return Sound.getFromBukkitName("BLOCK_NOTE_BLOCK_CHIME").name();
+	        case 9:
+	            return Sound.getFromBukkitName("BLOCK_NOTE_BLOCK_XYLOPHONE").name();
+	        default:
+	            return Sound.getFromBukkitName("BLOCK_NOTE_BLOCK_HARP").name();
+	    }
     }
 
     public static org.bukkit.Instrument getBukkitInstrument(byte instrument) {
@@ -92,6 +47,16 @@ public class Instrument {
                 return org.bukkit.Instrument.SNARE_DRUM;
             case 4:
                 return org.bukkit.Instrument.STICKS;
+            case 5:
+                return org.bukkit.Instrument.GUITAR;
+            case 6:
+            	return org.bukkit.Instrument.FLUTE;
+            case 7:
+            	return org.bukkit.Instrument.BELL;
+            case 8:
+            	return org.bukkit.Instrument.CHIME;
+            case 9:
+            	return org.bukkit.Instrument.XYLOPHONE;
             default:
                 return org.bukkit.Instrument.PIANO;
         }
