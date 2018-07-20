@@ -7,10 +7,12 @@
 	<groupId>com.xxmicloxx</groupId>
 	<artifactId>NoteBlockAPI</artifactId>
 	<version>1.2.0</version>
+	<name>NoteBlockAPI</name>
 
 	<properties>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
+		<mainClass>com.xxmicloxx.NoteBlockAPI.NoteBlockPlayerMain</mainClass>
 	</properties>
 
 	<repositories>
@@ -80,6 +82,25 @@
 				</executions>
 			</plugin>
 		</plugins>
+		<sourceDirectory>src/main/java</sourceDirectory>
+		<defaultGoal>package</defaultGoal>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>plugin.yml</include>
+				</includes>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>false</filtering>
+				<excludes>
+					<exclude>**/*.java</exclude>
+					<exclude>plugin.yml</exclude>
+				</excludes>
+			</resource>
+		</resources>
 	</build>
 
 </project>

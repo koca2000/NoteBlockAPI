@@ -3,7 +3,7 @@ package com.xxmicloxx.NoteBlockAPI;
 /**
  * Version independent Spigot sounds.
  *
- * Enum mapping to sound names for different
+ * Enum mapping to note names for different
  * Minecraft versions.
  * 
  * @see https://gist.github.com/NiklasEi/7bd0ffd136f8459df0940e4501d47a8a
@@ -30,10 +30,16 @@ public enum Sound {
 		this.versionDependentNames = versionDependentNames;
 	}
 
+	/**
+	 * Attempts to retrieve the org.bukkit.Sound equivalent of a version dependent enum name
+	 * @param bukkitSoundName
+	 * @return org.bukkit.Sound enum
+	 */
 	public static org.bukkit.Sound getFromBukkitName(String bukkitSoundName) {
 		for (Sound sound : values()) {
-			org.bukkit.Sound bukkitSound = sound.getSound();
-			if (bukkitSound != null) return bukkitSound;
+			for (String soundName : sound.versionDependentNames) {
+				if (soundName.equalsIgnoreCase(bukkitSoundName)) return sound.getSound();
+			}
 		}
 		return org.bukkit.Sound.valueOf(bukkitSoundName);
 	}
