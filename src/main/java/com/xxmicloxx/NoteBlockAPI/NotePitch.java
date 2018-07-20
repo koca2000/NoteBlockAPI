@@ -1,7 +1,11 @@
 package com.xxmicloxx.NoteBlockAPI;
 
-import com.xxmicloxx.NoteBlockAPI.CompatibilityUtils.NoteBlockCompatibility;
+import org.bukkit.Bukkit;
 
+/**
+ * Represents pitches of every noteblock note pre- & post-1.9
+ *
+ */
 public enum NotePitch {
 
 	NOTE_0(0, 0.5F, 0.50000F),
@@ -41,10 +45,10 @@ public enum NotePitch {
 	}
 
 	public static float getPitch(int note) {
+		boolean pre1_9 = Bukkit.getVersion().contains("1.8") || Bukkit.getVersion().contains("1.7");
 		for (NotePitch notePitch : values()) {
 			if (notePitch.note == note) {
-				return CompatibilityUtils.getCompatibility() == NoteBlockCompatibility.pre1_9 
-						? notePitch.pitchPre1_9 : notePitch.pitchPost1_9;
+				return pre1_9 ? notePitch.pitchPre1_9 : notePitch.pitchPost1_9;
 			}
 		}
 

@@ -4,6 +4,11 @@ import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
+/**
+ * Called whenever a Song is destroyed
+ * @see SongPlayer
+ *
+ */
 public class SongDestroyingEvent extends Event implements Cancellable {
 
 	private static final HandlerList handlers = new HandlerList();

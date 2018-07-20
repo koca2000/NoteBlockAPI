@@ -3,6 +3,10 @@ package com.xxmicloxx.NoteBlockAPI;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
+/**
+ * Called whenever a SongPlayer is stopped
+ *
+ */
 public class SongStoppedEvent extends Event {
 
 	private static final HandlerList handlers = new HandlerList();

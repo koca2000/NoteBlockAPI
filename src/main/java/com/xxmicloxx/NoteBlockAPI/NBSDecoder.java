@@ -14,22 +14,45 @@ import java.util.HashMap;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 
+/**
+ * Utils for reading Note Block Studio data
+ *
+ */
 public class NBSDecoder {
 
-	public static Song parse(File decodeFile) {
+	/**
+	 * Parses a Song from a Note Block Studio project file (.nbs)
+	 * @see Song
+	 * @param .nbs file
+	 * @return Song object representing a Note Block Studio project
+	 */
+	public static Song parse(File songFile) {
 		try {
-			return parse(new FileInputStream(decodeFile), decodeFile);
+			return parse(new FileInputStream(songFile), songFile);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
 		return null;
 	}
 
+	/**
+	 * Parses a Song from an InputStream
+	 * @see Song
+	 * @param inputStream of a Note Block Studio project file (.nbs)
+	 * @return Song object from the InputStream
+	 */
 	public static Song parse(InputStream inputStream) {
 		return parse(inputStream, null); // Source is unknown -> no file
 	}
 
-	private static Song parse(InputStream inputStream, File decodeFile) {
+	/**
+	 * Parses a Song from an InputStream and a Note Block Studio project file (.nbs)
+	 * @see Song
+	 * @param inputStream of a .nbs file
+	 * @param songFile representing a .nbs file
+	 * @return Song object representing the given .nbs file
+	 */
+	private static Song parse(InputStream inputStream, File songFile) {
 		HashMap<Integer, Layer> layerHashMap = new HashMap<Integer, Layer>();
 		byte biggestInstrumentIndex = -1;
 		try {
@@ -94,20 +117,20 @@ public class NBSDecoder {
 						readString(dataInputStream), readString(dataInputStream));
 			}
 
-			if (Instrument.isCustomInstrument((byte) (biggestInstrumentIndex - custom))){
+			if (InstrumentUtils.isCustomInstrument((byte) (biggestInstrumentIndex - custom))){
 				ArrayList<CustomInstrument> ci = CompatibilityUtils.get1_12Instruments();
 				ci.addAll(Arrays.asList(customInstruments));
 				customInstruments = ci.toArray(customInstruments);
 			}
 
 			return new Song(speed, layerHashMap, songHeight, length, title, 
-					author, description, decodeFile, customInstruments);
+					author, description, songFile, customInstruments);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (EOFException e){
 			String file = "";
-			if (decodeFile != null){
-				file = decodeFile.getName();
+			if (songFile != null){
+				file = songFile.getName();
 			}
 			Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.RED + "Song is corrupted: " + file);
 		} catch (IOException e) {
@@ -116,6 +139,14 @@ public class NBSDecoder {
 		return null;
 	}
 
+	/**
+	 * Sets a note at a tick in a given
+	 * @param layerIndex
+	 * @param ticks
+	 * @param instrument
+	 * @param key
+	 * @param layerHashMap
+	 */
 	private static void setNote(int layerIndex, int ticks, byte instrument, 
 			byte key, HashMap<Integer, Layer> layerHashMap) {
 		Layer layer = layerHashMap.get(layerIndex);

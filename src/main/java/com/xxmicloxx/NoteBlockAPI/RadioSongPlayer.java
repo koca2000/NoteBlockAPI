@@ -2,6 +2,10 @@ package com.xxmicloxx.NoteBlockAPI;
 
 import org.bukkit.entity.Player;
 
+/**
+ * SongPlayer created at a Player's location
+ *
+ */
 public class RadioSongPlayer extends SongPlayer {
 
 	public RadioSongPlayer(Song song) {
@@ -25,9 +29,9 @@ public class RadioSongPlayer extends SongPlayer {
 			float volume = (layer.getVolume() * (int) this.volume * (int) playerVolume) / 1000000F;
 			float pitch = NotePitch.getPitch(note.getKey() - 33);
 
-			if (Instrument.isCustomInstrument(note.getInstrument())) {
+			if (InstrumentUtils.isCustomInstrument(note.getInstrument())) {
 				CustomInstrument instrument = song.getCustomInstruments()
-						[note.getInstrument() - Instrument.getCustomInstrumentFirstIndex()];
+						[note.getInstrument() - InstrumentUtils.getCustomInstrumentFirstIndex()];
 
 				if (instrument.getSound() != null) {
 					CompatibilityUtils.playSound(player, player.getEyeLocation(),
@@ -40,7 +44,7 @@ public class RadioSongPlayer extends SongPlayer {
 				}
 			} else {
 				CompatibilityUtils.playSound(player, player.getEyeLocation(),
-						Instrument.getInstrument(note.getInstrument()), this.soundCategory, volume, pitch);
+						InstrumentUtils.getInstrument(note.getInstrument()), this.soundCategory, volume, pitch);
 			}
 		}
 	}

@@ -4,6 +4,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
+/**
+ * SongPlayer created at a specified Location
+ *
+ */
 public class PositionSongPlayer extends SongPlayer {
 
 	private Location targetLocation;
@@ -28,24 +32,22 @@ public class PositionSongPlayer extends SongPlayer {
 	@Override
 	public void playTick(Player player, int tick) {
 		if (!player.getWorld().getName().equals(targetLocation.getWorld().getName())) {
-			// not in same world
-			return;
+			return; // not in same world
 		}
+
 		byte playerVolume = NoteBlockPlayerMain.getPlayerVolume(player);
 
 		for (Layer layer : song.getLayerHashMap().values()) {
 			Note note = layer.getNote(tick);
-			if (note == null) {
-				continue;
-			}
+			if (note == null) continue;
 
 			float volume = ((layer.getVolume() * (int) this.volume * (int) playerVolume) / 1000000F) 
 					* ((1F / 16F) * distance);
 			float pitch = NotePitch.getPitch(note.getKey() - 33);
 
-			if (Instrument.isCustomInstrument(note.getInstrument())) {
+			if (InstrumentUtils.isCustomInstrument(note.getInstrument())) {
 				CustomInstrument instrument = song.getCustomInstruments()
-						[note.getInstrument() - Instrument.getCustomInstrumentFirstIndex()];
+						[note.getInstrument() - InstrumentUtils.getCustomInstrumentFirstIndex()];
 
 				if (instrument.getSound() != null) {
 					CompatibilityUtils.playSound(player, targetLocation, instrument.getSound(),
@@ -56,18 +58,18 @@ public class PositionSongPlayer extends SongPlayer {
 				}
 			} else {
 				CompatibilityUtils.playSound(player, targetLocation,
-						Instrument.getInstrument(note.getInstrument()), this.soundCategory, 
+						InstrumentUtils.getInstrument(note.getInstrument()), this.soundCategory, 
 						volume, pitch);
 			}
 
 			if (isPlayerInRange(player)) {
-				if (!this.playerList.get(player.getName())) {
-					playerList.put(player.getName(), true);
+				if (!this.playerList.get(player.getUniqueId())) {
+					playerList.put(player.getUniqueId(), true);
 					Bukkit.getPluginManager().callEvent(new PlayerRangeStateChangeEvent(this, player, true));
 				}
 			} else {
-				if (this.playerList.get(player.getName())) {
-					playerList.put(player.getName(), false);
+				if (this.playerList.get(player.getUniqueId())) {
+					playerList.put(player.getUniqueId(), false);
 					Bukkit.getPluginManager().callEvent(new PlayerRangeStateChangeEvent(this, player, false));
 				}
 			}

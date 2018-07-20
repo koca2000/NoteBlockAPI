@@ -4,6 +4,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
+/**
+ * Called whenever a Player enters the range of a stationary SongPlayer
+ *
+ */
 public class PlayerRangeStateChangeEvent extends Event {
 
 	private static final HandlerList handlers = new HandlerList();

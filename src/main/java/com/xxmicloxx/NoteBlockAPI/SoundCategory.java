@@ -1,5 +1,9 @@
 package com.xxmicloxx.NoteBlockAPI;
 
+/**
+ * @see org.bukkit.SoundCategory
+ *
+ */
 public enum SoundCategory {
 
 	MASTER,

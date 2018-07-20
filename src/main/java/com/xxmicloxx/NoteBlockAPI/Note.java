@@ -1,5 +1,10 @@
 package com.xxmicloxx.NoteBlockAPI;
 
+/**
+ * Represents a note played; contains the instrument and the key
+ * @see NotePitch
+ *
+ */
 public class Note {
 
 	private byte instrument;

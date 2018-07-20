@@ -9,11 +9,20 @@ import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
+/**
+ * Fields/methods for reflection & version checking
+ *
+ */
 public class CompatibilityUtils {
 
 	public static final String OBC_DIR = Bukkit.getServer().getClass().getPackage().getName();
 	public static final String NMS_DIR = OBC_DIR.replaceFirst("org.bukkit.craftbukkit", "net.minecraft.server");
 
+	/**
+	 * Gets NMS class from given name
+	 * @param name of class (w/ package)
+	 * @return Class of given name
+	 */
 	public static Class<?> getMinecraftClass(String name) {
 		try {
 			return Class.forName(NMS_DIR + "." + name);
@@ -23,6 +32,11 @@ public class CompatibilityUtils {
 		}
 	}
 
+	/**
+	 * Gets CraftBukkit class from given name
+	 * @param name of class (w/ package)
+	 * @return Class of given name
+	 */
 	public static Class<?> getCraftBukkitClass(String name) {
 		try {
 			return Class.forName(OBC_DIR + "." + name);
@@ -32,28 +46,23 @@ public class CompatibilityUtils {
 		}
 	}
 
-	public static class NoteBlockCompatibility {
-		public static final int pre1_9 = 0;
-		public static final int pre1_12 = 1;
-		public static final int v1_12 = 2;
-		public static final int post1_12 = 3;
-		public static final int post1_13 = 4;
-	}
-
-	protected static int getCompatibility() {
-		if (Bukkit.getVersion().contains("1.8") || Bukkit.getVersion().contains("1.7")) {
-			return NoteBlockCompatibility.pre1_9;
-		} else if (Bukkit.getVersion().contains("1.9") 
-				|| Bukkit.getVersion().contains("1.10") 
-				|| Bukkit.getVersion().contains("1.11")) {
-			return NoteBlockCompatibility.pre1_12;
-		} else if (Bukkit.getVersion().contains("1.12")) {
-			return NoteBlockCompatibility.v1_12;
-		} else {
-			return NoteBlockCompatibility.post1_13;
+	/**
+	 * Returns whether the version of Bukkit is or is after 1.12
+	 * @return version is after 1.12
+	 */
+	public static boolean isPost1_12() {
+		if (!isSoundCategoryCompatible() || Bukkit.getVersion().contains("1.11")) {
+			return false;
 		}
+		return true;
 	}
 
+	/**
+	 * Returns if SoundCategory is able to be used
+	 * @see org.bukkit.SoundCategory
+	 * @see SoundCategory
+	 * @return can use SoundCategory
+	 */
 	protected static boolean isSoundCategoryCompatible() {
 		if (Bukkit.getVersion().contains("1.7") 
 				|| Bukkit.getVersion().contains("1.8") 
@@ -65,6 +74,15 @@ public class CompatibilityUtils {
 		}
 	}
 
+	/**
+	 * Plays a sound using NMS & reflection
+	 * @param player
+	 * @param location
+	 * @param sound
+	 * @param category
+	 * @param volume
+	 * @param pitch
+	 */
 	protected static void playSound(Player player, Location location, String sound, 
 			SoundCategory category, float volume, float pitch) {
 		try {
@@ -95,6 +113,15 @@ public class CompatibilityUtils {
 		}
 	}
 
+	/**
+	 * Plays a sound using NMS & reflection
+	 * @param player
+	 * @param location
+	 * @param sound
+	 * @param category
+	 * @param volume
+	 * @param pitch
+	 */
 	public static void playSound(Player player, Location location, Sound sound, 
 			SoundCategory category, float volume, float pitch) {
 		try {
@@ -125,6 +152,10 @@ public class CompatibilityUtils {
 		}
 	}
 
+	/**
+	 * Gets instruments which were added post-1.12
+	 * @return ArrayList of instruments
+	 */
 	public static ArrayList<CustomInstrument> get1_12Instruments(){
 		ArrayList<CustomInstrument> instruments = new ArrayList<>();
 		instruments.add(new CustomInstrument((byte) 0, "Guitar", "guitar.ogg"));
