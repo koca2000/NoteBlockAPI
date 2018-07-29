@@ -4,69 +4,95 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import org.bstats.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+/**
+ * Main class; contains methods for playing and adjusting songs for players
+ *
+ */
 public class NoteBlockPlayerMain extends JavaPlugin {
 
-    public static NoteBlockPlayerMain plugin;
-    
-    public Map<String, ArrayList<SongPlayer>> playingSongs = Collections.synchronizedMap(new HashMap<String, ArrayList<SongPlayer>>());
-    public Map<String, Byte> playerVolume = Collections.synchronizedMap(new HashMap<String, Byte>());
+	public static NoteBlockPlayerMain plugin;
 
-    private boolean disabling = false;
-    
-    public static boolean isReceivingSong(Player p) {
-        return ((plugin.playingSongs.get(p.getName()) != null) && (!plugin.playingSongs.get(p.getName()).isEmpty()));
-    }
+	public Map<UUID, ArrayList<SongPlayer>> playingSongs = 
+			Collections.synchronizedMap(new HashMap<UUID, ArrayList<SongPlayer>>());
+	public Map<UUID, Byte> playerVolume = Collections.synchronizedMap(new HashMap<UUID, Byte>());
 
-    public static void stopPlaying(Player p) {
-        if (plugin.playingSongs.get(p.getName()) == null) {
-            return;
-        }
-        for (SongPlayer s : plugin.playingSongs.get(p.getName())) {
-            s.removePlayer(p);
-        }
-    }
+	private boolean disabling = false;
 
-    public static void setPlayerVolume(Player p, byte volume) {
-        plugin.playerVolume.put(p.getName(), volume);
-    }
+	/**
+	 * Returns true if a Player is currently receiving a song
+	 * @param player
+	 * @return is receiving a song
+	 */
+	public static boolean isReceivingSong(Player player) {
+		return ((plugin.playingSongs.get(player.getUniqueId()) != null) 
+				&& (!plugin.playingSongs.get(player.getUniqueId()).isEmpty()));
+	}
 
-    public static byte getPlayerVolume(Player p) {
-        Byte b = plugin.playerVolume.get(p.getName());
-        if (b == null) {
-            b = 100;
-            plugin.playerVolume.put(p.getName(), b);
-        }
-        return b;
-    }
+	/**
+	 * Stops the song for a Player
+	 * @param player
+	 */
+	public static void stopPlaying(Player player) {
+		if (plugin.playingSongs.get(player.getUniqueId()) == null) {
+			return;
+		}
+		for (SongPlayer songPlayer : plugin.playingSongs.get(player.getUniqueId())) {
+			songPlayer.removePlayer(player);
+		}
+	}
 
-    @Override
-    public void onEnable() {
-        plugin = this;
-        new Metrics(this);
-    }
+	/**
+	 * Sets the volume for a given Player
+	 * @param player
+	 * @param volume
+	 */
+	public static void setPlayerVolume(Player player, byte volume) {
+		plugin.playerVolume.put(player.getUniqueId(), volume);
+	}
 
-    @Override
-    public void onDisable() {    	
-    	disabling = true;
-        Bukkit.getScheduler().cancelTasks(this);
-    }
-    
-    public void doSync(Runnable r) {
-        getServer().getScheduler().runTask(this, r);
-    }
+	/**
+	 * Gets the volume for a given Player
+	 * @param player
+	 * @return volume (byte)
+	 */
+	public static byte getPlayerVolume(Player player) {
+		Byte byteObj = plugin.playerVolume.get(player.getUniqueId());
+		if (byteObj == null) {
+			byteObj = 100;
+			plugin.playerVolume.put(player.getUniqueId(), byteObj);
+		}
+		return byteObj;
+	}
 
-    public void doAsync(Runnable r) {
-        getServer().getScheduler().runTaskAsynchronously(this, r);
-    }
-    
-    protected boolean isDisabling(){
-    	return disabling;
-    }
-     
+	@Override
+	public void onEnable() {
+		plugin = this;
+		new Metrics(this);
+	}
+
+	@Override
+	public void onDisable() {    	
+		disabling = true;
+		Bukkit.getScheduler().cancelTasks(this);
+	}
+
+	public void doSync(Runnable runnable) {
+		getServer().getScheduler().runTask(this, runnable);
+	}
+
+	public void doAsync(Runnable runnable) {
+		getServer().getScheduler().runTaskAsynchronously(this, runnable);
+	}
+
+	protected boolean isDisabling() {
+		return disabling;
+	}
+
 }

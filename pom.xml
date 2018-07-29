@@ -1,81 +1,106 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-	
-    <groupId>com.xxmicloxx</groupId>
-    <artifactId>NoteBlockAPI</artifactId>
-    <version>1.2.0</version>
-    
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.xxmicloxx</groupId>
+	<artifactId>NoteBlockAPI</artifactId>
+	<version>1.2.0</version>
+	<name>NoteBlockAPI</name>
+
 	<properties>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
+		<mainClass>com.xxmicloxx.NoteBlockAPI.NoteBlockPlayerMain</mainClass>
 	</properties>
-  
+
 	<repositories>
-        <repository>
-            <id>spigot-repo</id>
-            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
-        </repository>
-        <repository>
-  			<id>bstats-repo</id>
-  			<url>http://repo.bstats.org/content/repositories/releases/</url>
+		<repository>
+			<id>spigot-repo</id>
+			<url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
 		</repository>
-    </repositories>
-    <dependencies>
-        <dependency>
-            <groupId>org.bukkit</groupId>
-            <artifactId>bukkit</artifactId>
-            <version>1.12-R0.1-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-  			<groupId>org.bstats</groupId>
-  			<artifactId>bstats-bukkit</artifactId>
-  			<version>1.1</version>
+		<repository>
+			<id>bstats-repo</id>
+			<url>http://repo.bstats.org/content/repositories/releases/</url>
+		</repository>
+	</repositories>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.bukkit</groupId>
+			<artifactId>bukkit</artifactId>
+			<version>1.12-R0.1-SNAPSHOT</version>
+			<scope>provided</scope>
 		</dependency>
-    </dependencies>
-    <distributionManagement>
-      <repository>
-         <id>sinndev-repo</id>
-         <name>Releases</name>
-         <url>http://repo.sinndev.com/content/repositories/releases/</url>
-      </repository>
-      <snapshotRepository>
-         <id>sinndev-repo</id>
-         <name>Snapshots</name>
-         <url>http://repo.sinndev.com/content/repositories/snapshots/</url>
-      </snapshotRepository>
-    </distributionManagement>
-    <build>
-        <plugins>
-            <plugin>
-		      <groupId>org.apache.maven.plugins</groupId>
-		      <artifactId>maven-shade-plugin</artifactId>
-		      <version>2.3</version>
-		      <configuration>
-		        <artifactSet>
-		          <includes>
-		            <include>org.bstats:*</include>
-		          </includes>
-		        </artifactSet>
-		        <relocations>
-		          <relocation>
-		            <pattern>org.bstats</pattern>
-		            <shadedPattern>com.xxmicloxx.NoteBlockAPI</shadedPattern>
-		          </relocation>
-		        </relocations>
-		      </configuration>
-		      <executions>
-		        <execution>
-		          <phase>package</phase>
-		          <goals>
-		            <goal>shade</goal>
-		          </goals>
-		        </execution>
-		      </executions>
-		    </plugin>
-        </plugins>
-    </build>
+		<dependency>
+			<groupId>org.bstats</groupId>
+			<artifactId>bstats-bukkit</artifactId>
+			<version>1.1</version>
+		</dependency>
+	</dependencies>
+
+	<distributionManagement>
+		<repository>
+			<id>sinndev-repo</id>
+			<name>Releases</name>
+			<url>http://repo.sinndev.com/content/repositories/releases/</url>
+		</repository>
+		<snapshotRepository>
+			<id>sinndev-repo</id>
+			<name>Snapshots</name>
+			<url>http://repo.sinndev.com/content/repositories/snapshots/</url>
+		</snapshotRepository>
+	</distributionManagement>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>2.3</version>
+				<configuration>
+					<artifactSet>
+						<includes>
+							<include>org.bstats:*</include>
+						</includes>
+					</artifactSet>
+					<relocations>
+						<relocation>
+							<pattern>org.bstats</pattern>
+							<shadedPattern>com.xxmicloxx.NoteBlockAPI</shadedPattern>
+						</relocation>
+					</relocations>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+		<sourceDirectory>src/main/java</sourceDirectory>
+		<defaultGoal>package</defaultGoal>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>plugin.yml</include>
+				</includes>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>false</filtering>
+				<excludes>
+					<exclude>**/*.java</exclude>
+					<exclude>plugin.yml</exclude>
+				</excludes>
+			</resource>
+		</resources>
+	</build>
+
 </project>

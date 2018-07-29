@@ -2,10 +2,8 @@ package com.xxmicloxx.NoteBlockAPI;
 
 /**
  * Various methods for working with instruments
- * @deprecated Moved to InstrumentUtils
  */
-@Deprecated
-public class Instrument {
+public class InstrumentUtils {
 
 	/**
 	 * Returns the org.bukkit.Sound enum for the current server version

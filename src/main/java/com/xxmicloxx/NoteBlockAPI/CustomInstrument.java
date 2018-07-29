@@ -1,50 +1,84 @@
 package com.xxmicloxx.NoteBlockAPI;
 
-import org.bukkit.Sound;
-
-import com.xxmicloxx.NoteBlockAPI.CompatibilityUtils.NoteBlockCompatibility;
-
+/**
+ * Create custom instruments from a sound file
+ * 
+ */
 public class CustomInstrument {
-	
+
 	private byte index;
 	private String name;
-	private String soundfile;
-	private byte pitch;
-	private byte press;
-	private Sound sound;
-	
-	public CustomInstrument(byte index, String name, String soundfile, byte pitch, byte press){
+	private String soundFileName;
+	private org.bukkit.Sound sound;
+
+	/**
+	 * Creates a CustomInstrument
+	 * @deprecated Unused parameters
+	 */
+	@Deprecated
+	public CustomInstrument(byte index, String name, String soundFileName, byte pitch, byte press) {
 		this.index = index;
 		this.name = name;
-		this.soundfile = soundfile.replaceAll(".ogg", "");
-		if (this.soundfile.equalsIgnoreCase("pling")){
-			switch (CompatibilityUtils.getCompatibility()){
-				case NoteBlockCompatibility.pre1_9:
-					this.sound = Sound.valueOf("NOTE_PLING");
-					break;
-				case CompatibilityUtils.NoteBlockCompatibility.pre1_12:
-				case NoteBlockCompatibility.post1_12:
-					this.sound = Sound.valueOf("BLOCK_NOTE_PLING");
-					break;
-			}
+		this.soundFileName = soundFileName.replaceAll(".ogg", "");
+		if (this.soundFileName.equalsIgnoreCase("pling")){
+			this.sound = Sound.getFromBukkitName("BLOCK_NOTE_PLING");
 		}
-		this.pitch = pitch;
-		this.press = press;
 	}
 
+	/**
+	 * Creates a CustomInstrument
+	 * @param index
+	 * @param name
+	 * @param soundFileName
+	 */
+	public CustomInstrument(byte index, String name, String soundFileName) {
+		this.index = index;
+		this.name = name;
+		this.soundFileName = soundFileName.replaceAll(".ogg", "");
+		if (this.soundFileName.equalsIgnoreCase("pling")){
+			this.sound = Sound.getFromBukkitName("BLOCK_NOTE_PLING");
+		}
+	}
+
+	/**
+	 * Gets index of CustomInstrument
+	 * @return index
+	 */
 	public byte getIndex() {
 		return index;
 	}
 
+	/**
+	 * Gets name of CustomInstrument
+	 * @return name
+	 */
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * Gets file name of the sound
+	 * @deprecated misleading name
+	 */
+	@Deprecated
 	public String getSoundfile() {
-		return soundfile;
+		return getSoundFileName();
 	}
-	
-	public Sound getSound(){
+
+	/**
+	 * Gets file name of the sound
+	 * @return file name
+	 */
+	public String getSoundFileName() {
+		return soundFileName;
+	}
+
+	/**
+	 * Gets the org.bukkit.Sound enum for this CustomInstrument
+	 * @return org.bukkit.Sound enum
+	 */
+	public org.bukkit.Sound getSound() {
 		return sound;
 	}
+
 }
