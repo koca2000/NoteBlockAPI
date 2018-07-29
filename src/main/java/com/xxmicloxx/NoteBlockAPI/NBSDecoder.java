@@ -99,37 +99,37 @@ public class NBSDecoder {
 				}
 			}
 			for (int i = 0; i < songHeight; i++) {
-				Layer l = layerHashMap.get(i);
+				Layer layer = layerHashMap.get(i);
 
 				String name = readString(dataInputStream);
 				byte volume = dataInputStream.readByte();
-				if (l != null) {
-					l.setName(name);
-					l.setVolume(volume);
+				if (layer != null) {
+					layer.setName(name);
+					layer.setVolume(volume);
 				}
 			}
 			//count of custom instruments
-			byte custom = dataInputStream.readByte();
-			CustomInstrument[] customInstruments = new CustomInstrument[custom];
+			byte customAmnt = dataInputStream.readByte();
+			CustomInstrument[] customInstrumentsArray = new CustomInstrument[customAmnt];
 
-			for (int index = 0; index < custom; index++) {
-				customInstruments[index] = new CustomInstrument((byte) index, 
+			for (int index = 0; index < customAmnt; index++) {
+				customInstrumentsArray[index] = new CustomInstrument((byte) index, 
 						readString(dataInputStream), readString(dataInputStream));
 			}
 
-			if (InstrumentUtils.isCustomInstrument((byte) (biggestInstrumentIndex - custom))){
-				ArrayList<CustomInstrument> ci = CompatibilityUtils.get1_12Instruments();
-				ci.addAll(Arrays.asList(customInstruments));
-				customInstruments = ci.toArray(customInstruments);
+			if (InstrumentUtils.isCustomInstrument((byte) (biggestInstrumentIndex - customAmnt))) {
+				ArrayList<CustomInstrument> customInstruments = CompatibilityUtils.get1_12Instruments();
+				customInstruments.addAll(Arrays.asList(customInstrumentsArray));
+				customInstrumentsArray = customInstruments.toArray(customInstrumentsArray);
 			}
 
 			return new Song(speed, layerHashMap, songHeight, length, title, 
-					author, description, songFile, customInstruments);
+					author, description, songFile, customInstrumentsArray);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
-		} catch (EOFException e){
+		} catch (EOFException e) {
 			String file = "";
-			if (songFile != null){
+			if (songFile != null) {
 				file = songFile.getName();
 			}
 			Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.RED + "Song is corrupted: " + file);
@@ -140,7 +140,7 @@ public class NBSDecoder {
 	}
 
 	/**
-	 * Sets a note at a tick in a given
+	 * Sets a note at a tick in a song
 	 * @param layerIndex
 	 * @param ticks
 	 * @param instrument

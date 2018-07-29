@@ -15,6 +15,7 @@ public class CustomInstrument {
 	 * Creates a CustomInstrument
 	 * @deprecated Unused parameters
 	 */
+	@Deprecated
 	public CustomInstrument(byte index, String name, String soundFileName, byte pitch, byte press) {
 		this.index = index;
 		this.name = name;
@@ -73,8 +74,8 @@ public class CustomInstrument {
 	}
 
 	/**
-	 * Gets the Sound enum for this CustomInstrument
-	 * @return
+	 * Gets the org.bukkit.Sound enum for this CustomInstrument
+	 * @return org.bukkit.Sound enum
 	 */
 	public org.bukkit.Sound getSound() {
 		return sound;

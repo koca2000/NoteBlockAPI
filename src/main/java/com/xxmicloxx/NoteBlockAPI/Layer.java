@@ -18,6 +18,7 @@ public class Layer {
 	 * @return HashMap of notes with the tick they are played at
 	 * @Deprecated Method name is vague
 	 */
+	@Deprecated
 	public HashMap<Integer, Note> getHashMap() {
 		return getNotesAtTicks();
 	}
@@ -26,6 +27,7 @@ public class Layer {
 	 * Sets the notes in the Layer with the tick they are created as a hash map
 	 * @Deprecated Method name is vague
 	 */
+	@Deprecated
 	public void setHashMap(HashMap<Integer, Note> hashMap) {
 		setNotesAtTicks(hashMap);
 	}
@@ -40,7 +42,6 @@ public class Layer {
 
 	/**
 	 * Sets the notes in the Layer with the tick they are created as a hash map
-	 * @Deprecated Method name is vague
 	 */
 	public void setNotesAtTicks(HashMap<Integer, Note> notesAtTicks) {
 		this.notesAtTicks = notesAtTicks;

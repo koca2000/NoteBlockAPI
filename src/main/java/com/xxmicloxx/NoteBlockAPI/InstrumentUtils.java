@@ -65,25 +65,30 @@ public class InstrumentUtils {
 				return org.bukkit.Instrument.SNARE_DRUM;
 			case 4:
 				return org.bukkit.Instrument.STICKS;
-			case 5:
-				return org.bukkit.Instrument.GUITAR;
-			case 6:
-				return org.bukkit.Instrument.FLUTE;
-			case 7:
-				return org.bukkit.Instrument.BELL;
-			case 8:
-				return org.bukkit.Instrument.CHIME;
-			case 9:
-				return org.bukkit.Instrument.XYLOPHONE;
-			default:
+			default: {
+				if (CompatibilityUtils.isPost1_12()) {
+					switch (instrument) {
+						case 5:
+							return org.bukkit.Instrument.GUITAR;
+						case 6:
+							return org.bukkit.Instrument.FLUTE;
+						case 7:
+							return org.bukkit.Instrument.BELL;
+						case 8:
+							return org.bukkit.Instrument.CHIME;
+						case 9:
+							return org.bukkit.Instrument.XYLOPHONE;
+					}
+				}
 				return org.bukkit.Instrument.PIANO;
+			}
 		}
 	}
 
 	/**
 	 * If true, the byte given represents a custom instrument
 	 * @param instrument
-	 * @return
+	 * @return whether the byte represents a custom instrument
 	 */
 	public static boolean isCustomInstrument(byte instrument) {
 		if (CompatibilityUtils.isPost1_12()) {
@@ -101,7 +106,7 @@ public class InstrumentUtils {
 	/**
 	 * Gets the first index in which a custom instrument 
 	 * can be added to the existing list of instruments
-	 * @return instrument as a byte
+	 * @return index where an instrument can be added
 	 */
 	public static byte getCustomInstrumentFirstIndex() {
 		if (CompatibilityUtils.isPost1_12()) {
