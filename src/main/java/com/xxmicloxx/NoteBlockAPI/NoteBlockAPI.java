@@ -4,24 +4,28 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
-import org.bstats.Metrics;
+import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer;
 
 public class NoteBlockAPI extends JavaPlugin {
 
-	public static NoteBlockAPI plugin;
+	private static NoteBlockAPI plugin;
 	
 	private Map<UUID, ArrayList<SongPlayer>> playingSongs = 
 			Collections.synchronizedMap(new HashMap<UUID, ArrayList<SongPlayer>>());
 	private Map<UUID, Byte> playerVolume = Collections.synchronizedMap(new HashMap<UUID, Byte>());
 
 	private boolean disabling = false;
+	
+	private HashMap<Plugin, Boolean> dependentPlugins = new HashMap<>();
 
 	/**
 	 * Returns true if a Player is currently receiving a song
@@ -80,7 +84,26 @@ public class NoteBlockAPI extends JavaPlugin {
 	@Override
 	public void onEnable() {
 		plugin = this;
-		new Metrics(this);
+		
+		for (Plugin pl : getServer().getPluginManager().getPlugins()){
+			if (pl.getDescription().getDepend().contains("NoteBlockAPI") || pl.getDescription().getSoftDepend().contains("NoteBlockAPI")){
+				dependentPlugins.put(pl, false);
+			}
+		}
+		
+		Metrics metrics = new Metrics(this);
+		
+		metrics.addCustomChart(new Metrics.DrilldownPie("deprecated", () -> {
+	        Map<String, Map<String, Integer>> map = new HashMap<>();
+	        for (Plugin pl : dependentPlugins.keySet()){
+	        	String deprecated = dependentPlugins.get(pl) ? "yes" : "no";
+	        	Map<String, Integer> entry = new HashMap<>();
+		        entry.put(pl.getDescription().getFullName(), 1);
+		        map.put(deprecated, entry);
+	        }
+	        return map;
+	    }));
+		
 		new NoteBlockPlayerMain().onEnable();
 	}
 
@@ -101,6 +124,48 @@ public class NoteBlockAPI extends JavaPlugin {
 
 	public boolean isDisabling() {
 		return disabling;
+	}
+	
+	public static NoteBlockAPI getAPI(){
+		return plugin;
+	}
+	
+	protected void handleDeprecated(StackTraceElement[] ste){
+		int pom = 1;
+		String clazz = ste[pom].getClassName();
+		while (clazz.startsWith("com.xxmicloxx.NoteBlockAPI")){
+			pom++;
+			clazz = ste[pom].getClassName();
+		}
+		String[] packageParts = clazz.split("\\.");
+		ArrayList<Plugin> plugins = new ArrayList<Plugin>();
+		plugins.addAll(dependentPlugins.keySet());
+		
+		ArrayList<Plugin> notResult = new ArrayList<Plugin>();
+		parts:
+		for (int i = 0; i < packageParts.length - 1; i++){
+			
+			for (Plugin pl : plugins){
+				if (notResult.contains(pl)){ continue;}
+				if (plugins.size() - notResult.size() == 1){
+					break parts;
+				}
+				String[] plParts = pl.getDescription().getMain().split("\\.");
+				if (!packageParts[i].equalsIgnoreCase(plParts[i])){
+					notResult.add(pl);
+					continue;
+				}
+			}
+			plugins.removeAll(notResult);
+			notResult.clear();
+		}
+		
+		plugins.removeAll(notResult);
+		notResult.clear();
+		if (plugins.size() == 1){
+			Bukkit.getLogger().info(plugins.get(0).getName());
+			dependentPlugins.put(plugins.get(0), true);
+		}
 	}
 	
 }

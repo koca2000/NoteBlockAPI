@@ -5,10 +5,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.bstats.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.java.JavaPlugin;
 
 /**
  * Main class; contains methods for playing and adjusting songs for players
@@ -81,11 +79,11 @@ public class NoteBlockPlayerMain {
 	}
 
 	public void doSync(Runnable runnable) {
-		Bukkit.getServer().getScheduler().runTask(NoteBlockAPI.plugin, runnable);
+		Bukkit.getServer().getScheduler().runTask(NoteBlockAPI.getAPI(), runnable);
 	}
 
 	public void doAsync(Runnable runnable) {
-		Bukkit.getServer().getScheduler().runTaskAsynchronously(NoteBlockAPI.plugin, runnable);
+		Bukkit.getServer().getScheduler().runTaskAsynchronously(NoteBlockAPI.getAPI(), runnable);
 	}
 
 	public boolean isDisabling() {

@@ -68,7 +68,7 @@ public abstract class SongPlayer {
 	public SongPlayer(Song song, SoundCategory soundCategory) {
 		this.song = song;
 		this.soundCategory = soundCategory;
-		plugin = NoteBlockAPI.plugin;
+		plugin = NoteBlockAPI.getAPI();
 		start();
 	}
 	
@@ -246,7 +246,7 @@ public abstract class SongPlayer {
 				long startTime = System.currentTimeMillis();
 				lock.lock();
 				try {
-					if (destroyed || NoteBlockAPI.plugin.isDisabling()){
+					if (destroyed || NoteBlockAPI.getAPI().isDisabling()){
 						break;
 					}
 
@@ -506,7 +506,7 @@ public abstract class SongPlayer {
 
 	void CallUpdate(String key, Object value){
 		try {
-			Method m = com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer.class.getDeclaredMethod("update", String.class, Object.class);
+			Method m = com.xxmicloxx.NoteBlockAPI.SongPlayer.class.getDeclaredMethod("update", String.class, Object.class);
 			m.setAccessible(true);
 			m.invoke(oldSongPlayer, key, value);
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
