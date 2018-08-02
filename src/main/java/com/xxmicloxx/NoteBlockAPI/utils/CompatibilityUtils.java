@@ -1,4 +1,4 @@
-package com.xxmicloxx.NoteBlockAPI;
+package com.xxmicloxx.NoteBlockAPI.utils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -9,11 +9,13 @@ import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
+import com.xxmicloxx.NoteBlockAPI.model.CustomInstrument;
+import com.xxmicloxx.NoteBlockAPI.model.SoundCategory;
+
 /**
  * Fields/methods for reflection & version checking
  *
  */
-@Deprecated
 public class CompatibilityUtils {
 
 	public static final String OBC_DIR = Bukkit.getServer().getClass().getPackage().getName();
@@ -166,5 +168,5 @@ public class CompatibilityUtils {
 		instruments.add(new CustomInstrument((byte) 0, "Xylophone", "xylobone.ogg"));
 		return instruments;
 	}
-	
+
 }

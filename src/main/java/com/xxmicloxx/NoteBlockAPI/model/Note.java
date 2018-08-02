@@ -1,11 +1,10 @@
-package com.xxmicloxx.NoteBlockAPI;
+package com.xxmicloxx.NoteBlockAPI.model;
 
 /**
  * Represents a note played; contains the instrument and the key
  * @see NotePitch
  *
  */
-@Deprecated
 public class Note {
 
 	private byte instrument;
@@ -31,5 +30,4 @@ public class Note {
 	public void setKey(byte key) {
 		this.key = key;
 	}
-	
 }

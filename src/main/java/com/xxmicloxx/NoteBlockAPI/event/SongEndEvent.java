@@ -1,7 +1,9 @@
-package com.xxmicloxx.NoteBlockAPI;
+package com.xxmicloxx.NoteBlockAPI.event;
 
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
+
+import com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer;
 
 /**
  * Called when a Song ends
@@ -9,7 +11,6 @@ import org.bukkit.event.HandlerList;
  * @see SongPlayer
  *
  */
-@Deprecated
 public class SongEndEvent extends Event {
 
 	private static final HandlerList handlers = new HandlerList();

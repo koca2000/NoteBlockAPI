@@ -1,30 +1,40 @@
-package com.xxmicloxx.NoteBlockAPI;
+package com.xxmicloxx.NoteBlockAPI.songplayer;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
+import com.xxmicloxx.NoteBlockAPI.NoteBlockAPI;
+import com.xxmicloxx.NoteBlockAPI.SongPlayer;
+import com.xxmicloxx.NoteBlockAPI.event.PlayerRangeStateChangeEvent;
+import com.xxmicloxx.NoteBlockAPI.model.CustomInstrument;
+import com.xxmicloxx.NoteBlockAPI.model.Layer;
+import com.xxmicloxx.NoteBlockAPI.model.Note;
+import com.xxmicloxx.NoteBlockAPI.model.NotePitch;
+import com.xxmicloxx.NoteBlockAPI.model.Song;
+import com.xxmicloxx.NoteBlockAPI.model.SoundCategory;
+import com.xxmicloxx.NoteBlockAPI.utils.CompatibilityUtils;
 import com.xxmicloxx.NoteBlockAPI.utils.InstrumentUtils;
 
 /**
  * SongPlayer created at a specified Location
  *
  */
-@Deprecated
-public class PositionSongPlayer extends SongPlayer {
+public class PositionSongPlayer extends RangeSongPlayer {
 
 	private Location targetLocation;
-	private int distance = 16;
 
 	public PositionSongPlayer(Song song) {
 		super(song);
-		makeNewClone(com.xxmicloxx.NoteBlockAPI.songplayer.PositionSongPlayer.class);
 	}
 
 	public PositionSongPlayer(Song song, SoundCategory soundCategory) {
 		super(song, soundCategory);
-		makeNewClone(com.xxmicloxx.NoteBlockAPI.songplayer.PositionSongPlayer.class);
+	}
+	
+	private PositionSongPlayer(SongPlayer songPlayer) {
+		super(songPlayer);
 	}
 	
 	@Override
@@ -32,9 +42,6 @@ public class PositionSongPlayer extends SongPlayer {
 		super.update(key, value);
 		
 		switch (key){
-			case "distance":
-				distance = (int) value;
-				break;
 			case "targetLocation":
 				targetLocation = (Location) value;
 				break;
@@ -74,7 +81,7 @@ public class PositionSongPlayer extends SongPlayer {
 					CompatibilityUtils.playSound(player, targetLocation, instrument.getSound(),
 							this.soundCategory, volume, pitch);
 				} else {
-					CompatibilityUtils.playSound(player, targetLocation, instrument.getSoundfile(),
+					CompatibilityUtils.playSound(player, targetLocation, instrument.getSoundFileName(),
 							this.soundCategory, volume, pitch);
 				}
 			} else {
@@ -83,31 +90,18 @@ public class PositionSongPlayer extends SongPlayer {
 						volume, pitch);
 			}
 
-			if (isPlayerInRange(player)) {
-				if (!this.playerList.get(player.getName())) {
-					playerList.put(player.getName(), true);
+			if (isInRange(player)) {
+				if (!this.playerList.get(player.getUniqueId())) {
+					playerList.put(player.getUniqueId(), true);
 					Bukkit.getPluginManager().callEvent(new PlayerRangeStateChangeEvent(this, player, true));
 				}
 			} else {
-				if (this.playerList.get(player.getName())) {
-					playerList.put(player.getName(), false);
+				if (this.playerList.get(player.getUniqueId())) {
+					playerList.put(player.getUniqueId(), false);
 					Bukkit.getPluginManager().callEvent(new PlayerRangeStateChangeEvent(this, player, false));
 				}
 			}
 		}
-	}
-
-	/**
-	 * Sets distance in blocks where would be player able to hear sound. 
-	 * @param distance (Default 16 blocks)
-	 */
-	public void setDistance(int distance) {
-		this.distance = distance;
-		CallUpdate("distance", distance);
-	}
-
-	public int getDistance() {
-		return distance;
 	}
 	
 	/**
@@ -115,9 +109,11 @@ public class PositionSongPlayer extends SongPlayer {
 	 * @param player in range
 	 * @return ability to hear the current PositionSongPlayer
 	 */
-	@Deprecated
-	public boolean isPlayerInRange(Player player) {
+	@Override
+	public boolean isInRange(Player player) {
 		return player.getLocation().distance(targetLocation) <= getDistance();
 	}
+
 	
+
 }

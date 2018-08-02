@@ -1,4 +1,4 @@
-package com.xxmicloxx.NoteBlockAPI;
+package com.xxmicloxx.NoteBlockAPI.utils;
 
 import java.io.DataInputStream;
 import java.io.EOFException;
@@ -14,15 +14,17 @@ import java.util.HashMap;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 
-import com.xxmicloxx.NoteBlockAPI.utils.InstrumentUtils;
+import com.xxmicloxx.NoteBlockAPI.model.CustomInstrument;
+import com.xxmicloxx.NoteBlockAPI.model.Layer;
+import com.xxmicloxx.NoteBlockAPI.model.Note;
+import com.xxmicloxx.NoteBlockAPI.model.Song;
 
 /**
  * Utils for reading Note Block Studio data
  *
  */
-@Deprecated
 public class NBSDecoder {
-	
+
 	/**
 	 * Parses a Song from a Note Block Studio project file (.nbs)
 	 * @see Song
@@ -186,4 +188,5 @@ public class NBSDecoder {
 		}
 		return builder.toString();
 	}
+	
 }

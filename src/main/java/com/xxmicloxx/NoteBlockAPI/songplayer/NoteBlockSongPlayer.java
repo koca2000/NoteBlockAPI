@@ -1,53 +1,61 @@
-package com.xxmicloxx.NoteBlockAPI;
+package com.xxmicloxx.NoteBlockAPI.songplayer;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
-import com.xxmicloxx.NoteBlockAPI.songplayer.RangeSongPlayer;
+import com.xxmicloxx.NoteBlockAPI.NoteBlockAPI;
+import com.xxmicloxx.NoteBlockAPI.SongPlayer;
+import com.xxmicloxx.NoteBlockAPI.event.PlayerRangeStateChangeEvent;
+import com.xxmicloxx.NoteBlockAPI.model.CustomInstrument;
+import com.xxmicloxx.NoteBlockAPI.model.Layer;
+import com.xxmicloxx.NoteBlockAPI.model.Note;
+import com.xxmicloxx.NoteBlockAPI.model.NotePitch;
+import com.xxmicloxx.NoteBlockAPI.model.Song;
+import com.xxmicloxx.NoteBlockAPI.model.SoundCategory;
+import com.xxmicloxx.NoteBlockAPI.utils.CompatibilityUtils;
 import com.xxmicloxx.NoteBlockAPI.utils.InstrumentUtils;
 
 /**
  * SongPlayer created at a specified NoteBlock
  *
  */
-@Deprecated
-public class NoteBlockSongPlayer extends SongPlayer {
+public class NoteBlockSongPlayer extends RangeSongPlayer {
 
 	private Block noteBlock;
-	private int distance = 16;
 
 	public NoteBlockSongPlayer(Song song) {
 		super(song);
-		makeNewClone(com.xxmicloxx.NoteBlockAPI.songplayer.NoteBlockSongPlayer.class);
 	}
 
 	public NoteBlockSongPlayer(Song song, SoundCategory soundCategory) {
 		super(song, soundCategory);
-		makeNewClone(com.xxmicloxx.NoteBlockAPI.songplayer.NoteBlockSongPlayer.class);
 	}
+	
+	
 
+	private NoteBlockSongPlayer(SongPlayer songPlayer) {
+		super(songPlayer);
+	}
+	
 	@Override
 	void update(String key, Object value) {
 		super.update(key, value);
 		
 		switch (key){
-			case "distance":
-				distance = (int) value;
-				break;
 			case "noteBlock":
 				noteBlock = (Block) value;
 				break;
 		}
 	}
-	
+
 	/**
 	 * Get the Block this SongPlayer is played at
 	 * @return Block representing a NoteBlock
 	 */
 	public Block getNoteBlock() {
-		return noteBlock;
+		return noteBlock;	
 	}
 
 	/**
@@ -90,52 +98,41 @@ public class NoteBlockSongPlayer extends SongPlayer {
 							instrument.getSound(), this.soundCategory, volume, pitch);
 				} else {
 					CompatibilityUtils.playSound(player, noteBlock.getLocation(), 
-							instrument.getSoundfile(), this.soundCategory, volume, pitch);
+							instrument.getSoundFileName(), this.soundCategory, volume, pitch);
 				}
 			} else {
 				CompatibilityUtils.playSound(player, noteBlock.getLocation(),
 						InstrumentUtils.getInstrument(note.getInstrument()), this.soundCategory, volume, pitch);
 			}
 
-			if (isPlayerInRange(player)) {
-				if (!this.playerList.get(player.getName())) {
-					playerList.put(player.getName(), true);
+			if (isInRange(player)) {
+				if (!this.playerList.get(player.getUniqueId())) {
+					playerList.put(player.getUniqueId(), true);
 					Bukkit.getPluginManager().callEvent(new PlayerRangeStateChangeEvent(this, player, true));
 				}
 			} else {
-				if (this.playerList.get(player.getName())) {
-					playerList.put(player.getName(), false);
+				if (this.playerList.get(player.getUniqueId())) {
+					playerList.put(player.getUniqueId(), false);
 					Bukkit.getPluginManager().callEvent(new PlayerRangeStateChangeEvent(this, player, false));
 				}
 			}
 		}
 	}
-
-	/**
-	 * Sets distance in blocks where would be player able to hear sound. 
-	 * @param distance (Default 16 blocks)
-	 */
-	public void setDistance(int distance) {
-		this.distance = distance;
-		CallUpdate("distance", distance);
-	}
-
-	public int getDistance() {
-		return distance;
-	}
-	
 	
 	/**
 	 * Returns true if the Player is able to hear the current NoteBlockSongPlayer 
 	 * @param player in range
 	 * @return ability to hear the current NoteBlockSongPlayer
 	 */	
-	@Deprecated
-	public boolean isPlayerInRange(Player player) {
+	@Override
+	public boolean isInRange(Player player) {
 		if (player.getLocation().distance(noteBlock.getLocation()) > getDistance()) {
 			return false;
 		} else {
 			return true;
 		}
 	}
+
+	
+
 }

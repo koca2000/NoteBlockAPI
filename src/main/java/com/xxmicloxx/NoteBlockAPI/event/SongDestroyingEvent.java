@@ -1,15 +1,16 @@
-package com.xxmicloxx.NoteBlockAPI;
+package com.xxmicloxx.NoteBlockAPI.event;
 
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
+
+import com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer;
 
 /**
  * Called whenever a Song is destroyed
  * @see SongPlayer
  *
  */
-@Deprecated
 public class SongDestroyingEvent extends Event implements Cancellable {
 
 	private static final HandlerList handlers = new HandlerList();
@@ -41,5 +42,7 @@ public class SongDestroyingEvent extends Event implements Cancellable {
 	public void setCancelled(boolean arg0) {
 		cancelled = arg0;
 	}
+
+	
 
 }

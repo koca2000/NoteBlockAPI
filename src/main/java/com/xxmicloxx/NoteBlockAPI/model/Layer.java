@@ -1,4 +1,4 @@
-package com.xxmicloxx.NoteBlockAPI;
+package com.xxmicloxx.NoteBlockAPI.model;
 
 import java.util.HashMap;
 
@@ -7,12 +7,26 @@ import java.util.HashMap;
  * A Layer can have a maximum of one note per tick (20 ticks a second)
  *
  */
-@Deprecated
-public class Layer{
+public class Layer {
 
 	private HashMap<Integer, Note> notesAtTicks = new HashMap<Integer, Note>();
 	private byte volume = 100;
 	private String name = "";
+
+	/**
+	 * Gets the notes in the Layer with the tick they are created as a hash map
+	 * @return HashMap of notes with the tick they are played at
+	 */
+	public HashMap<Integer, Note> getNotesAtTicks() {
+		return notesAtTicks;
+	}
+
+	/**
+	 * Sets the notes in the Layer with the tick they are created as a hash map
+	 */
+	public void setNotesAtTicks(HashMap<Integer, Note> notesAtTicks) {
+		this.notesAtTicks = notesAtTicks;
+	}
 
 	/**
 	 * Gets the name of the Layer
@@ -57,24 +71,5 @@ public class Layer{
 	public void setVolume(byte volume) {
 		this.volume = volume;
 	}
-	
-	/**
-	 * Gets the notes in the Layer with the tick they are created as a hash map. 
-	 * @return HashMap of notes with the tick they are played at
-	 * @Deprecated Method name is vague
-	 */
-	@Deprecated
-	public HashMap<Integer, Note> getHashMap() {
-		return notesAtTicks;
-	}
-	
-	/**
-	 * Sets the notes in the Layer with the tick they are created as a hash map
-	 * @Deprecated Method name is vague
-	 */
-	@Deprecated
-	public void setHashMap(HashMap<Integer, Note> hashMap) {
-		this.notesAtTicks = notesAtTicks;
-	}
-	
+
 }

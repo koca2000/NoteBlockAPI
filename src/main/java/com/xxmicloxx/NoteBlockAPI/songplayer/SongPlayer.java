@@ -1,4 +1,4 @@
-package com.xxmicloxx.NoteBlockAPI;
+package com.xxmicloxx.NoteBlockAPI.songplayer;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -6,26 +6,40 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
+import com.xxmicloxx.NoteBlockAPI.NoteBlockAPI;
+import com.xxmicloxx.NoteBlockAPI.event.SongDestroyingEvent;
+import com.xxmicloxx.NoteBlockAPI.event.SongEndEvent;
+import com.xxmicloxx.NoteBlockAPI.event.SongStoppedEvent;
+import com.xxmicloxx.NoteBlockAPI.model.CustomInstrument;
+import com.xxmicloxx.NoteBlockAPI.model.Fade;
+import com.xxmicloxx.NoteBlockAPI.model.Layer;
+import com.xxmicloxx.NoteBlockAPI.model.Note;
+import com.xxmicloxx.NoteBlockAPI.model.Song;
+import com.xxmicloxx.NoteBlockAPI.model.SoundCategory;
+import com.xxmicloxx.NoteBlockAPI.utils.Interpolator;
+
+
 /**
  * Plays a Song for a list of Players
  *
  */
-@Deprecated
 public abstract class SongPlayer {
 
 	protected Song song;
 
 	protected boolean playing = false;
 	protected short tick = -1;
-	protected Map<String, Boolean> playerList = Collections.synchronizedMap(new HashMap<String, Boolean>());
+	protected Map<UUID, Boolean> playerList = Collections.synchronizedMap(new HashMap<UUID, Boolean>());
 
 	protected boolean autoDestroy = false;
 	protected boolean destroyed = false;
@@ -37,15 +51,15 @@ public abstract class SongPlayer {
 	protected byte fadeTarget = 100;
 	protected int fadeDuration = 60;
 	protected int fadeDone = 0;
-	protected FadeType fadeType = FadeType.FADE_LINEAR;
+	protected Fade fadeType = Fade.FADE_LINEAR;
 
 	private final Lock lock = new ReentrantLock();
 
-	protected NoteBlockPlayerMain plugin;
+	protected NoteBlockAPI plugin;
 
 	protected SoundCategory soundCategory;
 	
-	private com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer newSongPlayer;
+	com.xxmicloxx.NoteBlockAPI.SongPlayer oldSongPlayer;
 
 	public SongPlayer(Song song) {
 		this(song, SoundCategory.MASTER);
@@ -54,30 +68,30 @@ public abstract class SongPlayer {
 	public SongPlayer(Song song, SoundCategory soundCategory) {
 		this.song = song;
 		this.soundCategory = soundCategory;
-		plugin = NoteBlockPlayerMain.plugin;
+		plugin = NoteBlockAPI.plugin;
 		start();
 	}
 	
-	SongPlayer(com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer songPlayer){
-		newSongPlayer = songPlayer;
-		com.xxmicloxx.NoteBlockAPI.model.Song s = songPlayer.getSong();
+	SongPlayer(com.xxmicloxx.NoteBlockAPI.SongPlayer songPlayer){
+		oldSongPlayer = songPlayer;
+		com.xxmicloxx.NoteBlockAPI.Song s = songPlayer.getSong();
 		HashMap<Integer, Layer> layerHashMap = new HashMap<Integer, Layer>();
 		for (Integer i : s.getLayerHashMap().keySet()){
-			com.xxmicloxx.NoteBlockAPI.model.Layer l = s.getLayerHashMap().get(i);
+			com.xxmicloxx.NoteBlockAPI.Layer l = s.getLayerHashMap().get(i);
 			HashMap<Integer, Note> noteHashMap = new HashMap<Integer, Note>();
-			for (Integer iL : l.getNotesAtTicks().keySet()){
-				com.xxmicloxx.NoteBlockAPI.model.Note note = l.getNotesAtTicks().get(iL);
+			for (Integer iL : l.getHashMap().keySet()){
+				com.xxmicloxx.NoteBlockAPI.Note note = l.getHashMap().get(iL);
 				noteHashMap.put(iL, new Note(note.getInstrument(), note.getKey()));
 			}
 			Layer layer = new Layer();
-			layer.setHashMap(noteHashMap);
+			layer.setNotesAtTicks(noteHashMap);
 			layer.setVolume(l.getVolume());
 			layerHashMap.put(i, layer);
 		}
-		com.xxmicloxx.NoteBlockAPI.CustomInstrument[] instruments = new com.xxmicloxx.NoteBlockAPI.CustomInstrument[s.getCustomInstruments().length];
+		CustomInstrument[] instruments = new CustomInstrument[s.getCustomInstruments().length];
 		for (int i = 0; i < s.getCustomInstruments().length; i++){
-			com.xxmicloxx.NoteBlockAPI.model.CustomInstrument ci = s.getCustomInstruments()[i];
-			instruments[i] = new CustomInstrument(ci.getIndex(), ci.getName(), ci.getSoundFileName());
+			com.xxmicloxx.NoteBlockAPI.CustomInstrument ci = s.getCustomInstruments()[i];
+			instruments[i] = new CustomInstrument(ci.getIndex(), ci.getName(), ci.getSoundfile());
 		}
 		song = new Song(s.getSpeed(), layerHashMap, s.getSongHeight(), s.getLength(), s.getTitle(), s.getAuthor(), s.getDescription(), s.getPath(), instruments);
 	}
@@ -88,7 +102,7 @@ public abstract class SongPlayer {
 				playing = (boolean) value;
 				break;
 			case "fadeType":
-				fadeType = FadeType.valueOf((String) value);
+				fadeType = Fade.valueOf((String) value);
 				break;
 			case "fadeTarget":
 				fadeTarget = (byte) value;
@@ -123,12 +137,12 @@ public abstract class SongPlayer {
 				
 		}
 	}
-
+	
 	/**
 	 * Gets the FadeType for this SongPlayer (unused)
 	 * @return FadeType
 	 */
-	public FadeType getFadeType() {
+	public Fade getFadeType() {
 		return fadeType;
 	}
 
@@ -136,7 +150,7 @@ public abstract class SongPlayer {
 	 * Sets the FadeType for this SongPlayer
 	 * @param fadeType
 	 */
-	public void setFadeType(FadeType fadeType) {
+	public void setFadeType(Fade fadeType) {
 		this.fadeType = fadeType;
 		CallUpdate("fadetype", fadeType.name());
 	}
@@ -250,15 +264,15 @@ public abstract class SongPlayer {
 							continue;
 						}
 						CallUpdate("tick", tick);
-
+						
 						plugin.doSync(() -> {
-							for (String s : playerList.keySet()) {
-	                            Player p = Bukkit.getPlayerExact(s);
-	                            if (p == null) {
-	                                // offline...
-	                                continue;
-	                            }
-	                            playTick(p, tick);
+							for (UUID uuid : playerList.keySet()) {
+								Player player = Bukkit.getPlayer(uuid);
+								if (player == null) {
+									// offline...
+									continue;
+								}
+								playTick(player, tick);
 							}
 						});
 					}
@@ -284,19 +298,15 @@ public abstract class SongPlayer {
 			}
 		});
 	}
-
+	
 	/**
-	 * Gets list of current Player usernames listening to this SongPlayer
-	 * @return list of Player usernames
-	 * @Deprecated use getPlayerUUIDs
+	 * Gets list of current Player UUIDs listening to this SongPlayer
+	 * @return list of Player UUIDs
 	 */
-	@Deprecated
-	public List<String> getPlayerList() {
-		List<String> list = new ArrayList<>();
-		for (String s : playerList.keySet()) {
-			list.add(Bukkit.getPlayer(s).getName());
-		}
-		return Collections.unmodifiableList(list);
+	public Set<UUID> getPlayerUUIDs() {
+		Set<UUID> uuids = new HashSet<>();
+		uuids.addAll(playerList.keySet());
+		return Collections.unmodifiableSet(uuids);
 	}
 
 	/**
@@ -310,15 +320,14 @@ public abstract class SongPlayer {
 	private void addPlayer(Player player, boolean notify){
 		lock.lock();
 		try {
-			if (!playerList.containsKey(player.getName())) {
-				playerList.put(player.getName(), false);
-				ArrayList<SongPlayer> songs = NoteBlockPlayerMain.plugin.playingSongs
-						.get(player.getName());
+			if (!playerList.containsKey(player.getUniqueId())) {
+				playerList.put(player.getUniqueId(), false);
+				ArrayList<SongPlayer> songs = NoteBlockAPI.getSongPlayersByPlayer(player);
 				if (songs == null) {
 					songs = new ArrayList<SongPlayer>();
 				}
 				songs.add(this);
-				NoteBlockPlayerMain.plugin.playingSongs.put(player.getName(), songs);
+				NoteBlockAPI.setSongPlayersByPlayer(player, songs);
 				if (notify){
 					CallUpdate("addplayer", player);
 				}
@@ -434,14 +443,14 @@ public abstract class SongPlayer {
 			if (notify){
 				CallUpdate("removeplayer", player);
 			}
-			playerList.remove(player.getName());
-			if (NoteBlockPlayerMain.plugin.playingSongs.get(player.getName()) == null) {
+			playerList.remove(player.getUniqueId());
+			if (NoteBlockAPI.getSongPlayersByPlayer(player) == null) {
 				return;
 			}
 			ArrayList<SongPlayer> songs = new ArrayList<>(
-					NoteBlockPlayerMain.plugin.playingSongs.get(player.getName()));
+					NoteBlockAPI.getSongPlayersByPlayer(player));
 			songs.remove(this);
-			NoteBlockPlayerMain.plugin.playingSongs.put(player.getName(), songs);
+			NoteBlockAPI.setSongPlayersByPlayer(player, songs);
 			if (playerList.isEmpty() && autoDestroy) {
 				SongEndEvent event = new SongEndEvent(this);
 				Bukkit.getPluginManager().callEvent(event);
@@ -494,12 +503,12 @@ public abstract class SongPlayer {
 		this.soundCategory = soundCategory;
 		CallUpdate("soundCategory", soundCategory.name());
 	}
-	
+
 	void CallUpdate(String key, Object value){
 		try {
 			Method m = com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer.class.getDeclaredMethod("update", String.class, Object.class);
 			m.setAccessible(true);
-			m.invoke(newSongPlayer, key, value);
+			m.invoke(oldSongPlayer, key, value);
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
 				| SecurityException e) {
 			e.printStackTrace();
@@ -510,7 +519,7 @@ public abstract class SongPlayer {
 		try {
 			Constructor c = newClass.getDeclaredConstructor(new Class[] { SongPlayer.class });
 			c.setAccessible(true);
-			newSongPlayer = (com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer) c.newInstance(new Object[]{this});
+			oldSongPlayer = (com.xxmicloxx.NoteBlockAPI.SongPlayer) c.newInstance(new Object[]{this});
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
 				| NoSuchMethodException | SecurityException e) {
 			e.printStackTrace();

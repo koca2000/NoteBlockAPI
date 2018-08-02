@@ -1,4 +1,4 @@
-package com.xxmicloxx.NoteBlockAPI;
+package com.xxmicloxx.NoteBlockAPI.utils;
 
 import java.util.Arrays;
 
@@ -20,7 +20,6 @@ import java.util.Arrays;
  *          <font size="-1" color="#336699">Copyright 2002 MBARI.<br>
  *          MBARI Proprietary Information. All rights reserved.</font><br><hr><br>
  */
-@Deprecated
 public class Interpolator {
 
 	public static double[] interpLinear(double[] x, double[] y, double[] xi) throws IllegalArgumentException {
@@ -100,5 +99,5 @@ public class Interpolator {
 		}
 		return interpLinear(x, y, new double[] {xx})[0];
 	}
-
+	
 }

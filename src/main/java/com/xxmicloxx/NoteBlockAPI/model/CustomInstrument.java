@@ -1,13 +1,10 @@
-package com.xxmicloxx.NoteBlockAPI;
-
-import com.xxmicloxx.NoteBlockAPI.model.Sound;
+package com.xxmicloxx.NoteBlockAPI.model;
 
 /**
  * Create custom instruments from a sound file
  * 
  */
-@Deprecated
-public class CustomInstrument{
+public class CustomInstrument {
 	
 	private byte index;
 	private String name;
@@ -44,7 +41,15 @@ public class CustomInstrument{
 	public String getName() {
 		return name;
 	}
-	
+
+	/**
+	 * Gets file name of the sound
+	 * @return file name
+	 */
+	public String getSoundFileName() {
+		return soundFileName;
+	}
+
 	/**
 	 * Gets the org.bukkit.Sound enum for this CustomInstrument
 	 * @return org.bukkit.Sound enum
@@ -52,13 +57,4 @@ public class CustomInstrument{
 	public org.bukkit.Sound getSound() {
 		return sound;
 	}
-	
-	/**
-	 * Gets file name of the sound
-	 * @deprecated misleading name
-	 */
-	public String getSoundfile() {
-		return soundFileName;
-	}
-
 }

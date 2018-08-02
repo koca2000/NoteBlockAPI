@@ -4,24 +4,22 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import org.bstats.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-/**
- * Main class; contains methods for playing and adjusting songs for players
- *
- */
-@Deprecated
-public class NoteBlockPlayerMain {
+import com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer;
 
-	public static NoteBlockPlayerMain plugin;
+public class NoteBlockAPI extends JavaPlugin {
 
-	public Map<String, ArrayList<SongPlayer>> playingSongs = 
-			Collections.synchronizedMap(new HashMap<String, ArrayList<SongPlayer>>());
-	public Map<String, Byte> playerVolume = Collections.synchronizedMap(new HashMap<String, Byte>());
+	public static NoteBlockAPI plugin;
+	
+	private Map<UUID, ArrayList<SongPlayer>> playingSongs = 
+			Collections.synchronizedMap(new HashMap<UUID, ArrayList<SongPlayer>>());
+	private Map<UUID, Byte> playerVolume = Collections.synchronizedMap(new HashMap<UUID, Byte>());
 
 	private boolean disabling = false;
 
@@ -54,8 +52,7 @@ public class NoteBlockPlayerMain {
 	 * @param volume
 	 */
 	public static void setPlayerVolume(Player player, byte volume) {
-		plugin.playerVolume.put(player.getName(), volume);
-		NoteBlockAPI.setPlayerVolume(player, volume);
+		plugin.playerVolume.put(player.getUniqueId(), volume);
 	}
 
 	/**
@@ -64,28 +61,42 @@ public class NoteBlockPlayerMain {
 	 * @return volume (byte)
 	 */
 	public static byte getPlayerVolume(Player player) {
-		Byte byteObj = plugin.playerVolume.get(player.getName());
+		Byte byteObj = plugin.playerVolume.get(player.getUniqueId());
 		if (byteObj == null) {
 			byteObj = 100;
-			plugin.playerVolume.put(player.getName(), byteObj);
+			plugin.playerVolume.put(player.getUniqueId(), byteObj);
 		}
 		return byteObj;
 	}
 	
-	public void onEnable() {
-		plugin = this;
+	public static ArrayList<SongPlayer> getSongPlayersByPlayer(Player player){
+		return plugin.playingSongs.get(player.getUniqueId());
 	}
 	
+	public static void setSongPlayersByPlayer(Player player, ArrayList<SongPlayer> songs){
+		plugin.playingSongs.put(player.getUniqueId(), songs);
+	}
+
+	@Override
+	public void onEnable() {
+		plugin = this;
+		new Metrics(this);
+		new NoteBlockPlayerMain().onEnable();
+	}
+
+	@Override
 	public void onDisable() {    	
 		disabling = true;
+		Bukkit.getScheduler().cancelTasks(this);
+		NoteBlockPlayerMain.plugin.onDisable();
 	}
 
 	public void doSync(Runnable runnable) {
-		Bukkit.getServer().getScheduler().runTask(NoteBlockAPI.plugin, runnable);
+		getServer().getScheduler().runTask(this, runnable);
 	}
 
 	public void doAsync(Runnable runnable) {
-		Bukkit.getServer().getScheduler().runTaskAsynchronously(NoteBlockAPI.plugin, runnable);
+		getServer().getScheduler().runTaskAsynchronously(this, runnable);
 	}
 
 	public boolean isDisabling() {

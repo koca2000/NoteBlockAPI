@@ -1,4 +1,4 @@
-package com.xxmicloxx.NoteBlockAPI;
+package com.xxmicloxx.NoteBlockAPI.model;
 
 import org.bukkit.Bukkit;
 
@@ -6,7 +6,6 @@ import org.bukkit.Bukkit;
  * Represents pitches of every noteblock note pre- & post-1.9
  *
  */
-@Deprecated
 public enum NotePitch {
 
 	NOTE_0(0, 0.5F, 0.50000F),
@@ -52,7 +51,6 @@ public enum NotePitch {
 				return pre1_9 ? notePitch.pitchPre1_9 : notePitch.pitchPost1_9;
 			}
 		}
-
 		return 0.0F;
 	}
 

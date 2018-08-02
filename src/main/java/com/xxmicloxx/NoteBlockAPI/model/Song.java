@@ -1,4 +1,4 @@
-package com.xxmicloxx.NoteBlockAPI;
+package com.xxmicloxx.NoteBlockAPI.model;
 
 import java.io.File;
 import java.util.HashMap;
@@ -7,7 +7,6 @@ import java.util.HashMap;
  * Represents a Note Block Studio project
  *
  */
-@Deprecated
 public class Song implements Cloneable {
 
 	private HashMap<Integer, Layer> layerHashMap = new HashMap<Integer, Layer>();
@@ -133,5 +132,7 @@ public class Song implements Cloneable {
 	public Song clone() {
 		return new Song(this);
 	}
+
+	
 
 }

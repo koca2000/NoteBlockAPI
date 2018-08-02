@@ -1,10 +1,9 @@
-package com.xxmicloxx.NoteBlockAPI;
+package com.xxmicloxx.NoteBlockAPI.model;
 
 /**
  * @see org.bukkit.SoundCategory
  *
  */
-@Deprecated
 public enum SoundCategory {
 
 	MASTER,

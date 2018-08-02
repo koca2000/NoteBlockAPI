@@ -1,4 +1,6 @@
-package com.xxmicloxx.NoteBlockAPI;
+package com.xxmicloxx.NoteBlockAPI.utils;
+
+import com.xxmicloxx.NoteBlockAPI.model.Sound;
 
 /**
  * Various methods for working with instruments
@@ -46,7 +48,7 @@ public class InstrumentUtils {
 			default:
 				return Sound.getFromBukkitName("BLOCK_NOTE_BLOCK_HARP").name();
 		}
-	}
+}
 
 	/**
 	 * Returns the name of the org.bukkit.Instrument enum for the current server version
@@ -69,15 +71,15 @@ public class InstrumentUtils {
 				if (CompatibilityUtils.isPost1_12()) {
 					switch (instrument) {
 						case 5:
-							return org.bukkit.Instrument.GUITAR;
+							return org.bukkit.Instrument.valueOf("GUITAR");
 						case 6:
-							return org.bukkit.Instrument.FLUTE;
+							return org.bukkit.Instrument.valueOf("FLUTE");
 						case 7:
-							return org.bukkit.Instrument.BELL;
+							return org.bukkit.Instrument.valueOf("BELL");
 						case 8:
-							return org.bukkit.Instrument.CHIME;
+							return org.bukkit.Instrument.valueOf("CHIME");
 						case 9:
-							return org.bukkit.Instrument.XYLOPHONE;
+							return org.bukkit.Instrument.valueOf("XYLOPHONE");
 					}
 				}
 				return org.bukkit.Instrument.PIANO;

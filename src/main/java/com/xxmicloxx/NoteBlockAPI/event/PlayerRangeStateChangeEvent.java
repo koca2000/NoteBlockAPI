@@ -1,14 +1,15 @@
-package com.xxmicloxx.NoteBlockAPI;
+package com.xxmicloxx.NoteBlockAPI.event;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
+import com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer;
+
 /**
  * Called whenever a Player enters the range of a stationary SongPlayer
  *
  */
-@Deprecated
 public class PlayerRangeStateChangeEvent extends Event {
 
 	private static final HandlerList handlers = new HandlerList();
