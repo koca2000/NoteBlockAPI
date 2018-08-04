@@ -27,10 +27,12 @@ public class PositionSongPlayer extends RangeSongPlayer {
 
 	public PositionSongPlayer(Song song) {
 		super(song);
+		makeNewClone(com.xxmicloxx.NoteBlockAPI.PositionSongPlayer.class);
 	}
 
 	public PositionSongPlayer(Song song, SoundCategory soundCategory) {
 		super(song, soundCategory);
+		makeNewClone(com.xxmicloxx.NoteBlockAPI.PositionSongPlayer.class);
 	}
 	
 	private PositionSongPlayer(SongPlayer songPlayer) {

@@ -19,6 +19,7 @@ import org.bukkit.entity.Player;
 import com.xxmicloxx.NoteBlockAPI.NoteBlockAPI;
 import com.xxmicloxx.NoteBlockAPI.event.SongDestroyingEvent;
 import com.xxmicloxx.NoteBlockAPI.event.SongEndEvent;
+import com.xxmicloxx.NoteBlockAPI.event.SongLoopEvent;
 import com.xxmicloxx.NoteBlockAPI.event.SongStoppedEvent;
 import com.xxmicloxx.NoteBlockAPI.model.CustomInstrument;
 import com.xxmicloxx.NoteBlockAPI.model.Fade;
@@ -52,6 +53,7 @@ public abstract class SongPlayer {
 	protected int fadeDuration = 60;
 	protected int fadeDone = 0;
 	protected Fade fadeType = Fade.FADE_LINEAR;
+	protected boolean loop = false;
 
 	private final Lock lock = new ReentrantLock();
 
@@ -254,9 +256,15 @@ public abstract class SongPlayer {
 						calculateFade();
 						tick++;
 						if (tick > song.getLength()) {
-							playing = false;
 							tick = -1;
-							SongEndEvent event = new SongEndEvent(SongPlayer.this);
+							if (loop){
+								fadeDone = 0;
+								SongLoopEvent event = new SongLoopEvent(this);
+								plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
+								continue;
+							}
+							playing = false;
+							SongEndEvent event = new SongEndEvent(this);
 							plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
 							if (autoDestroy) {
 								destroy();
@@ -502,6 +510,22 @@ public abstract class SongPlayer {
 	public void setCategory(SoundCategory soundCategory) {
 		this.soundCategory = soundCategory;
 		CallUpdate("soundCategory", soundCategory.name());
+	}
+	
+	/**
+	 * Sets whether the SongPlayer will loop
+	 * @param playing
+	 */
+	public void setLoop(boolean loop){
+		this.loop = loop;
+	}
+	
+	/**
+	 * Gets whether the SongPlayer will loop
+	 * @return is loop
+	 */
+	public boolean isLoop(){
+		return loop;
 	}
 
 	void CallUpdate(String key, Object value){

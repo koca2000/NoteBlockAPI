@@ -20,6 +20,10 @@ public class RadioSongPlayer extends SongPlayer {
 		super(song, soundCategory);
 		makeNewClone(com.xxmicloxx.NoteBlockAPI.songplayer.RadioSongPlayer.class);
 	}
+	
+	public RadioSongPlayer(com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer songPlayer) {
+		super(songPlayer);
+	}
 
 	@Override
 	public void playTick(Player player, int tick) {

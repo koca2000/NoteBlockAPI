@@ -27,6 +27,10 @@ public class NoteBlockSongPlayer extends SongPlayer {
 		super(song, soundCategory);
 		makeNewClone(com.xxmicloxx.NoteBlockAPI.songplayer.NoteBlockSongPlayer.class);
 	}
+	
+	public NoteBlockSongPlayer(com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer songPlayer) {
+		super(songPlayer);
+	}
 
 	@Override
 	void update(String key, Object value) {

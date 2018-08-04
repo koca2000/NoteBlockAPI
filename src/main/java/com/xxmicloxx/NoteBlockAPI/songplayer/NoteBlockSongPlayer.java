@@ -27,10 +27,12 @@ public class NoteBlockSongPlayer extends RangeSongPlayer {
 
 	public NoteBlockSongPlayer(Song song) {
 		super(song);
+		makeNewClone(com.xxmicloxx.NoteBlockAPI.NoteBlockSongPlayer.class);
 	}
 
 	public NoteBlockSongPlayer(Song song, SoundCategory soundCategory) {
 		super(song, soundCategory);
+		makeNewClone(com.xxmicloxx.NoteBlockAPI.NoteBlockSongPlayer.class);
 	}
 	
 	
