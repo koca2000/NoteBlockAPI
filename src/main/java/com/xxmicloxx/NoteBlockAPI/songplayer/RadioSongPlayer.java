@@ -13,7 +13,7 @@ import com.xxmicloxx.NoteBlockAPI.utils.CompatibilityUtils;
 import com.xxmicloxx.NoteBlockAPI.utils.InstrumentUtils;
 
 /**
- * SongPlayer created at a Player's location
+ * SongPlayer playing to everyone added to it no matter where he is
  *
  */
 public class RadioSongPlayer extends SongPlayer {

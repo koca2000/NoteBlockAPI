@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import org.bstats.bukkit.Metrics;
@@ -15,6 +14,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer;
 
+/**
+ * Main class; contains methods for playing and adjusting songs for players
+ */
 public class NoteBlockAPI extends JavaPlugin {
 
 	private static NoteBlockAPI plugin;

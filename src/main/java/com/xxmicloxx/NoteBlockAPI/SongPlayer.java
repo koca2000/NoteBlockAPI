@@ -15,8 +15,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 /**
- * Plays a Song for a list of Players
- *
+ * @Deprecated {@link com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer}
  */
 @Deprecated
 public abstract class SongPlayer {

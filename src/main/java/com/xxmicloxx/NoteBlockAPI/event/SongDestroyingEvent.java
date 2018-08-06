@@ -7,7 +7,7 @@ import org.bukkit.event.HandlerList;
 import com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer;
 
 /**
- * Called whenever a Song is destroyed
+ * Called whenever a SongPlayer is destroyed
  * @see SongPlayer
  *
  */
@@ -25,6 +25,10 @@ public class SongDestroyingEvent extends Event implements Cancellable {
 		return handlers;
 	}
 
+	/**
+	 * Returns SongPlayer which is being destroyed
+	 * @return SongPlayer
+	 */
 	public SongPlayer getSongPlayer() {
 		return song;
 	}

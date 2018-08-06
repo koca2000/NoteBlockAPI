@@ -5,8 +5,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
 /**
- * Called whenever a Player enters the range of a stationary SongPlayer
- *
+ * @Deprecated {@link com.xxmicloxx.NoteBlockAPI.event.PlayerRangeStateChangeEvent}
  */
 @Deprecated
 public class PlayerRangeStateChangeEvent extends Event {

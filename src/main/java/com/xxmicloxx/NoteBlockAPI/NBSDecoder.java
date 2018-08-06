@@ -17,8 +17,7 @@ import org.bukkit.ChatColor;
 import com.xxmicloxx.NoteBlockAPI.utils.InstrumentUtils;
 
 /**
- * Utils for reading Note Block Studio data
- *
+ * @Deprecated {@link com.xxmicloxx.NoteBlockAPI.utils.NBSDecoder}
  */
 @Deprecated
 public class NBSDecoder {

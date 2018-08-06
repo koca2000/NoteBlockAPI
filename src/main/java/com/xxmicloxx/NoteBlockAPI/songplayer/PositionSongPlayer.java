@@ -2,7 +2,6 @@ package com.xxmicloxx.NoteBlockAPI.songplayer;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
 import com.xxmicloxx.NoteBlockAPI.NoteBlockAPI;
@@ -50,10 +49,17 @@ public class PositionSongPlayer extends RangeSongPlayer {
 		}
 	}
 
+	/**
+	 * Gets location on which is the PositionSongPlayer playing
+	 * @return {@link Location}
+	 */
 	public Location getTargetLocation() {
 		return targetLocation;
 	}
 
+	/**
+	 * Sets location on which is the PositionSongPlayer playing
+	 */
 	public void setTargetLocation(Location targetLocation) {
 		this.targetLocation = targetLocation;
 		CallUpdate("targetLocation", targetLocation);

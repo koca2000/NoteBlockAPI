@@ -4,10 +4,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
 /**
- * Called when a Song ends
- * or when no players are listening and auto destroy is enabled
- * @see SongPlayer
- *
+ * @Deprecated {@link com.xxmicloxx.NoteBlockAPI.event.SongEndEvent}
  */
 @Deprecated
 public class SongEndEvent extends Event {

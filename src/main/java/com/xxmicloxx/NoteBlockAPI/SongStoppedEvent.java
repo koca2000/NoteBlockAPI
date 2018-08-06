@@ -4,8 +4,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
 /**
- * Called whenever a SongPlayer is stopped
- *
+ * @Deprecated {@link com.xxmicloxx.NoteBlockAPI.event.SongStoppedEvent}
  */
 @Deprecated
 public class SongStoppedEvent extends Event {

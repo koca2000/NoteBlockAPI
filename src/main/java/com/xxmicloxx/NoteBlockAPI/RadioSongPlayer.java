@@ -5,8 +5,7 @@ import org.bukkit.entity.Player;
 import com.xxmicloxx.NoteBlockAPI.utils.InstrumentUtils;
 
 /**
- * SongPlayer created at a Player's location
- *
+ * @Deprecated {@link com.xxmicloxx.NoteBlockAPI.songplayer.RadioSongPlayer}
  */
 @Deprecated
 public class RadioSongPlayer extends SongPlayer {

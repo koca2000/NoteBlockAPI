@@ -3,6 +3,7 @@ package com.xxmicloxx.NoteBlockAPI.event;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
+import com.xxmicloxx.NoteBlockAPI.model.Song;
 import com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer;
 
 /**
@@ -24,6 +25,10 @@ public class SongEndEvent extends Event {
 		return handlers;
 	}
 
+	/**
+	 * Returns SongPlayer which {@link Song} ends
+	 * @return SongPlayer
+	 */
 	public SongPlayer getSongPlayer() {
 		return song;
 	}

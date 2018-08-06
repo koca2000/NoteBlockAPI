@@ -20,6 +20,10 @@ public class Song implements Cloneable {
 	private float delay;
 	private CustomInstrument[] customInstruments;
 
+	/**
+	 * Create Song instance by copying other Song parameters
+	 * @param other song
+	 */
 	public Song(Song other) {
 		this(other.getSpeed(), other.getLayerHashMap(), other.getSongHeight(), 
 				other.getLength(), other.getTitle(), other.getAuthor(), 

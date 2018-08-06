@@ -5,7 +5,10 @@ import org.bukkit.entity.Player;
 import com.xxmicloxx.NoteBlockAPI.model.Song;
 import com.xxmicloxx.NoteBlockAPI.model.SoundCategory;
 
-
+/**
+ * SongPlayer playing only in specified distance
+ *
+ */
 public abstract class RangeSongPlayer extends SongPlayer{
 
 	private int distance = 16;

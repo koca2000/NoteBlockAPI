@@ -8,7 +8,7 @@ import com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer;
 
 /**
  * Called whenever a SongPlayer is stopped
- *
+ * @see SongPlayer
  */
 public class SongStoppedEvent extends Event {
 
@@ -23,6 +23,10 @@ public class SongStoppedEvent extends Event {
 		return handlers;
 	}
 
+	/**
+	 * Returns SongPlayer which is now stopped
+	 * @return SongPlayer
+	 */	
 	public SongPlayer getSongPlayer() {
 		return songPlayer;
 	}

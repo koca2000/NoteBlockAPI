@@ -1,9 +1,7 @@
 package com.xxmicloxx.NoteBlockAPI;
 
 /**
- * Represents a note played; contains the instrument and the key
- * @see NotePitch
- *
+ * @Deprecated {@link com.xxmicloxx.NoteBlockAPI.model.Note}
  */
 @Deprecated
 public class Note {

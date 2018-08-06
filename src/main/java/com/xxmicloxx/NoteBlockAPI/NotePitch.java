@@ -3,8 +3,7 @@ package com.xxmicloxx.NoteBlockAPI;
 import org.bukkit.Bukkit;
 
 /**
- * Represents pitches of every noteblock note pre- & post-1.9
- *
+ * @Deprecated {@link com.xxmicloxx.NoteBlockAPI.model.NotePitch}
  */
 @Deprecated
 public enum NotePitch {

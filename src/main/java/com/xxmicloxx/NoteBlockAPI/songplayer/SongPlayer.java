@@ -22,7 +22,7 @@ import com.xxmicloxx.NoteBlockAPI.event.SongEndEvent;
 import com.xxmicloxx.NoteBlockAPI.event.SongLoopEvent;
 import com.xxmicloxx.NoteBlockAPI.event.SongStoppedEvent;
 import com.xxmicloxx.NoteBlockAPI.model.CustomInstrument;
-import com.xxmicloxx.NoteBlockAPI.model.Fade;
+import com.xxmicloxx.NoteBlockAPI.model.FadeType;
 import com.xxmicloxx.NoteBlockAPI.model.Layer;
 import com.xxmicloxx.NoteBlockAPI.model.Note;
 import com.xxmicloxx.NoteBlockAPI.model.Song;
@@ -52,7 +52,7 @@ public abstract class SongPlayer {
 	protected byte fadeTarget = 100;
 	protected int fadeDuration = 60;
 	protected int fadeDone = 0;
-	protected Fade fadeType = Fade.FADE_LINEAR;
+	protected FadeType fadeType = FadeType.LINEAR;
 	protected boolean loop = false;
 
 	private final Lock lock = new ReentrantLock();
@@ -104,7 +104,7 @@ public abstract class SongPlayer {
 				playing = (boolean) value;
 				break;
 			case "fadeType":
-				fadeType = Fade.valueOf((String) value);
+				fadeType = FadeType.valueOf(((String) value).replace("FADE_", ""));
 				break;
 			case "fadeTarget":
 				fadeTarget = (byte) value;
@@ -144,7 +144,7 @@ public abstract class SongPlayer {
 	 * Gets the FadeType for this SongPlayer (unused)
 	 * @return FadeType
 	 */
-	public Fade getFadeType() {
+	public FadeType getFadeType() {
 		return fadeType;
 	}
 
@@ -152,9 +152,9 @@ public abstract class SongPlayer {
 	 * Sets the FadeType for this SongPlayer
 	 * @param fadeType
 	 */
-	public void setFadeType(Fade fadeType) {
+	public void setFadeType(FadeType fadeType) {
 		this.fadeType = fadeType;
-		CallUpdate("fadetype", fadeType.name());
+		CallUpdate("fadetype", "FADE_" + fadeType.name());
 	}
 
 	/**
@@ -257,11 +257,13 @@ public abstract class SongPlayer {
 						tick++;
 						if (tick > song.getLength()) {
 							tick = -1;
+							fadeDone = 0;
 							if (loop){
-								fadeDone = 0;
 								SongLoopEvent event = new SongLoopEvent(this);
 								plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
-								continue;
+								if (!event.isCancelled()){
+									continue;
+								}
 							}
 							playing = false;
 							SongEndEvent event = new SongEndEvent(this);
@@ -360,7 +362,8 @@ public abstract class SongPlayer {
 	}
 
 	/**
-	 * Sets autoDestroy
+	 * Sets whether the SongPlayer is going to destroy itself when no one is listening 
+	 * or when the Song ends
 	 * @param if autoDestroy is enabled
 	 */
 	public void setAutoDestroy(boolean autoDestroy) {
@@ -380,6 +383,9 @@ public abstract class SongPlayer {
 	 */
 	public abstract void playTick(Player player, int tick);
 
+	/**
+	 * SongPlayer will destroy itself
+	 */
 	public void destroy() {
 		lock.lock();
 		try {
@@ -482,7 +488,13 @@ public abstract class SongPlayer {
 	 * @param volume (0-100)
 	 */
 	public void setVolume(byte volume) {
+		if (volume > 100){
+			volume = 100;
+		} else if (volume < 0){
+			volume = 0;
+		}
 		this.volume = volume;
+		
 		CallUpdate("volume", volume);
 	}
 
@@ -514,7 +526,7 @@ public abstract class SongPlayer {
 	
 	/**
 	 * Sets whether the SongPlayer will loop
-	 * @param playing
+	 * @param loop
 	 */
 	public void setLoop(boolean loop){
 		this.loop = loop;

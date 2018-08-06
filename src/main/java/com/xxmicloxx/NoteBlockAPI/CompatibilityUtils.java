@@ -10,8 +10,7 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
 /**
- * Fields/methods for reflection & version checking
- *
+ * @Deprecated {@link com.xxmicloxx.NoteBlockAPI.utils.CompatibilityUtils}
  */
 @Deprecated
 public class CompatibilityUtils {

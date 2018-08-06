@@ -3,9 +3,7 @@ package com.xxmicloxx.NoteBlockAPI;
 import java.util.HashMap;
 
 /**
- * Represents a series of notes in Note Block Studio. 
- * A Layer can have a maximum of one note per tick (20 ticks a second)
- *
+ * @Deprecated {@link com.xxmicloxx.NoteBlockAPI.model.Layer}
  */
 @Deprecated
 public class Layer{
@@ -74,7 +72,7 @@ public class Layer{
 	 */
 	@Deprecated
 	public void setHashMap(HashMap<Integer, Note> hashMap) {
-		this.notesAtTicks = notesAtTicks;
+		this.notesAtTicks = hashMap;
 	}
 	
 }

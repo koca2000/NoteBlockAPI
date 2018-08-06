@@ -1,8 +1,7 @@
 package com.xxmicloxx.NoteBlockAPI;
 
 /**
- * @see org.bukkit.SoundCategory
- *
+ * @Deprecated {@link com.xxmicloxx.NoteBlockAPI.model.SoundCategory}
  */
 @Deprecated
 public enum SoundCategory {

@@ -57,7 +57,7 @@ public class NoteBlockSongPlayer extends RangeSongPlayer {
 	 * @return Block representing a NoteBlock
 	 */
 	public Block getNoteBlock() {
-		return noteBlock;	
+		return noteBlock;
 	}
 
 	/**

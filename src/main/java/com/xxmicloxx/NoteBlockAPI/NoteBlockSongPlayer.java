@@ -5,12 +5,10 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
-import com.xxmicloxx.NoteBlockAPI.songplayer.RangeSongPlayer;
 import com.xxmicloxx.NoteBlockAPI.utils.InstrumentUtils;
 
 /**
- * SongPlayer created at a specified NoteBlock
- *
+ * @Deprecated {@link com.xxmicloxx.NoteBlockAPI.songplayer.NoteBlockSongPlayer}
  */
 @Deprecated
 public class NoteBlockSongPlayer extends SongPlayer {

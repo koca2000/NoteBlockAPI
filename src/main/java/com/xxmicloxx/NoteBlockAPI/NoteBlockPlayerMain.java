@@ -9,8 +9,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 /**
- * Main class; contains methods for playing and adjusting songs for players
- *
+ * @Deprecated {@link com.xxmicloxx.NoteBlockAPI.NoteBlockAPI}
  */
 @Deprecated
 public class NoteBlockPlayerMain {

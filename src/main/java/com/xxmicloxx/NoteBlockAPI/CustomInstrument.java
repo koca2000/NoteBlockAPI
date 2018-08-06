@@ -3,8 +3,7 @@ package com.xxmicloxx.NoteBlockAPI;
 import com.xxmicloxx.NoteBlockAPI.model.Sound;
 
 /**
- * Create custom instruments from a sound file
- * 
+ * @Deprecated {@link com.xxmicloxx.NoteBlockAPI.model.CustomInstrument}
  */
 @Deprecated
 public class CustomInstrument{
@@ -55,7 +54,7 @@ public class CustomInstrument{
 	
 	/**
 	 * Gets file name of the sound
-	 * @deprecated misleading name
+	 * @deprecated misleading name.
 	 */
 	public String getSoundfile() {
 		return soundFileName;
