@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.HashMap;
 
 /**
- * @Deprecated {@link com.xxmicloxx.NoteBlockAPI.model.Song}
+ * @deprecated {@link com.xxmicloxx.NoteBlockAPI.model.Song}
  */
 @Deprecated
 public class Song implements Cloneable {

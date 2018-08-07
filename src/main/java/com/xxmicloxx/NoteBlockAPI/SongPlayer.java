@@ -15,7 +15,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 /**
- * @Deprecated {@link com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer}
+ * @deprecated {@link com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer}
  */
 @Deprecated
 public abstract class SongPlayer {
@@ -289,7 +289,7 @@ public abstract class SongPlayer {
 	/**
 	 * Gets list of current Player usernames listening to this SongPlayer
 	 * @return list of Player usernames
-	 * @Deprecated use getPlayerUUIDs
+	 * @deprecated use getPlayerUUIDs
 	 */
 	@Deprecated
 	public List<String> getPlayerList() {
@@ -345,7 +345,7 @@ public abstract class SongPlayer {
 
 	/**
 	 * Sets autoDestroy
-	 * @param if autoDestroy is enabled
+	 * @param autoDestroy if autoDestroy is enabled
 	 */
 	public void setAutoDestroy(boolean autoDestroy) {
 		lock.lock();

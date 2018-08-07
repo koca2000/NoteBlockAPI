@@ -5,7 +5,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
 /**
- * @Deprecated {@link com.xxmicloxx.NoteBlockAPI.event.SongDestroyingEvent}
+ * @deprecated {@link com.xxmicloxx.NoteBlockAPI.event.SongDestroyingEvent}
  */
 @Deprecated
 public class SongDestroyingEvent extends Event implements Cancellable {

@@ -13,7 +13,7 @@ import com.xxmicloxx.NoteBlockAPI.model.CustomInstrument;
 import com.xxmicloxx.NoteBlockAPI.model.SoundCategory;
 
 /**
- * Fields/methods for reflection & version checking
+ * Fields/methods for reflection &amp; version checking
  *
  */
 public class CompatibilityUtils {
@@ -78,7 +78,7 @@ public class CompatibilityUtils {
 	}
 
 	/**
-	 * Plays a sound using NMS & reflection
+	 * Plays a sound using NMS &amp; reflection
 	 * @param player
 	 * @param location
 	 * @param sound
@@ -117,7 +117,7 @@ public class CompatibilityUtils {
 	}
 
 	/**
-	 * Plays a sound using NMS & reflection
+	 * Plays a sound using NMS &amp; reflection
 	 * @param player
 	 * @param location
 	 * @param sound

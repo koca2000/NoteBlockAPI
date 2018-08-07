@@ -6,7 +6,7 @@ package com.xxmicloxx.NoteBlockAPI.model;
  * Enum mapping to note names for different
  * Minecraft versions.
  * 
- * @see https://gist.github.com/NiklasEi/7bd0ffd136f8459df0940e4501d47a8a
+ * @see <a href="https://gist.github.com/NiklasEi/7bd0ffd136f8459df0940e4501d47a8a">https://gist.github.com/NiklasEi/7bd0ffd136f8459df0940e4501d47a8a</a>
  * @author NiklasEi
  */
 public enum Sound {

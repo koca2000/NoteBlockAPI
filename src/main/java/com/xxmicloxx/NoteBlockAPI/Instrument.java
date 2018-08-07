@@ -3,7 +3,7 @@ package com.xxmicloxx.NoteBlockAPI;
 import com.xxmicloxx.NoteBlockAPI.model.Sound;
 
 /**
- * @Deprecated {@link com.xxmicloxx.NoteBlockAPI.utils.InstrumentUtils}
+ * @deprecated {@link com.xxmicloxx.NoteBlockAPI.utils.InstrumentUtils}
  */
 @Deprecated
 public class Instrument {

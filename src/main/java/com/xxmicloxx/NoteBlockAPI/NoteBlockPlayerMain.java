@@ -9,7 +9,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 /**
- * @Deprecated {@link com.xxmicloxx.NoteBlockAPI.NoteBlockAPI}
+ * @deprecated {@link com.xxmicloxx.NoteBlockAPI.NoteBlockAPI}
  */
 @Deprecated
 public class NoteBlockPlayerMain {

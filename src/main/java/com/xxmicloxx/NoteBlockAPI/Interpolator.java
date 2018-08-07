@@ -7,7 +7,6 @@ import java.util.Arrays;
  *
  * @author : $Author: brian $
  * @version : $Revision: 1.1 $
- *          <p/>
  *          <hr><p><font size="-1" color="#336699"><a href="http://www.mbari.org">
  *          The Monterey Bay Aquarium Research Institute (MBARI)</a> provides this
  *          documentation and code &quot;as is&quot;, with no warranty, express or
@@ -16,7 +15,6 @@ import java.util.Arrays;
  *          modification, or enhancement. This information should not be published or
  *          distributed to third parties without specific written permission from
  *          MBARI.</font></p><br>
- *          <p/>
  *          <font size="-1" color="#336699">Copyright 2002 MBARI.<br>
  *          MBARI Proprietary Information. All rights reserved.</font><br><hr><br>
  * @deprecated {@link com.xxmicloxx.NoteBlockAPI.utils.Interpolator}

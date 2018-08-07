@@ -28,7 +28,7 @@ public class NBSDecoder {
 	/**
 	 * Parses a Song from a Note Block Studio project file (.nbs)
 	 * @see Song
-	 * @param .nbs file
+	 * @param songFile .nbs file
 	 * @return Song object representing a Note Block Studio project
 	 */
 	public static Song parse(File songFile) {

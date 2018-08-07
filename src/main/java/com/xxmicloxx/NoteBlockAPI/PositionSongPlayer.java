@@ -7,7 +7,7 @@ import org.bukkit.entity.Player;
 import com.xxmicloxx.NoteBlockAPI.utils.InstrumentUtils;
 
 /**
- * @Deprecated {@link com.xxmicloxx.NoteBlockAPI.songplayer.PositionSongPlayer}
+ * @deprecated {@link com.xxmicloxx.NoteBlockAPI.songplayer.PositionSongPlayer}
  */
 @Deprecated
 public class PositionSongPlayer extends SongPlayer {

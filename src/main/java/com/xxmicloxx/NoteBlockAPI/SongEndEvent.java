@@ -4,7 +4,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
 /**
- * @Deprecated {@link com.xxmicloxx.NoteBlockAPI.event.SongEndEvent}
+ * @deprecated {@link com.xxmicloxx.NoteBlockAPI.event.SongEndEvent}
  */
 @Deprecated
 public class SongEndEvent extends Event {

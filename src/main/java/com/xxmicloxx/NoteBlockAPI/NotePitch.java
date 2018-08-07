@@ -3,7 +3,7 @@ package com.xxmicloxx.NoteBlockAPI;
 import org.bukkit.Bukkit;
 
 /**
- * @Deprecated {@link com.xxmicloxx.NoteBlockAPI.model.NotePitch}
+ * @deprecated {@link com.xxmicloxx.NoteBlockAPI.model.NotePitch}
  */
 @Deprecated
 public enum NotePitch {

@@ -3,7 +3,7 @@ package com.xxmicloxx.NoteBlockAPI;
 import java.util.HashMap;
 
 /**
- * @Deprecated {@link com.xxmicloxx.NoteBlockAPI.model.Layer}
+ * @deprecated {@link com.xxmicloxx.NoteBlockAPI.model.Layer}
  */
 @Deprecated
 public class Layer{
@@ -59,7 +59,7 @@ public class Layer{
 	/**
 	 * Gets the notes in the Layer with the tick they are created as a hash map. 
 	 * @return HashMap of notes with the tick they are played at
-	 * @Deprecated Method name is vague
+	 * @deprecated Method name is vague
 	 */
 	@Deprecated
 	public HashMap<Integer, Note> getHashMap() {
@@ -68,7 +68,7 @@ public class Layer{
 	
 	/**
 	 * Sets the notes in the Layer with the tick they are created as a hash map
-	 * @Deprecated Method name is vague
+	 * @deprecated Method name is vague
 	 */
 	@Deprecated
 	public void setHashMap(HashMap<Integer, Note> hashMap) {

@@ -364,7 +364,7 @@ public abstract class SongPlayer {
 	/**
 	 * Sets whether the SongPlayer is going to destroy itself when no one is listening 
 	 * or when the Song ends
-	 * @param if autoDestroy is enabled
+	 * @param autoDestroy if autoDestroy is enabled
 	 */
 	public void setAutoDestroy(boolean autoDestroy) {
 		lock.lock();

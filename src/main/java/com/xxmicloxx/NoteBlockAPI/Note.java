@@ -1,7 +1,7 @@
 package com.xxmicloxx.NoteBlockAPI;
 
 /**
- * @Deprecated {@link com.xxmicloxx.NoteBlockAPI.model.Note}
+ * @deprecated {@link com.xxmicloxx.NoteBlockAPI.model.Note}
  */
 @Deprecated
 public class Note {

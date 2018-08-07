@@ -10,7 +10,7 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
 /**
- * @Deprecated {@link com.xxmicloxx.NoteBlockAPI.utils.CompatibilityUtils}
+ * @deprecated {@link com.xxmicloxx.NoteBlockAPI.utils.CompatibilityUtils}
  */
 @Deprecated
 public class CompatibilityUtils {
@@ -75,7 +75,7 @@ public class CompatibilityUtils {
 	}
 
 	/**
-	 * Plays a sound using NMS & reflection
+	 * Plays a sound using NMS and reflection
 	 * @param player
 	 * @param location
 	 * @param sound
@@ -114,7 +114,7 @@ public class CompatibilityUtils {
 	}
 
 	/**
-	 * Plays a sound using NMS & reflection
+	 * Plays a sound using NMS and reflection
 	 * @param player
 	 * @param location
 	 * @param sound

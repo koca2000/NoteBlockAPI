@@ -17,7 +17,7 @@ import org.bukkit.ChatColor;
 import com.xxmicloxx.NoteBlockAPI.utils.InstrumentUtils;
 
 /**
- * @Deprecated {@link com.xxmicloxx.NoteBlockAPI.utils.NBSDecoder}
+ * @deprecated {@link com.xxmicloxx.NoteBlockAPI.utils.NBSDecoder}
  */
 @Deprecated
 public class NBSDecoder {
@@ -25,7 +25,7 @@ public class NBSDecoder {
 	/**
 	 * Parses a Song from a Note Block Studio project file (.nbs)
 	 * @see Song
-	 * @param .nbs file
+	 * @param songFile .nbs file
 	 * @return Song object representing a Note Block Studio project
 	 */
 	public static Song parse(File songFile) {

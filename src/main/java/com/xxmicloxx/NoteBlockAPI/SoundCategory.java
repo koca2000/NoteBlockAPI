@@ -1,7 +1,7 @@
 package com.xxmicloxx.NoteBlockAPI;
 
 /**
- * @Deprecated {@link com.xxmicloxx.NoteBlockAPI.model.SoundCategory}
+ * @deprecated {@link com.xxmicloxx.NoteBlockAPI.model.SoundCategory}
  */
 @Deprecated
 public enum SoundCategory {

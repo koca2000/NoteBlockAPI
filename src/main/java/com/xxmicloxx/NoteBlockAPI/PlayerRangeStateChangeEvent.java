@@ -5,7 +5,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
 /**
- * @Deprecated {@link com.xxmicloxx.NoteBlockAPI.event.PlayerRangeStateChangeEvent}
+ * @deprecated {@link com.xxmicloxx.NoteBlockAPI.event.PlayerRangeStateChangeEvent}
  */
 @Deprecated
 public class PlayerRangeStateChangeEvent extends Event {
