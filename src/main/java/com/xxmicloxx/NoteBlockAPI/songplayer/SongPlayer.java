@@ -27,7 +27,6 @@ import com.xxmicloxx.NoteBlockAPI.model.Layer;
 import com.xxmicloxx.NoteBlockAPI.model.Note;
 import com.xxmicloxx.NoteBlockAPI.model.Song;
 import com.xxmicloxx.NoteBlockAPI.model.SoundCategory;
-import com.xxmicloxx.NoteBlockAPI.utils.Interpolator;
 
 
 /**
@@ -48,11 +47,13 @@ public abstract class SongPlayer {
 	protected Thread playerThread;
 
 	protected byte volume = 100;
-	protected byte fadeStart = volume;
+	/*protected byte fadeStart = volume;
 	protected byte fadeTarget = 100;
 	protected int fadeDuration = 60;
 	protected int fadeDone = 0;
-	protected FadeType fadeType = FadeType.LINEAR;
+	protected FadeType fadeType = FadeType.LINEAR;*/
+	protected Fade fadeIn;
+	protected Fade fadeOut;
 	protected boolean loop = false;
 
 	private final Lock lock = new ReentrantLock();
@@ -71,6 +72,15 @@ public abstract class SongPlayer {
 		this.song = song;
 		this.soundCategory = soundCategory;
 		plugin = NoteBlockAPI.getAPI();
+		
+		fadeIn = new Fade(FadeType.NONE, 60);
+		fadeIn.setFadeStart((byte) 0);
+		fadeIn.setFadeTarget(volume);
+		
+		fadeOut = new Fade(FadeType.NONE, 60);
+		fadeOut.setFadeStart(volume);
+		fadeOut.setFadeTarget((byte) 0);
+		
 		start();
 	}
 	
@@ -96,6 +106,14 @@ public abstract class SongPlayer {
 			instruments[i] = new CustomInstrument(ci.getIndex(), ci.getName(), ci.getSoundfile());
 		}
 		song = new Song(s.getSpeed(), layerHashMap, s.getSongHeight(), s.getLength(), s.getTitle(), s.getAuthor(), s.getDescription(), s.getPath(), instruments);
+		
+		fadeIn = new Fade(FadeType.NONE, 60);
+		fadeIn.setFadeStart((byte) 0);
+		fadeIn.setFadeTarget(volume);
+		
+		fadeOut = new Fade(FadeType.NONE, 60);
+		fadeOut.setFadeStart(volume);
+		fadeOut.setFadeTarget((byte) 0);
 	}
 
 	void update(String key, Object value){
@@ -104,19 +122,19 @@ public abstract class SongPlayer {
 				playing = (boolean) value;
 				break;
 			case "fadeType":
-				fadeType = FadeType.valueOf(((String) value).replace("FADE_", ""));
+				fadeIn.setType(FadeType.valueOf(((String) value).replace("FADE_", "")));
 				break;
 			case "fadeTarget":
-				fadeTarget = (byte) value;
+				fadeIn.setFadeTarget((byte) value);
 				break;
 			case "fadeStart":
-				fadeStart = (byte) value;
+				fadeIn.setFadeStart((byte) value);
 				break;
 			case "fadeDuration":
-				fadeDuration = (int) value;
+				fadeIn.setFadeDuration((int) value);
 				break;
 			case "fadeDone":
-				fadeDone = (int) value;
+				fadeIn.setFadeDone((int) value);
 				break;
 			case "tick":
 				tick = (short) value;
@@ -143,99 +161,105 @@ public abstract class SongPlayer {
 	/**
 	 * Gets the FadeType for this SongPlayer (unused)
 	 * @return FadeType
+	 * @deprecated returns fadeIn value
 	 */
+	@Deprecated
 	public FadeType getFadeType() {
-		return fadeType;
+		return fadeIn.getType();
 	}
 
 	/**
 	 * Sets the FadeType for this SongPlayer
 	 * @param fadeType
+	 * @deprecated set fadeIn value
 	 */
+	@Deprecated
 	public void setFadeType(FadeType fadeType) {
-		this.fadeType = fadeType;
+		fadeIn.setType(fadeType);
 		CallUpdate("fadetype", "FADE_" + fadeType.name());
 	}
 
 	/**
 	 * Target volume for fade
 	 * @return byte representing fade target
+	 * @deprecated returns fadeIn value
 	 */
+	@Deprecated
 	public byte getFadeTarget() {
-		return fadeTarget;
+		return fadeIn.getFadeTarget();
 	}
 
 	/**
 	 * Set target volume for fade
 	 * @param fadeTarget
+	 * @deprecated set fadeIn value
 	 */
+	@Deprecated
 	public void setFadeTarget(byte fadeTarget) {
-		this.fadeTarget = fadeTarget;
+		fadeIn.setFadeTarget(fadeTarget);
 		CallUpdate("fadeTarget", fadeTarget);
 	}
 
 	/**
-	 * Gets the starting time for the fade
+	 * Gets the starting volume for the fade
 	 * @return
+	 * @deprecated returns fadeIn value
 	 */
+	@Deprecated
 	public byte getFadeStart() {
-		return fadeStart;
+		return fadeIn.getFadeStart();
 	}
 
 	/**
-	 * Sets the starting time for the fade
+	 * Sets the starting volume for the fade
 	 * @param fadeStart
+	 * @deprecated set fadeIn value
 	 */
+	@Deprecated
 	public void setFadeStart(byte fadeStart) {
-		this.fadeStart = fadeStart;
+		fadeIn.setFadeStart(fadeStart);
 		CallUpdate("fadeStart", fadeStart);
 	}
 
 	/**
 	 * Gets the duration of the fade
 	 * @return duration of the fade
+	 * @deprecated returns fadeIn value
 	 */
+	@Deprecated
 	public int getFadeDuration() {
-		return fadeDuration;
+		return fadeIn.getFadeDuration();
 	}
 
 	/**
 	 * Sets the duration of the fade
 	 * @param fadeDuration
+	 * @deprecated set fadeIn value
 	 */
+	@Deprecated
 	public void setFadeDuration(int fadeDuration) {
-		this.fadeDuration = fadeDuration;
+		fadeIn.setFadeDuration(fadeDuration);
 		CallUpdate("fadeDuration", fadeDuration);
 	}
 
 	/**
 	 * Gets the tick when fade will be finished
 	 * @return tick
+	 * @deprecated returns fadeIn value
 	 */
+	@Deprecated
 	public int getFadeDone() {
-		return fadeDone;
+		return fadeIn.getFadeDone();
 	}
 
 	/**
 	 * Sets the tick when fade will be finished
 	 * @param fadeDone
+	 * @deprecated set fadeIn value
 	 */
+	@Deprecated
 	public void setFadeDone(int fadeDone) {
-		this.fadeDone = fadeDone;
-		CallUpdate("fadeDone", fadeDone);
-	}
-
-	/**
-	 * Calculates the fade at the given time and sets the current volume
-	 */
-	protected void calculateFade() {
-		if (fadeDone == fadeDuration) {
-			return; // no fade today
-		}
-		double targetVolume = Interpolator.interpLinear(
-				new double[]{0, fadeStart, fadeDuration, fadeTarget}, fadeDone);
-		setVolume((byte) targetVolume);
-		fadeDone++;
+		fadeIn.setFadeDone(fadeDone);
 		CallUpdate("fadeDone", fadeDone);
 	}
 
@@ -253,11 +277,24 @@ public abstract class SongPlayer {
 					}
 
 					if (playing) {
-						calculateFade();
+						if (tick < fadeIn.getFadeDuration()){
+							int fade = fadeIn.calculateFade();
+							if (fade != -1){
+								volume = (byte) fade;
+							}
+							CallUpdate("fadeDone", fadeIn.getFadeDone());
+						} else if (tick >= song.getLength() - fadeOut.getFadeDuration()){
+							int fade = fadeOut.calculateFade();
+							if (fade != -1){
+								volume = (byte) fade;
+							}
+						}
+						
 						tick++;
 						if (tick > song.getLength()) {
 							tick = -1;
-							fadeDone = 0;
+							fadeIn.setFadeDone(0);
+							fadeOut.setFadeDone(0);
 							if (loop){
 								SongLoopEvent event = new SongLoopEvent(this);
 								plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
@@ -307,6 +344,22 @@ public abstract class SongPlayer {
 				}
 			}
 		});
+	}
+	
+	/**
+	 * Returns {@link Fade} for Fade in effect
+	 * @return Fade
+	 */
+	public Fade getFadeIn(){
+		return fadeIn;
+	}
+	
+	/**
+	 * Returns {@link Fade} for Fade out effect
+	 * @return Fade
+	 */
+	public Fade getFadeOut(){
+		return fadeOut;
 	}
 	
 	/**
@@ -494,6 +547,9 @@ public abstract class SongPlayer {
 			volume = 0;
 		}
 		this.volume = volume;
+		
+		fadeIn.setFadeTarget(volume);
+		fadeOut.setFadeStart(volume);
 		
 		CallUpdate("volume", volume);
 	}
