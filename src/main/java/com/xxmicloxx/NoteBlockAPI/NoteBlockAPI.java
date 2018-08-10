@@ -1,5 +1,6 @@
 package com.xxmicloxx.NoteBlockAPI;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -15,6 +16,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer;
+import com.xxmicloxx.NoteBlockAPI.utils.Updater;
 
 /**
  * Main class; contains methods for playing and adjusting songs for players
@@ -110,7 +112,7 @@ public class NoteBlockAPI extends JavaPlugin {
 		
 		new NoteBlockPlayerMain().onEnable();
 		
-		getServer().getScheduler().runTaskLater(this, new BukkitRunnable() {
+		getServer().getScheduler().runTaskLater(this, new Runnable() {
 			
 			@Override
 			public void run() {
@@ -128,6 +130,21 @@ public class NoteBlockAPI extends JavaPlugin {
 		        }
 			}
 		}, 20*60);
+		
+		getServer().getScheduler().runTaskLater(this, new Runnable() {
+			
+			@Override
+			public void run() {
+				try {
+					if (Updater.checkUpdate("19287", getDescription().getVersion())){
+						Bukkit.getLogger().info(String.format("[%s] New update available!", plugin.getDescription().getName()));
+					}
+				} catch (IOException e) {
+					Bukkit.getLogger().info(String.format("[%s] Cannot receive update from Spigot resource page!", plugin.getDescription().getName()));
+				}
+			}
+		}, 20*10);
+		
 	}
 
 	@Override
