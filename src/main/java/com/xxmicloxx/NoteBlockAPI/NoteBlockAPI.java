@@ -1,6 +1,8 @@
 package com.xxmicloxx.NoteBlockAPI;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -10,6 +12,7 @@ import java.util.UUID;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredListener;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -117,19 +120,28 @@ public class NoteBlockAPI extends JavaPlugin {
 			@Override
 			public void run() {
 				Plugin[] plugins = getServer().getPluginManager().getPlugins();
-		        for(Plugin plugin: plugins) {
-		           
-		            ArrayList<RegisteredListener> rls = new ArrayList<>();
-		            rls.addAll(PlayerRangeStateChangeEvent.getHandlerList().getRegisteredListeners(plugin));
-		            rls.addAll(SongDestroyingEvent.getHandlerList().getRegisteredListeners(plugin));
-		            rls.addAll(SongEndEvent.getHandlerList().getRegisteredListeners(plugin));
-		            rls.addAll(SongStoppedEvent.getHandlerList().getRegisteredListeners(plugin));
-		            if (!rls.isEmpty()){
-		            	dependentPlugins.put(plugin, true);
+		        Type[] types = new Type[]{PlayerRangeStateChangeEvent.class, SongDestroyingEvent.class, SongEndEvent.class, SongStoppedEvent.class };
+		        for (Plugin plugin : plugins) {
+		            ArrayList<RegisteredListener> rls = HandlerList.getRegisteredListeners(plugin);
+		            for (RegisteredListener rl : rls) {
+		                Method[] methods = rl.getListener().getClass().getDeclaredMethods();
+		                for (Method m : methods) {
+		                    Type[] params = m.getParameterTypes();
+		                    param:
+		                    for (Type paramType : params) {
+		                    	for (Type type : types){
+		                    		if (paramType.equals(type)) {
+		                    			dependentPlugins.put(plugin, true);
+		                    			break param;
+		                    		}
+		                    	}
+		                    }
+		                }
+
 		            }
 		        }
 			}
-		}, 20*60);
+		}, 20*30);
 		
 		getServer().getScheduler().runTaskLater(this, new Runnable() {
 			
