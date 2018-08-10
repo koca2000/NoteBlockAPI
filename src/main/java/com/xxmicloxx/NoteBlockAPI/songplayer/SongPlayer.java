@@ -594,14 +594,23 @@ public abstract class SongPlayer {
 		return playlist;
 	}
 	
+	/**
+	 * Get index of actually played {@link Song} in {@link Playlist}
+	 * @return
+	 */
 	public int getPlayedSongIndex(){
 		return actualSong;
 	}
 	
+	/**
+	 * Start playing {@link Song} at specified index in {@link Playlist}
+	 * If there is no {@link Song} at this index, {@link SongPlayer} will continue playing current song
+	 * @param index
+	 */
 	public void playSong(int index){
 		lock.lock();
 		try {
-			if (playlist.exits(index)){
+			if (playlist.exist(index)){
 				song = playlist.get(index);
 				actualSong = index;
 				tick = -1;

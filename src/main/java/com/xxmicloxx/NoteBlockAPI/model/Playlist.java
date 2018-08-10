@@ -11,6 +11,10 @@ public class Playlist {
 		this.songs.addAll(Arrays.asList(songs));
 	}
 	
+	/**
+	 * Add array of {@link Song} to playlist
+	 * @param songs
+	 */
 	public void add(Song ...songs){
 		this.songs.addAll(Arrays.asList(songs));
 	}
@@ -31,19 +35,38 @@ public class Playlist {
 		}
 	}
 	
+	/**
+	 * Get {@link Song} in playlist at specified index
+	 * @param songNumber - song index
+	 * @return
+	 */
 	public Song get(int songNumber){
 		return songs.get(songNumber);
 	}
 	
+	/**
+	 * Get number of {@link Song} in playlist
+	 * @return
+	 */
 	public int getCount(){
 		return songs.size();
 	}
 	
+	/**
+	 * Check whether {@link Song} is not last in playlist
+	 * @param songNumber
+	 * @return true if there is another {@link Song} after specified index
+	 */
 	public boolean hasNext(int songNumber){
 		return songs.size() > (songNumber + 1);
 	}
 	
-	public boolean exits(int songNumber){
+	/**
+	 * Check whether {@link Song} with specified index exists in playlist
+	 * @param songNumber
+	 * @return
+	 */
+	public boolean exist(int songNumber){
 		return songs.size() > songNumber;
 	}
 }
