@@ -11,6 +11,7 @@ import com.xxmicloxx.NoteBlockAPI.model.CustomInstrument;
 import com.xxmicloxx.NoteBlockAPI.model.Layer;
 import com.xxmicloxx.NoteBlockAPI.model.Note;
 import com.xxmicloxx.NoteBlockAPI.model.NotePitch;
+import com.xxmicloxx.NoteBlockAPI.model.Playlist;
 import com.xxmicloxx.NoteBlockAPI.model.Song;
 import com.xxmicloxx.NoteBlockAPI.model.SoundCategory;
 import com.xxmicloxx.NoteBlockAPI.utils.CompatibilityUtils;
@@ -38,6 +39,16 @@ public class PositionSongPlayer extends RangeSongPlayer {
 		super(songPlayer);
 	}
 	
+	public PositionSongPlayer(Playlist playlist, SoundCategory soundCategory) {
+		super(playlist, soundCategory);
+		makeNewClone(com.xxmicloxx.NoteBlockAPI.PositionSongPlayer.class);
+	}
+
+	public PositionSongPlayer(Playlist playlist) {
+		super(playlist);
+		makeNewClone(com.xxmicloxx.NoteBlockAPI.PositionSongPlayer.class);
+	}
+
 	@Override
 	void update(String key, Object value) {
 		super.update(key, value);

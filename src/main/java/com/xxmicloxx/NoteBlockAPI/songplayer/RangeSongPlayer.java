@@ -2,6 +2,7 @@ package com.xxmicloxx.NoteBlockAPI.songplayer;
 
 import org.bukkit.entity.Player;
 
+import com.xxmicloxx.NoteBlockAPI.model.Playlist;
 import com.xxmicloxx.NoteBlockAPI.model.Song;
 import com.xxmicloxx.NoteBlockAPI.model.SoundCategory;
 
@@ -24,7 +25,14 @@ public abstract class RangeSongPlayer extends SongPlayer{
 	protected RangeSongPlayer(com.xxmicloxx.NoteBlockAPI.SongPlayer songPlayer) {
 		super(songPlayer);
 	}
-	
+
+	public RangeSongPlayer(Playlist playlist, SoundCategory soundCategory) {
+		super(playlist, soundCategory);
+	}
+
+	public RangeSongPlayer(Playlist playlist) {
+		super(playlist);
+	}
 
 	@Override
 	void update(String key, Object value) {

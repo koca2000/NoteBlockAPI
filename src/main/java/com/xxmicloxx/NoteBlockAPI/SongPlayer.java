@@ -61,7 +61,10 @@ public abstract class SongPlayer {
 	
 	SongPlayer(com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer songPlayer){
 		newSongPlayer = songPlayer;
-		com.xxmicloxx.NoteBlockAPI.model.Song s = songPlayer.getSong();
+		song = createSongFromNew(songPlayer.getSong());
+	}
+	
+	private Song createSongFromNew(com.xxmicloxx.NoteBlockAPI.model.Song s){
 		HashMap<Integer, Layer> layerHashMap = new HashMap<Integer, Layer>();
 		for (Integer i : s.getLayerHashMap().keySet()){
 			com.xxmicloxx.NoteBlockAPI.model.Layer l = s.getLayerHashMap().get(i);
@@ -80,7 +83,8 @@ public abstract class SongPlayer {
 			com.xxmicloxx.NoteBlockAPI.model.CustomInstrument ci = s.getCustomInstruments()[i];
 			instruments[i] = new CustomInstrument(ci.getIndex(), ci.getName(), ci.getSoundFileName());
 		}
-		song = new Song(s.getSpeed(), layerHashMap, s.getSongHeight(), s.getLength(), s.getTitle(), s.getAuthor(), s.getDescription(), s.getPath(), instruments);
+		
+		return new Song(s.getSpeed(), layerHashMap, s.getSongHeight(), s.getLength(), s.getTitle(), s.getAuthor(), s.getDescription(), s.getPath(), instruments);
 	}
 
 	void update(String key, Object value){
@@ -120,6 +124,9 @@ public abstract class SongPlayer {
 				break;
 			case "soundCategory":
 				soundCategory = SoundCategory.valueOf((String) value);
+				break;
+			case "song":
+				song = createSongFromNew((com.xxmicloxx.NoteBlockAPI.model.Song) value);
 				break;
 				
 		}

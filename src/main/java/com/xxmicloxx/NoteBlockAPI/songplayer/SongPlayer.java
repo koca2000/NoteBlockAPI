@@ -20,11 +20,13 @@ import com.xxmicloxx.NoteBlockAPI.NoteBlockAPI;
 import com.xxmicloxx.NoteBlockAPI.event.SongDestroyingEvent;
 import com.xxmicloxx.NoteBlockAPI.event.SongEndEvent;
 import com.xxmicloxx.NoteBlockAPI.event.SongLoopEvent;
+import com.xxmicloxx.NoteBlockAPI.event.SongNextEvent;
 import com.xxmicloxx.NoteBlockAPI.event.SongStoppedEvent;
 import com.xxmicloxx.NoteBlockAPI.model.CustomInstrument;
 import com.xxmicloxx.NoteBlockAPI.model.FadeType;
 import com.xxmicloxx.NoteBlockAPI.model.Layer;
 import com.xxmicloxx.NoteBlockAPI.model.Note;
+import com.xxmicloxx.NoteBlockAPI.model.Playlist;
 import com.xxmicloxx.NoteBlockAPI.model.Song;
 import com.xxmicloxx.NoteBlockAPI.model.SoundCategory;
 
@@ -36,6 +38,8 @@ import com.xxmicloxx.NoteBlockAPI.model.SoundCategory;
 public abstract class SongPlayer {
 
 	protected Song song;
+	protected Playlist playlist;
+	protected int actualSong = 0;
 
 	protected boolean playing = false;
 	protected short tick = -1;
@@ -47,11 +51,6 @@ public abstract class SongPlayer {
 	protected Thread playerThread;
 
 	protected byte volume = 100;
-	/*protected byte fadeStart = volume;
-	protected byte fadeTarget = 100;
-	protected int fadeDuration = 60;
-	protected int fadeDone = 0;
-	protected FadeType fadeType = FadeType.LINEAR;*/
 	protected Fade fadeIn;
 	protected Fade fadeOut;
 	protected boolean loop = false;
@@ -65,11 +64,21 @@ public abstract class SongPlayer {
 	com.xxmicloxx.NoteBlockAPI.SongPlayer oldSongPlayer;
 
 	public SongPlayer(Song song) {
-		this(song, SoundCategory.MASTER);
+		this(new Playlist(song), SoundCategory.MASTER);
 	}
 
 	public SongPlayer(Song song, SoundCategory soundCategory) {
-		this.song = song;
+		//this.song = song;
+		this(new Playlist(song), soundCategory);
+	}
+	
+	public SongPlayer(Playlist playlist){
+		this(playlist, SoundCategory.MASTER);
+	}
+	
+	public SongPlayer(Playlist playlist, SoundCategory soundCategory){
+		this.playlist = playlist;
+		this.song = playlist.get(actualSong);
 		this.soundCategory = soundCategory;
 		plugin = NoteBlockAPI.getAPI();
 		
@@ -106,6 +115,7 @@ public abstract class SongPlayer {
 			instruments[i] = new CustomInstrument(ci.getIndex(), ci.getName(), ci.getSoundfile());
 		}
 		song = new Song(s.getSpeed(), layerHashMap, s.getSongHeight(), s.getLength(), s.getTitle(), s.getAuthor(), s.getDescription(), s.getPath(), instruments);
+		playlist = new Playlist(song);
 		
 		fadeIn = new Fade(FadeType.NONE, 60);
 		fadeIn.setFadeStart((byte) 0);
@@ -294,12 +304,26 @@ public abstract class SongPlayer {
 						if (tick > song.getLength()) {
 							tick = -1;
 							fadeIn.setFadeDone(0);
+							CallUpdate("fadeDone", fadeIn.getFadeDone());
 							fadeOut.setFadeDone(0);
-							if (loop){
-								SongLoopEvent event = new SongLoopEvent(this);
+							if (playlist.hasNext(actualSong)){
+								actualSong++;
+								song = playlist.get(actualSong);
+								CallUpdate("song", song);
+								SongNextEvent event = new SongNextEvent(this);
 								plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
-								if (!event.isCancelled()){
-									continue;
+								continue;
+							} else{
+								actualSong = 0;
+								song = playlist.get(actualSong);
+								CallUpdate("song", song);
+								if (loop){
+									SongLoopEvent event = new SongLoopEvent(this);
+									plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
+									
+									if (!event.isCancelled()){
+										continue;
+									}
 								}
 							}
 							playing = false;
@@ -560,6 +584,36 @@ public abstract class SongPlayer {
 	 */
 	public Song getSong() {
 		return song;
+	}
+	
+	/**
+	 * Gets the Playlist being played by this SongPlayer
+	 * @return
+	 */
+	public Playlist getPlaylist() {
+		return playlist;
+	}
+	
+	public int getPlayedSongIndex(){
+		return actualSong;
+	}
+	
+	public void playSong(int index){
+		lock.lock();
+		try {
+			if (playlist.exits(index)){
+				song = playlist.get(index);
+				actualSong = index;
+				tick = -1;
+				fadeIn.setFadeDone(0);
+				fadeOut.setFadeDone(0);
+				CallUpdate("song", song);
+				CallUpdate("fadeDone", fadeIn.getFadeDone());
+				CallUpdate("tick", tick);
+			}
+		} finally {
+			lock.unlock();
+		}
 	}
 
 	/**
