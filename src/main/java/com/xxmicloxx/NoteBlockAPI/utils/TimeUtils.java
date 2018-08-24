@@ -15,6 +15,7 @@ public class TimeUtils {
 	 *			<li>ss for two-digit seconds</li>
 	 * 			<li>s for one-digit seconds</li>
 	 * 			<li>m for miliseconds (do not use without seconds, would be more than 4 digits)</li>
+	 * 		</ul>
 	 * @param songPlayer
 	 * @return formatted string
 	 */
@@ -33,6 +34,7 @@ public class TimeUtils {
 	 *			<li>ss for two-digit seconds</li>
 	 * 			<li>s for one-digit seconds</li>
 	 * 			<li>m for miliseconds (do not use without seconds, would be more than 4 digits)</li>
+	 * 		</ul>
 	 * @param songPlayer
 	 * @return formatted string
 	 */
