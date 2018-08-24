@@ -69,4 +69,12 @@ public class Playlist {
 	public boolean exist(int songNumber){
 		return songs.size() > songNumber;
 	}
+	
+	/**
+	 * Returns list of Songs in Playlist
+	 * @return
+	 */	
+	public ArrayList<Song> getSongList(){
+		return (ArrayList<Song>) songs.clone();
+	}
 }
