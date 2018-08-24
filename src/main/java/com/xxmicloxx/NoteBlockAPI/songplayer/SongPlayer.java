@@ -595,6 +595,14 @@ public abstract class SongPlayer {
 	}
 	
 	/**
+	 * Sets the Playlist being played by this SongPlayer. Will affect next Song
+	 * @return
+	 */
+	public void setPlaylist(Playlist playlist) {
+		this.playlist = playlist;
+	}
+	
+	/**
 	 * Get index of actually played {@link Song} in {@link Playlist}
 	 * @return
 	 */
