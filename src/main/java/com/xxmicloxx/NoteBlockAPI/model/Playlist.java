@@ -2,12 +2,17 @@ package com.xxmicloxx.NoteBlockAPI.model;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class Playlist {
 
 	ArrayList<Song> songs = new ArrayList<>();
 	
 	public Playlist(Song ...songs){
+		if (songs.length == 0){
+			throw new IllegalArgumentException("Cannot create empty playlist");
+		}
+		checkNull(songs);		
 		this.songs.addAll(Arrays.asList(songs));
 	}
 	
@@ -16,7 +21,18 @@ public class Playlist {
 	 * @param songs
 	 */
 	public void add(Song ...songs){
+		if (songs.length == 0){
+			return;
+		}
+		checkNull(songs);
 		this.songs.addAll(Arrays.asList(songs));
+	}
+	
+	private void checkNull(Song ...songs){
+		List<Song> songList = Arrays.asList(songs);
+		if (songList.contains(null)){
+			throw new IllegalArgumentException("Cannot add null to playlist");
+		}
 	}
 	
 	/**
