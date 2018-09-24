@@ -18,7 +18,9 @@ import com.xxmicloxx.NoteBlockAPI.utils.InstrumentUtils;
  *
  */
 public class RadioSongPlayer extends SongPlayer {
-
+	
+	protected boolean stereo = true;
+	
 	public RadioSongPlayer(Song song) {
 		super(song);
 		makeNewClone(com.xxmicloxx.NoteBlockAPI.RadioSongPlayer.class);
@@ -63,19 +65,33 @@ public class RadioSongPlayer extends SongPlayer {
 				if (instrument.getSound() != null) {
 					CompatibilityUtils.playSound(player, player.getEyeLocation(),
 							instrument.getSound(),
-							this.soundCategory, volume, pitch);
+							this.soundCategory, volume, pitch, stereo);
 				} else {
 					CompatibilityUtils.playSound(player, player.getEyeLocation(),
 							instrument.getSoundFileName(),
-							this.soundCategory, volume, pitch);
+							this.soundCategory, volume, pitch, stereo);
 				}
 			} else {
 				CompatibilityUtils.playSound(player, player.getEyeLocation(),
-						InstrumentUtils.getInstrument(note.getInstrument()), this.soundCategory, volume, pitch);
+						InstrumentUtils.getInstrument(note.getInstrument()), this.soundCategory, volume, pitch, stereo);
 			}
 		}
 	}
 
+	/**
+	 * Returns if the SongPlayer will play Notes from two sources as stereo
+	 * @return
+	 */
+	public boolean isStereo(){
+		return stereo;
+	}
 	
+	/**
+	 * Sets if the SongPlayer will play Notes from two sources as stereo
+	 * @param stereo
+	 */
+	public void setStereo(boolean stereo){
+		this.stereo = stereo;
+	}
 
 }

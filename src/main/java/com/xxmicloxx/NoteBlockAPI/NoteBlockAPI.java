@@ -19,6 +19,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer;
+import com.xxmicloxx.NoteBlockAPI.utils.MathUtils;
 import com.xxmicloxx.NoteBlockAPI.utils.Updater;
 
 /**
@@ -157,6 +158,7 @@ public class NoteBlockAPI extends JavaPlugin {
 			}
 		}, 20*10);
 		
+		new MathUtils();
 	}
 
 	@Override
@@ -215,7 +217,6 @@ public class NoteBlockAPI extends JavaPlugin {
 		plugins.removeAll(notResult);
 		notResult.clear();
 		if (plugins.size() == 1){
-			Bukkit.getLogger().info(plugins.get(0).getName());
 			dependentPlugins.put(plugins.get(0), true);
 		}
 	}

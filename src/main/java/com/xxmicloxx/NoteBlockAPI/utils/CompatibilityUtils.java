@@ -87,7 +87,7 @@ public class CompatibilityUtils {
 	 * @param pitch
 	 */
 	public static void playSound(Player player, Location location, String sound, 
-			SoundCategory category, float volume, float pitch) {
+			SoundCategory category, float volume, float pitch, boolean stereo) {
 		try {
 			if (isSoundCategoryCompatible()) {
 				Method method = Player.class.getMethod("playSound", Location.class, String.class, 
@@ -95,11 +95,21 @@ public class CompatibilityUtils {
 				Class<? extends Enum> soundCategory = 
 						(Class<? extends Enum>) Class.forName("org.bukkit.SoundCategory");
 				Enum<?> soundCategoryEnum = Enum.valueOf(soundCategory, category.name());
-				method.invoke(player, location, sound, soundCategoryEnum, volume, pitch);
+				if (!stereo){
+					method.invoke(player, location, sound, soundCategoryEnum, volume, pitch);
+				} else {
+					method.invoke(player, MathUtils.stereoSourceLeft(location, 2), sound, soundCategoryEnum, volume, pitch);
+					method.invoke(player, MathUtils.stereoSourceRight(location, 2), sound, soundCategoryEnum, volume, pitch);
+				}
 			} else {
 				Method method = Player.class.getMethod("playSound", Location.class, 
 						String.class, float.class, float.class);
-				method.invoke(player, location, sound, volume, pitch);
+				if (!stereo){
+					method.invoke(player, location, sound, volume, pitch);
+				} else {
+					method.invoke(player, MathUtils.stereoSourceLeft(location, 2), sound, volume, pitch);
+					method.invoke(player, MathUtils.stereoSourceRight(location, 2), sound, volume, pitch);
+				}
 			}
 		} catch (NoSuchMethodException e) {
 			e.printStackTrace();
@@ -126,7 +136,7 @@ public class CompatibilityUtils {
 	 * @param pitch
 	 */
 	public static void playSound(Player player, Location location, Sound sound, 
-			SoundCategory category, float volume, float pitch) {
+			SoundCategory category, float volume, float pitch, boolean stereo) {
 		try {
 			if (isSoundCategoryCompatible()) {
 				Method method = Player.class.getMethod("playSound", Location.class, Sound.class, 
@@ -134,11 +144,21 @@ public class CompatibilityUtils {
 				Class<? extends Enum> soundCategory = 
 						(Class<? extends Enum>) Class.forName("org.bukkit.SoundCategory");
 				Enum<?> soundCategoryEnum = Enum.valueOf(soundCategory, category.name());
-				method.invoke(player, location, sound, soundCategoryEnum, volume, pitch);
+				if (!stereo){
+					method.invoke(player, location, sound, soundCategoryEnum, volume, pitch);
+				} else {
+					method.invoke(player, MathUtils.stereoSourceLeft(location, 2), sound, soundCategoryEnum, volume, pitch);
+					method.invoke(player, MathUtils.stereoSourceRight(location, 2), sound, soundCategoryEnum, volume, pitch);
+				}
 			} else {
 				Method method = Player.class.getMethod("playSound", Location.class, 
 						Sound.class, float.class, float.class);
-				method.invoke(player, location, sound, volume, pitch);
+				if (!stereo){
+					method.invoke(player, location, sound, volume, pitch);
+				} else {
+					method.invoke(player, MathUtils.stereoSourceLeft(location, 2), sound, volume, pitch);
+					method.invoke(player, MathUtils.stereoSourceRight(location, 2), sound, volume, pitch);
+				}
 			}
 		} catch (NoSuchMethodException e) {
 			e.printStackTrace();

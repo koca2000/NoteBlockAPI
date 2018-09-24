@@ -106,14 +106,14 @@ public class NoteBlockSongPlayer extends RangeSongPlayer {
 
 				if (instrument.getSound() != null) {
 					CompatibilityUtils.playSound(player, noteBlock.getLocation(), 
-							instrument.getSound(), this.soundCategory, volume, pitch);
+							instrument.getSound(), this.soundCategory, volume, pitch, false);
 				} else {
 					CompatibilityUtils.playSound(player, noteBlock.getLocation(), 
-							instrument.getSoundFileName(), this.soundCategory, volume, pitch);
+							instrument.getSoundFileName(), this.soundCategory, volume, pitch, false);
 				}
 			} else {
 				CompatibilityUtils.playSound(player, noteBlock.getLocation(),
-						InstrumentUtils.getInstrument(note.getInstrument()), this.soundCategory, volume, pitch);
+						InstrumentUtils.getInstrument(note.getInstrument()), this.soundCategory, volume, pitch, false);
 			}
 
 			if (isInRange(player)) {

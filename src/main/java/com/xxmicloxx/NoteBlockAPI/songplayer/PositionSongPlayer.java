@@ -98,15 +98,15 @@ public class PositionSongPlayer extends RangeSongPlayer {
 
 				if (instrument.getSound() != null) {
 					CompatibilityUtils.playSound(player, targetLocation, instrument.getSound(),
-							this.soundCategory, volume, pitch);
+							this.soundCategory, volume, pitch, false);
 				} else {
 					CompatibilityUtils.playSound(player, targetLocation, instrument.getSoundFileName(),
-							this.soundCategory, volume, pitch);
+							this.soundCategory, volume, pitch, false);
 				}
 			} else {
 				CompatibilityUtils.playSound(player, targetLocation,
 						InstrumentUtils.getInstrument(note.getInstrument()), this.soundCategory, 
-						volume, pitch);
+						volume, pitch, false);
 			}
 
 			if (isInRange(player)) {
