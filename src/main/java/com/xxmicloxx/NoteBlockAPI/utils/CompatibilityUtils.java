@@ -76,6 +76,22 @@ public class CompatibilityUtils {
 			return true;
 		}
 	}
+	
+	/**
+	 * Plays a sound using NMS &amp; reflection
+	 * @param player
+	 * @param location
+	 * @param sound
+	 * @param category
+	 * @param volume
+	 * @param pitch
+	 * 
+	 * @deprecated stereo is set to false
+	 */
+	public static void playSound(Player player, Location location, String sound, 
+			SoundCategory category, float volume, float pitch) {
+		playSound(player, location, sound, category, volume, pitch, false);
+	}
 
 	/**
 	 * Plays a sound using NMS &amp; reflection
@@ -126,6 +142,22 @@ public class CompatibilityUtils {
 		}
 	}
 
+	/**
+	 * Plays a sound using NMS &amp; reflection
+	 * @param player
+	 * @param location
+	 * @param sound
+	 * @param category
+	 * @param volume
+	 * @param pitch
+	 * 
+	 * @deprecated stereo is set to false
+	 */
+	public static void playSound(Player player, Location location, Sound sound, 
+			SoundCategory category, float volume, float pitch) {
+		playSound(player, location, sound, category, volume, pitch, false);
+	}
+	
 	/**
 	 * Plays a sound using NMS &amp; reflection
 	 * @param player
