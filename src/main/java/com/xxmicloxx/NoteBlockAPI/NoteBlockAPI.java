@@ -16,7 +16,6 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredListener;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer;
 import com.xxmicloxx.NoteBlockAPI.utils.MathUtils;
@@ -101,18 +100,7 @@ public class NoteBlockAPI extends JavaPlugin {
 			}
 		}
 		
-		Metrics metrics = new Metrics(this);
-		
-		metrics.addCustomChart(new Metrics.DrilldownPie("deprecated", () -> {
-	        Map<String, Map<String, Integer>> map = new HashMap<>();
-	        for (Plugin pl : dependentPlugins.keySet()){
-	        	String deprecated = dependentPlugins.get(pl) ? "yes" : "no";
-	        	Map<String, Integer> entry = new HashMap<>();
-		        entry.put(pl.getDescription().getFullName(), 1);
-		        map.put(deprecated, entry);
-	        }
-	        return map;
-	    }));
+		Metrics metrics = new Metrics(this);	
 		
 		new NoteBlockPlayerMain().onEnable();
 		
@@ -141,10 +129,21 @@ public class NoteBlockAPI extends JavaPlugin {
 
 		            }
 		        }
+		        
+		        metrics.addCustomChart(new Metrics.DrilldownPie("deprecated", () -> {
+			        Map<String, Map<String, Integer>> map = new HashMap<>();
+			        for (Plugin pl : dependentPlugins.keySet()){
+			        	String deprecated = dependentPlugins.get(pl) ? "yes" : "no";
+			        	Map<String, Integer> entry = new HashMap<>();
+				        entry.put(pl.getDescription().getFullName(), 1);
+				        map.put(deprecated, entry);
+			        }
+			        return map;
+			    }));
 			}
-		}, 20*30);
+		}, 1);
 		
-		getServer().getScheduler().runTaskLater(this, new Runnable() {
+		getServer().getScheduler().runTaskLaterAsynchronously(this, new Runnable() {
 			
 			@Override
 			public void run() {
