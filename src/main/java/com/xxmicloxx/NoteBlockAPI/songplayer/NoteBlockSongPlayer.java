@@ -1,6 +1,7 @@
 package com.xxmicloxx.NoteBlockAPI.songplayer;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -87,13 +88,15 @@ public class NoteBlockSongPlayer extends RangeSongPlayer {
 			return;
 		}
 		byte playerVolume = NoteBlockAPI.getPlayerVolume(player);
-
+		Location loc = noteBlock.getLocation();
+		loc = new Location(loc.getWorld(), loc.getX() + 0.5f, loc.getY() - 0.5f, loc.getZ() + 0.5f);
+		
 		for (Layer layer : song.getLayerHashMap().values()) {
 			Note note = layer.getNote(tick);
 			if (note == null) {
 				continue;
 			}
-			player.playNote(noteBlock.getLocation(), InstrumentUtils.getBukkitInstrument(note.getInstrument()),
+			player.playNote(loc, InstrumentUtils.getBukkitInstrument(note.getInstrument()),
 					new org.bukkit.Note(note.getKey() - 33));
 
 			float volume = ((layer.getVolume() * (int) this.volume * (int) playerVolume) / 1000000F) 
@@ -105,14 +108,14 @@ public class NoteBlockSongPlayer extends RangeSongPlayer {
 						[note.getInstrument() - InstrumentUtils.getCustomInstrumentFirstIndex()];
 
 				if (instrument.getSound() != null) {
-					CompatibilityUtils.playSound(player, noteBlock.getLocation(), 
+					CompatibilityUtils.playSound(player, loc, 
 							instrument.getSound(), this.soundCategory, volume, pitch, false);
 				} else {
-					CompatibilityUtils.playSound(player, noteBlock.getLocation(), 
+					CompatibilityUtils.playSound(player, loc, 
 							instrument.getSoundFileName(), this.soundCategory, volume, pitch, false);
 				}
 			} else {
-				CompatibilityUtils.playSound(player, noteBlock.getLocation(),
+				CompatibilityUtils.playSound(player, loc,
 						InstrumentUtils.getInstrument(note.getInstrument()), this.soundCategory, volume, pitch, false);
 			}
 
@@ -137,7 +140,9 @@ public class NoteBlockSongPlayer extends RangeSongPlayer {
 	 */	
 	@Override
 	public boolean isInRange(Player player) {
-		if (player.getLocation().distance(noteBlock.getLocation()) > getDistance()) {
+		Location loc = noteBlock.getLocation();
+		loc = new Location(loc.getWorld(), loc.getX() + 0.5f, loc.getY() - 0.5f, loc.getZ() + 0.5f);
+		if (player.getLocation().distance(loc) > getDistance()) {
 			return false;
 		} else {
 			return true;
