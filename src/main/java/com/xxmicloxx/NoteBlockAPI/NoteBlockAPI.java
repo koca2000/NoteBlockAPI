@@ -83,11 +83,19 @@ public class NoteBlockAPI extends JavaPlugin {
 	}
 	
 	public static ArrayList<SongPlayer> getSongPlayersByPlayer(Player player){
-		return plugin.playingSongs.get(player.getUniqueId());
+		return getSongPlayersByPlayer(player.getUniqueId());
+	}
+	
+	public static ArrayList<SongPlayer> getSongPlayersByPlayer(UUID player){
+		return plugin.playingSongs.get(player);
 	}
 	
 	public static void setSongPlayersByPlayer(Player player, ArrayList<SongPlayer> songs){
-		plugin.playingSongs.put(player.getUniqueId(), songs);
+		setSongPlayersByPlayer(player.getUniqueId(), songs);
+	}
+	
+	public static void setSongPlayersByPlayer(UUID player, ArrayList<SongPlayer> songs){
+		plugin.playingSongs.put(player, songs);
 	}
 
 	@Override

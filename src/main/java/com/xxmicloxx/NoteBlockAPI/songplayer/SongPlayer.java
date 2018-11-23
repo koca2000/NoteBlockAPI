@@ -150,10 +150,10 @@ public abstract class SongPlayer {
 				tick = (short) value;
 				break;
 			case "addplayer":
-				addPlayer((Player) value, false);
+				addPlayer(((Player) value).getUniqueId(), false);
 				break;
 			case "removeplayer":
-				removePlayer((Player) value, false);
+				removePlayer(((Player) value).getUniqueId(), false);
 				break;
 			case "autoDestroy":
 				autoDestroy = (boolean) value;
@@ -401,14 +401,22 @@ public abstract class SongPlayer {
 	 * @param player
 	 */
 	public void addPlayer(Player player) {
+		addPlayer(player.getUniqueId());
+	}
+	
+	/**
+	 * Adds a Player to the list of Players listening to this SongPlayer
+	 * @param player's uuid
+	 */
+	public void addPlayer(UUID player) {
 		addPlayer(player, true);
 	}
 	
-	private void addPlayer(Player player, boolean notify){
+	private void addPlayer(UUID player, boolean notify){
 		lock.lock();
 		try {
-			if (!playerList.containsKey(player.getUniqueId())) {
-				playerList.put(player.getUniqueId(), false);
+			if (!playerList.containsKey(player)) {
+				playerList.put(player, false);
 				ArrayList<SongPlayer> songs = NoteBlockAPI.getSongPlayersByPlayer(player);
 				if (songs == null) {
 					songs = new ArrayList<SongPlayer>();
@@ -416,7 +424,10 @@ public abstract class SongPlayer {
 				songs.add(this);
 				NoteBlockAPI.setSongPlayersByPlayer(player, songs);
 				if (notify){
-					CallUpdate("addplayer", player);
+					Player p = Bukkit.getPlayer(player);
+					if (p != null){
+						CallUpdate("addplayer", p);
+					}
 				}
 			}
 		} finally {
@@ -525,16 +536,27 @@ public abstract class SongPlayer {
 	 * @param player to remove
 	 */
 	public void removePlayer(Player player) {
+		removePlayer(player.getUniqueId());
+	}
+	
+	/**
+	 * Removes a player from this SongPlayer
+	 * @param uuid of player to remove
+	 */
+	public void removePlayer(UUID player) {
 		removePlayer(player, true);
 	}
 	
-	private void removePlayer(Player player, boolean notify) {
+	private void removePlayer(UUID player, boolean notify) {
 		lock.lock();
 		try {
 			if (notify){
-				CallUpdate("removeplayer", player);
+				Player p = Bukkit.getPlayer(player);
+				if (p != null){
+					CallUpdate("removeplayer", p);
+				}
 			}
-			playerList.remove(player.getUniqueId());
+			playerList.remove(player);
 			if (NoteBlockAPI.getSongPlayersByPlayer(player) == null) {
 				return;
 			}
