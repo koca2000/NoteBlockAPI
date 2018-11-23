@@ -543,8 +543,8 @@ public abstract class SongPlayer {
 	 * Removes a player from this SongPlayer
 	 * @param uuid of player to remove
 	 */
-	public void removePlayer(UUID player) {
-		removePlayer(player, true);
+	public void removePlayer(UUID uuid) {
+		removePlayer(uuid, true);
 	}
 	
 	private void removePlayer(UUID player, boolean notify) {

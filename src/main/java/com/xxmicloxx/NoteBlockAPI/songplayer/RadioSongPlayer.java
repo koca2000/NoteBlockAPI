@@ -80,7 +80,7 @@ public class RadioSongPlayer extends SongPlayer {
 
 	/**
 	 * Returns if the SongPlayer will play Notes from two sources as stereo
-	 * @return
+	 * @return if is played stereo
 	 */
 	public boolean isStereo(){
 		return stereo;
