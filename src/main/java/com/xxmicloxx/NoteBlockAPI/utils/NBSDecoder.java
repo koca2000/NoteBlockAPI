@@ -120,6 +120,8 @@ public class NBSDecoder {
 			for (int index = 0; index < customAmnt; index++) {
 				customInstrumentsArray[index] = new CustomInstrument((byte) index, 
 						readString(dataInputStream), readString(dataInputStream));
+				dataInputStream.readByte();//pitch
+				dataInputStream.readByte();//key
 			}
 
 			if (InstrumentUtils.isCustomInstrument((byte) (biggestInstrumentIndex - customAmnt))) {
