@@ -7,6 +7,7 @@ import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.xxmicloxx.NoteBlockAPI.model.*;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -16,13 +17,6 @@ import com.xxmicloxx.NoteBlockAPI.event.SongEndEvent;
 import com.xxmicloxx.NoteBlockAPI.event.SongLoopEvent;
 import com.xxmicloxx.NoteBlockAPI.event.SongNextEvent;
 import com.xxmicloxx.NoteBlockAPI.event.SongStoppedEvent;
-import com.xxmicloxx.NoteBlockAPI.model.CustomInstrument;
-import com.xxmicloxx.NoteBlockAPI.model.FadeType;
-import com.xxmicloxx.NoteBlockAPI.model.Layer;
-import com.xxmicloxx.NoteBlockAPI.model.Note;
-import com.xxmicloxx.NoteBlockAPI.model.Playlist;
-import com.xxmicloxx.NoteBlockAPI.model.Song;
-import com.xxmicloxx.NoteBlockAPI.model.SoundCategory;
 
 
 /**
@@ -45,7 +39,7 @@ public abstract class SongPlayer {
 	protected byte volume = 100;
 	protected Fade fadeIn;
 	protected Fade fadeOut;
-	protected boolean loop = false;
+	protected RepeatMode repeat = RepeatMode.NO;
 	protected boolean random = false;
 
 	protected Map<Song, Boolean> songQueue = Collections.synchronizedMap(new HashMap<Song, Boolean>()); //True if already played
@@ -319,59 +313,68 @@ public abstract class SongPlayer {
 							fadeIn.setFadeDone(0);
 							CallUpdate("fadeDone", fadeIn.getFadeDone());
 							fadeOut.setFadeDone(0);
-							if (random){
-								songQueue.put(song, true);
-								checkPlaylistQueue();
-								ArrayList<Song> left = new ArrayList<>();
-								for (Song s : songQueue.keySet()){
-									if (!songQueue.get(s)){
-										left.add(s);
-									}
-								}
+							if (repeat == RepeatMode.ONE){
+								SongLoopEvent event = new SongLoopEvent(this);
+								plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
 
-								if (left.size() == 0){
-									left.addAll(songQueue.keySet());
-									for (Song s : songQueue.keySet()) {
-										songQueue.put(s, false);
-									}
-									song = left.get(rng.nextInt(left.size()));
-									actualSong = playlist.getIndex(song);
-									CallUpdate("song", song);
-									if (loop) {
-										SongLoopEvent event = new SongLoopEvent(this);
-										plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
-
-										if (!event.isCancelled()) {
-											continue;
-										}
-									}
-								} else {
-									song = left.get(rng.nextInt(left.size()));
-									actualSong = playlist.getIndex(song);
-
-									CallUpdate("song", song);
-									SongNextEvent event = new SongNextEvent(this);
-									plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
+								if (!event.isCancelled()) {
 									continue;
 								}
 							} else {
-								if (playlist.hasNext(actualSong)) {
-									actualSong++;
-									song = playlist.get(actualSong);
-									CallUpdate("song", song);
-									SongNextEvent event = new SongNextEvent(this);
-									plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
-									continue;
-								} else {
-									actualSong = 0;
-									song = playlist.get(actualSong);
-									CallUpdate("song", song);
-									if (loop) {
-										SongLoopEvent event = new SongLoopEvent(this);
-										plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
+								if (random) {
+									songQueue.put(song, true);
+									checkPlaylistQueue();
+									ArrayList<Song> left = new ArrayList<>();
+									for (Song s : songQueue.keySet()) {
+										if (!songQueue.get(s)) {
+											left.add(s);
+										}
+									}
 
-										if (!event.isCancelled()) {
-											continue;
+									if (left.size() == 0) {
+										left.addAll(songQueue.keySet());
+										for (Song s : songQueue.keySet()) {
+											songQueue.put(s, false);
+										}
+										song = left.get(rng.nextInt(left.size()));
+										actualSong = playlist.getIndex(song);
+										CallUpdate("song", song);
+										if (repeat == RepeatMode.ALL) {
+											SongLoopEvent event = new SongLoopEvent(this);
+											plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
+
+											if (!event.isCancelled()) {
+												continue;
+											}
+										}
+									} else {
+										song = left.get(rng.nextInt(left.size()));
+										actualSong = playlist.getIndex(song);
+
+										CallUpdate("song", song);
+										SongNextEvent event = new SongNextEvent(this);
+										plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
+										continue;
+									}
+								} else {
+									if (playlist.hasNext(actualSong)) {
+										actualSong++;
+										song = playlist.get(actualSong);
+										CallUpdate("song", song);
+										SongNextEvent event = new SongNextEvent(this);
+										plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
+										continue;
+									} else {
+										actualSong = 0;
+										song = playlist.get(actualSong);
+										CallUpdate("song", song);
+										if (repeat == RepeatMode.ALL) {
+											SongLoopEvent event = new SongLoopEvent(this);
+											plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
+
+											if (!event.isCancelled()) {
+												continue;
+											}
 										}
 									}
 								}
@@ -738,18 +741,36 @@ public abstract class SongPlayer {
 	
 	/**
 	 * Sets whether the SongPlayer will loop
+	 * @deprecated
 	 * @param loop
 	 */
 	public void setLoop(boolean loop){
-		this.loop = loop;
+		this.repeat = RepeatMode.ALL;
 	}
 	
 	/**
 	 * Gets whether the SongPlayer will loop
+	 * @deprecated
 	 * @return is loop
 	 */
 	public boolean isLoop(){
-		return loop;
+		return repeat == RepeatMode.ALL;
+	}
+
+	/**
+	 * Sets SongPlayer's {@link RepeatMode}
+	 * @param repeatMode
+	 */
+	public void setRepeatMode(RepeatMode repeatMode){
+		this.repeat = repeatMode;
+	}
+
+	/**
+	 * Gets SongPlayer's {@link RepeatMode}
+	 * @return
+	 */
+	public RepeatMode getRepeatMode(){
+		return repeat;
 	}
 
 	/**
