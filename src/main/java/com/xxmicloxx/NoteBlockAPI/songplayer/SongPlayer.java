@@ -3,13 +3,7 @@ package com.xxmicloxx.NoteBlockAPI.songplayer;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -48,14 +42,16 @@ public abstract class SongPlayer {
 	protected boolean autoDestroy = false;
 	protected boolean destroyed = false;
 
-	protected Thread playerThread;
-
 	protected byte volume = 100;
 	protected Fade fadeIn;
 	protected Fade fadeOut;
 	protected boolean loop = false;
+	protected boolean random = false;
+
+	protected Map<Song, Boolean> songQueue = Collections.synchronizedMap(new HashMap<Song, Boolean>()); //True if already played
 
 	private final Lock lock = new ReentrantLock();
+	private Random rng = new Random();
 
 	protected NoteBlockAPI plugin;
 
@@ -68,17 +64,24 @@ public abstract class SongPlayer {
 	}
 
 	public SongPlayer(Song song, SoundCategory soundCategory) {
-		//this.song = song;
 		this(new Playlist(song), soundCategory);
+	}
+
+	public SongPlayer(Song song, SoundCategory soundCategory, boolean random) {
+		this(new Playlist(song), soundCategory, random);
 	}
 	
 	public SongPlayer(Playlist playlist){
 		this(playlist, SoundCategory.MASTER);
 	}
-	
+
 	public SongPlayer(Playlist playlist, SoundCategory soundCategory){
+		this(playlist, soundCategory, false);
+	}
+
+	public SongPlayer(Playlist playlist, SoundCategory soundCategory, boolean random){
 		this.playlist = playlist;
-		this.song = playlist.get(actualSong);
+		this.random = random;
 		this.soundCategory = soundCategory;
 		plugin = NoteBlockAPI.getAPI();
 		
@@ -89,10 +92,20 @@ public abstract class SongPlayer {
 		fadeOut = new Fade(FadeType.NONE, 60);
 		fadeOut.setFadeStart(volume);
 		fadeOut.setFadeTarget((byte) 0);
-		
+
+		if (random){
+			checkPlaylistQueue();
+			actualSong = rng.nextInt(playlist.getCount());
+		}
+		this.song = playlist.get(actualSong);
+
 		start();
 	}
-	
+
+	/**
+	 * @deprecated
+	 * @param songPlayer
+	 */
 	SongPlayer(com.xxmicloxx.NoteBlockAPI.SongPlayer songPlayer){
 		oldSongPlayer = songPlayer;
 		com.xxmicloxx.NoteBlockAPI.Song s = songPlayer.getSong();
@@ -306,23 +319,60 @@ public abstract class SongPlayer {
 							fadeIn.setFadeDone(0);
 							CallUpdate("fadeDone", fadeIn.getFadeDone());
 							fadeOut.setFadeDone(0);
-							if (playlist.hasNext(actualSong)){
-								actualSong++;
-								song = playlist.get(actualSong);
-								CallUpdate("song", song);
-								SongNextEvent event = new SongNextEvent(this);
-								plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
-								continue;
-							} else{
-								actualSong = 0;
-								song = playlist.get(actualSong);
-								CallUpdate("song", song);
-								if (loop){
-									SongLoopEvent event = new SongLoopEvent(this);
+							if (random){
+								songQueue.put(song, true);
+								checkPlaylistQueue();
+								ArrayList<Song> left = new ArrayList<>();
+								for (Song s : songQueue.keySet()){
+									if (!songQueue.get(s)){
+										left.add(s);
+									}
+								}
+
+								if (left.size() == 0){
+									left.addAll(songQueue.keySet());
+									for (Song s : songQueue.keySet()) {
+										songQueue.put(s, false);
+									}
+									song = left.get(rng.nextInt(left.size()));
+									actualSong = playlist.getIndex(song);
+									CallUpdate("song", song);
+									if (loop) {
+										SongLoopEvent event = new SongLoopEvent(this);
+										plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
+
+										if (!event.isCancelled()) {
+											continue;
+										}
+									}
+								} else {
+									song = left.get(rng.nextInt(left.size()));
+									actualSong = playlist.getIndex(song);
+
+									CallUpdate("song", song);
+									SongNextEvent event = new SongNextEvent(this);
 									plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
-									
-									if (!event.isCancelled()){
-										continue;
+									continue;
+								}
+							} else {
+								if (playlist.hasNext(actualSong)) {
+									actualSong++;
+									song = playlist.get(actualSong);
+									CallUpdate("song", song);
+									SongNextEvent event = new SongNextEvent(this);
+									plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
+									continue;
+								} else {
+									actualSong = 0;
+									song = playlist.get(actualSong);
+									CallUpdate("song", song);
+									if (loop) {
+										SongLoopEvent event = new SongLoopEvent(this);
+										plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
+
+										if (!event.isCancelled()) {
+											continue;
+										}
 									}
 								}
 							}
@@ -368,6 +418,20 @@ public abstract class SongPlayer {
 				}
 			}
 		});
+	}
+
+	private void checkPlaylistQueue(){
+		for (Song s : songQueue.keySet()){
+			if (!playlist.contains(s)){
+				songQueue.remove(s);
+			}
+		}
+
+		for (Song s : playlist.getSongList()){
+			if (!songQueue.containsKey(s)){
+				songQueue.put(s, false);
+			}
+		}
 	}
 	
 	/**
@@ -686,6 +750,22 @@ public abstract class SongPlayer {
 	 */
 	public boolean isLoop(){
 		return loop;
+	}
+
+	/**
+	 * Sets whether the SongPlayer will choose next song from player randomly
+	 * @param random
+	 */
+	public void setRandom(boolean random){
+		this.random = random;
+	}
+
+	/**
+	 * Gets whether the SongPlayer will choose next song from player randomly
+	 * @return is random
+	 */
+	public boolean isRandom(){
+		return random;
 	}
 
 	void CallUpdate(String key, Object value){

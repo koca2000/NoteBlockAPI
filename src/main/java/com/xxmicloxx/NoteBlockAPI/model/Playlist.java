@@ -85,7 +85,21 @@ public class Playlist {
 	public boolean exist(int songNumber){
 		return songs.size() > songNumber;
 	}
-	
+
+	/**
+	 * Returns index of song.
+	 * @param song
+	 * @return Index of song. -1 if song is not in playelist
+	 */
+	public int getIndex(Song song){	return songs.indexOf(song);	}
+
+	/**
+	 * Check whether playlist contains song.
+	 * @param song
+	 * @return
+	 */
+	public boolean contains(Song song) { return songs.contains(song); }
+
 	/**
 	 * Returns list of Songs in Playlist
 	 * @return
