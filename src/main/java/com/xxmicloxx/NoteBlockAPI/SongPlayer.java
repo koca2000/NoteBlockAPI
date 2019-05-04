@@ -375,7 +375,7 @@ public abstract class SongPlayer {
 		lock.lock();
 		try {
 			SongDestroyingEvent event = new SongDestroyingEvent(this);
-			Bukkit.getPluginManager().callEvent(event);
+			plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
 			//Bukkit.getScheduler().cancelTask(threadId);
 			if (event.isCancelled()) {
 				return;
@@ -406,7 +406,7 @@ public abstract class SongPlayer {
 		this.playing = playing;
 		if (!playing) {
 			SongStoppedEvent event = new SongStoppedEvent(this);
-			Bukkit.getPluginManager().callEvent(event);
+			plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
 		}
 		CallUpdate("playing", playing);
 	}
@@ -452,7 +452,7 @@ public abstract class SongPlayer {
 			NoteBlockPlayerMain.plugin.playingSongs.put(player.getName(), songs);
 			if (playerList.isEmpty() && autoDestroy) {
 				SongEndEvent event = new SongEndEvent(this);
-				Bukkit.getPluginManager().callEvent(event);
+				plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
 				destroy();
 			}
 		} finally {

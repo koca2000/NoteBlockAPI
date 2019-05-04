@@ -5,8 +5,8 @@ import org.bukkit.Location;
 public class MathUtils {
 
 	private static MathUtils instance;
-	private double cos[] = new double[360];
-	private double sin[] = new double[360];
+	private double[] cos = new double[360];
+	private double[] sin = new double[360];
 	
 	public MathUtils(){
 		instance = this;

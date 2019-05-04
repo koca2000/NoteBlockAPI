@@ -1,6 +1,7 @@
 package com.xxmicloxx.NoteBlockAPI.utils;
 
 import com.xxmicloxx.NoteBlockAPI.model.Sound;
+import org.bukkit.Instrument;
 
 /**
  * Various methods for working with instruments
@@ -45,6 +46,18 @@ public class InstrumentUtils {
 				return Sound.getFromBukkitName("BLOCK_NOTE_BLOCK_CHIME").name();
 			case 9:
 				return Sound.getFromBukkitName("BLOCK_NOTE_BLOCK_XYLOPHONE").name();
+			case 10:
+				return Sound.getFromBukkitName("BLOCK_NOTE_BLOCK_IRON_XYLOPHONE").name();
+			case 11:
+				return Sound.getFromBukkitName("BLOCK_NOTE_BLOCK_COW_BELL").name();
+			case 12:
+				return Sound.getFromBukkitName("BLOCK_NOTE_BLOCK_DIDGERIDOO").name();
+			case 13:
+				return Sound.getFromBukkitName("BLOCK_NOTE_BLOCK_BIT").name();
+			case 14:
+				return Sound.getFromBukkitName("BLOCK_NOTE_BLOCK_BANJO").name();
+			case 15:
+				return Sound.getFromBukkitName("BLOCK_NOTE_BLOCK_PLING").name();
 			default:
 				return Sound.getFromBukkitName("BLOCK_NOTE_BLOCK_HARP").name();
 		}
@@ -55,34 +68,53 @@ public class InstrumentUtils {
 	 * @param instrument
 	 * @return Instrument enum (for the current server version)
 	 */
-	public static org.bukkit.Instrument getBukkitInstrument(byte instrument) {
+	public static Instrument getBukkitInstrument(byte instrument) {
 		switch (instrument) {
 			case 0:
-				return org.bukkit.Instrument.PIANO;
+				return Instrument.PIANO;
 			case 1:
-				return org.bukkit.Instrument.BASS_GUITAR;
+				return Instrument.BASS_GUITAR;
 			case 2:
-				return org.bukkit.Instrument.BASS_DRUM;
+				return Instrument.BASS_DRUM;
 			case 3:
-				return org.bukkit.Instrument.SNARE_DRUM;
+				return Instrument.SNARE_DRUM;
 			case 4:
-				return org.bukkit.Instrument.STICKS;
+				return Instrument.STICKS;
 			default: {
-				if (CompatibilityUtils.isPost1_12()) {
+				if (CompatibilityUtils.getServerVersion() >= 0.0112f) {
 					switch (instrument) {
 						case 5:
-							return org.bukkit.Instrument.valueOf("GUITAR");
+							return Instrument.valueOf("GUITAR");
 						case 6:
-							return org.bukkit.Instrument.valueOf("FLUTE");
+							return Instrument.valueOf("FLUTE");
 						case 7:
-							return org.bukkit.Instrument.valueOf("BELL");
+							return Instrument.valueOf("BELL");
 						case 8:
-							return org.bukkit.Instrument.valueOf("CHIME");
+							return Instrument.valueOf("CHIME");
 						case 9:
-							return org.bukkit.Instrument.valueOf("XYLOPHONE");
+							return Instrument.valueOf("XYLOPHONE");
+						default: {
+							if (CompatibilityUtils.getServerVersion() >= 0.0114f) {
+								switch (instrument) {
+									case 10:
+										return Instrument.valueOf("IRON_XYLOPHONE");
+									case 11:
+										return Instrument.valueOf("COW_BELL");
+									case 12:
+										return Instrument.valueOf("DIDGERIDOO");
+									case 13:
+										return Instrument.valueOf("BIT");
+									case 14:
+										return Instrument.valueOf("BANJO");
+									case 15:
+										return Instrument.valueOf("PLING");
+								}
+							}
+							return Instrument.PIANO;
+						}
 					}
 				}
-				return org.bukkit.Instrument.PIANO;
+				return Instrument.PIANO;
 			}
 		}
 	}
@@ -93,16 +125,7 @@ public class InstrumentUtils {
 	 * @return whether the byte represents a custom instrument
 	 */
 	public static boolean isCustomInstrument(byte instrument) {
-		if (CompatibilityUtils.isPost1_12()) {
-			if (instrument > 9) {
-				return true;
-			}
-			return false;
-		}
-		if (instrument > 4) {
-			return true;
-		}
-		return false;
+		return instrument >= getCustomInstrumentFirstIndex();
 	}
 
 	/**
@@ -111,8 +134,11 @@ public class InstrumentUtils {
 	 * @return index where an instrument can be added
 	 */
 	public static byte getCustomInstrumentFirstIndex() {
-		if (CompatibilityUtils.isPost1_12()) {
+		if (CompatibilityUtils.getServerVersion() >= 0.0112f) {
 			return 10;
+		}
+		if (CompatibilityUtils.getServerVersion() >= 0.0114f) {
+			return 16;
 		}
 		return 5;
 	}

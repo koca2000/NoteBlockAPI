@@ -21,6 +21,9 @@ public class CompatibilityUtils {
 	public static final String OBC_DIR = Bukkit.getServer().getClass().getPackage().getName();
 	public static final String NMS_DIR = OBC_DIR.replaceFirst("org.bukkit.craftbukkit", "net.minecraft.server");
 
+
+	private static float serverVersion = -1;
+
 	/**
 	 * Gets NMS class from given name
 	 * @param name of class (w/ package)
@@ -52,12 +55,10 @@ public class CompatibilityUtils {
 	/**
 	 * Returns whether the version of Bukkit is or is after 1.12
 	 * @return version is after 1.12
+	 * @deprecated Compare {@link #getServerVersion()} with 0.0112f
 	 */
 	public static boolean isPost1_12() {
-		if (!isSoundCategoryCompatible() || Bukkit.getVersion().contains("1.11")) {
-			return false;
-		}
-		return true;
+		return getServerVersion() >= 0.0112f;
 	}
 
 	/**
@@ -67,14 +68,7 @@ public class CompatibilityUtils {
 	 * @return can use SoundCategory
 	 */
 	protected static boolean isSoundCategoryCompatible() {
-		if (Bukkit.getVersion().contains("1.7") 
-				|| Bukkit.getVersion().contains("1.8") 
-				|| Bukkit.getVersion().contains("1.9") 
-				|| Bukkit.getVersion().contains("1.10")) {
-			return false;
-		} else {
-			return true;
-		}
+		return getServerVersion() >= 0.0111f;
 	}
 	
 	/**
@@ -210,15 +204,49 @@ public class CompatibilityUtils {
 	/**
 	 * Gets instruments which were added post-1.12
 	 * @return ArrayList of instruments
+	 * @deprecated Use {@link #getVersionCustomInstruments()}
 	 */
 	public static ArrayList<CustomInstrument> get1_12Instruments(){
+		return getVersionCustomInstruments();
+	}
+
+	public static ArrayList<CustomInstrument> getVersionCustomInstruments(){
 		ArrayList<CustomInstrument> instruments = new ArrayList<>();
-		instruments.add(new CustomInstrument((byte) 0, "Guitar", "guitar.ogg"));
-		instruments.add(new CustomInstrument((byte) 0, "Flute", "flute.ogg"));
-		instruments.add(new CustomInstrument((byte) 0, "Bell", "bell.ogg"));
-		instruments.add(new CustomInstrument((byte) 0, "Chime", "icechime.ogg"));
-		instruments.add(new CustomInstrument((byte) 0, "Xylophone", "xylobone.ogg"));
+		if (getServerVersion() < 0.0112f){
+			instruments.add(new CustomInstrument((byte) 0, "Guitar", "guitar.ogg"));
+			instruments.add(new CustomInstrument((byte) 0, "Flute", "flute.ogg"));
+			instruments.add(new CustomInstrument((byte) 0, "Bell", "bell.ogg"));
+			instruments.add(new CustomInstrument((byte) 0, "Chime", "icechime.ogg"));
+			instruments.add(new CustomInstrument((byte) 0, "Xylophone", "xylobone.ogg"));
+		}
+
+		if (getServerVersion() < 0.0114f){
+			//TODO: Implement once custom instruments problems will be solved
+		}
 		return instruments;
+	}
+
+	public static float getServerVersion(){
+		if (serverVersion != -1){
+			return serverVersion;
+		}
+
+		String versionInfo = Bukkit.getServer().getVersion();
+		int start = versionInfo.lastIndexOf('(');
+		int end = versionInfo.lastIndexOf(')');
+
+		String[] versionParts = versionInfo.substring(start + 5, end).split("\\.");
+
+		String versionString = "0.";
+		for (String part : versionParts){
+			if (part.length() == 1){
+				versionString += "0";
+			}
+
+			versionString += part;
+		}
+		serverVersion = Float.parseFloat(versionString);
+		return serverVersion;
 	}
 
 }
