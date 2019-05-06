@@ -9,7 +9,13 @@ import java.net.URLConnection;
 
 public class Updater {
 	
-	public static boolean checkUpdate(String resource, String actualVersion) throws MalformedURLException, IOException{		
+	public static boolean checkUpdate(String resource, String actualVersion) throws MalformedURLException, IOException{
+		boolean snapshot = false;
+		if (actualVersion.contains("-SNAPSHOT")){
+			snapshot = true;
+			actualVersion = actualVersion.replace("-SNAPSHOT","");
+		}
+
 		Float version = getVersionNumber(actualVersion);
 		
 		URLConnection con = new URL("https://api.spigotmc.org/legacy/update.php?resource=" + resource).openConnection();
@@ -19,7 +25,7 @@ public class Updater {
 		
 		Float newVer = getVersionNumber(newVersion);
 
-		return newVer > version;
+		return snapshot ? newVer >= version : newVer > version;
 	}
 	
 	private static Float getVersionNumber(String version){

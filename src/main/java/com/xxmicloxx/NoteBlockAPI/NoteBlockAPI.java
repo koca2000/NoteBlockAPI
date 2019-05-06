@@ -151,7 +151,7 @@ public class NoteBlockAPI extends JavaPlugin {
 			}
 		}, 1);
 		
-		getServer().getScheduler().runTaskLaterAsynchronously(this, new Runnable() {
+		getServer().getScheduler().runTaskTimerAsynchronously(this, new Runnable() {
 			
 			@Override
 			public void run() {
@@ -163,7 +163,7 @@ public class NoteBlockAPI extends JavaPlugin {
 					Bukkit.getLogger().info(String.format("[%s] Cannot receive update from Spigot resource page!", plugin.getDescription().getName()));
 				}
 			}
-		}, 20*10);
+		}, 20*10, 20 * 60 * 60 * 24);
 		
 		new MathUtils();
 	}
