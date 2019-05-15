@@ -204,15 +204,22 @@ public class CompatibilityUtils {
 	/**
 	 * Gets instruments which were added post-1.12
 	 * @return ArrayList of instruments
-	 * @deprecated Use {@link #getVersionCustomInstruments()}
+	 * @deprecated Alternative not ready yet
 	 */
 	public static ArrayList<CustomInstrument> get1_12Instruments(){
-		return getVersionCustomInstruments();
+		ArrayList<CustomInstrument> instruments = new ArrayList<>();
+		instruments.add(new CustomInstrument((byte) 0, "Guitar", "guitar.ogg"));
+		instruments.add(new CustomInstrument((byte) 0, "Flute", "flute.ogg"));
+		instruments.add(new CustomInstrument((byte) 0, "Bell", "bell.ogg"));
+		instruments.add(new CustomInstrument((byte) 0, "Chime", "icechime.ogg"));
+		instruments.add(new CustomInstrument((byte) 0, "Xylophone", "xylobone.ogg"));
+		return instruments;
 	}
 
-	public static ArrayList<CustomInstrument> getVersionCustomInstruments(){
+	/* NOT READY TO USE YET
+	public static ArrayList<CustomInstrument> getVersionCustomInstruments(float serverVersion){
 		ArrayList<CustomInstrument> instruments = new ArrayList<>();
-		if (getServerVersion() < 0.0112f){
+		if (serverVersion < 0.0112f){
 			instruments.add(new CustomInstrument((byte) 0, "Guitar", "guitar.ogg"));
 			instruments.add(new CustomInstrument((byte) 0, "Flute", "flute.ogg"));
 			instruments.add(new CustomInstrument((byte) 0, "Bell", "bell.ogg"));
@@ -220,11 +227,29 @@ public class CompatibilityUtils {
 			instruments.add(new CustomInstrument((byte) 0, "Xylophone", "xylobone.ogg"));
 		}
 
-		if (getServerVersion() < 0.0114f){
-			//TODO: Implement once custom instruments problems will be solved
+		if (serverVersion < 0.0114f){
+			instruments.add(new CustomInstrument((byte) 0, "Iron Xylophone", "iron_xylophone.ogg"));
+			instruments.add(new CustomInstrument((byte) 0, "Cow Bell", "cow_bell.ogg"));
+			instruments.add(new CustomInstrument((byte) 0, "Didgeridoo", "didgeridoo.ogg"));
+			instruments.add(new CustomInstrument((byte) 0, "Bit", "bit.ogg"));
+			instruments.add(new CustomInstrument((byte) 0, "Banjo", "banjo.ogg"));
+			instruments.add(new CustomInstrument((byte) 0, "Pling", "pling.ogg"));
 		}
 		return instruments;
 	}
+
+	public static ArrayList<CustomInstrument> getVersionCustomInstrumentsForSong(int firstCustomInstrumentIndex){
+		ArrayList<CustomInstrument> instruments = new ArrayList<>();
+
+		if (getServerVersion() < 0.0112f && firstCustomInstrumentIndex < 10){
+			instruments.addAll(getVersionCustomInstruments(0.0111f));
+		} else if (getServerVersion() < 0.0114f && firstCustomInstrumentIndex < 16){
+			instruments.addAll(getVersionCustomInstruments(0.0113f));
+		}
+
+		return instruments;
+	}*/
+
 
 	public static float getServerVersion(){
 		if (serverVersion != -1){

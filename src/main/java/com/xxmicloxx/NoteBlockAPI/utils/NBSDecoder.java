@@ -63,6 +63,14 @@ public class NBSDecoder {
 		try {
 			DataInputStream dataInputStream = new DataInputStream(inputStream);
 			short length = readShort(dataInputStream);
+			int firstcustominstrument = InstrumentUtils.getCustomInstrumentFirstIndex();
+			int firstcustominstrumentdiff = 0;
+			int nbsversion = 0;
+			if (length == 0){
+				nbsversion = dataInputStream.readByte();
+				firstcustominstrument = dataInputStream.readByte();
+				firstcustominstrumentdiff = InstrumentUtils.getCustomInstrumentFirstIndex() - firstcustominstrument;
+			}
 			short songHeight = readShort(dataInputStream);
 			String title = readString(dataInputStream);
 			String author = readString(dataInputStream);
@@ -96,13 +104,19 @@ public class NBSDecoder {
 					layer += jumpLayers;
 					//System.out.println("Layer: " + layer);
 					byte instrument = dataInputStream.readByte();
-					if (instrument > biggestInstrumentIndex) {
-						biggestInstrumentIndex = instrument;
+
+					if (firstcustominstrumentdiff > 0 && instrument >= firstcustominstrument){
+						instrument += firstcustominstrumentdiff;
 					}
 					setNote(layer, tick, instrument /* instrument */, 
 							dataInputStream.readByte() /* note */, layerHashMap);
 				}
 			}
+
+			if (nbsversion > 0) {
+				length = tick;
+			}
+
 			for (int i = 0; i < songHeight; i++) {
 				Layer layer = layerHashMap.get(i);
 
@@ -124,14 +138,14 @@ public class NBSDecoder {
 				dataInputStream.readByte();//key
 			}
 
-			if (InstrumentUtils.isCustomInstrument((byte) (biggestInstrumentIndex - customAmnt))) {
-				ArrayList<CustomInstrument> customInstruments = CompatibilityUtils.get1_12Instruments();
+			if (firstcustominstrumentdiff < 0){
+				ArrayList<CustomInstrument> customInstruments = CompatibilityUtils.get1_12Instruments();//CompatibilityUtils.getVersionCustomInstrumentsForSong(firstcustominstrument);
 				customInstruments.addAll(Arrays.asList(customInstrumentsArray));
 				customInstrumentsArray = customInstruments.toArray(customInstrumentsArray);
 			}
 
 			return new Song(speed, layerHashMap, songHeight, length, title, 
-					author, description, songFile, customInstrumentsArray);
+					author, description, songFile, firstcustominstrument, customInstrumentsArray);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (EOFException e) {

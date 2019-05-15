@@ -27,6 +27,22 @@ public class Playlist {
 		checkNull(songs);
 		this.songs.addAll(Arrays.asList(songs));
 	}
+
+	/**
+	 * Insert array of {@link Song} at a specified index
+	 * @param index
+	 * @param songs
+	 */
+	public void insert(int index, Song ...songs){
+		if (songs.length == 0){
+			return;
+		}
+		if (index > this.songs.size()){
+			throw new IllegalArgumentException("Index is higher than playlist size");
+		}
+		checkNull(songs);
+		this.songs.addAll(index, Arrays.asList(songs));
+	}
 	
 	private void checkNull(Song ...songs){
 		List<Song> songList = Arrays.asList(songs);
