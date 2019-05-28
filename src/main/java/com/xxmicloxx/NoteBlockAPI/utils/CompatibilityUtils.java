@@ -14,7 +14,6 @@ import com.xxmicloxx.NoteBlockAPI.model.SoundCategory;
 
 /**
  * Fields/methods for reflection &amp; version checking
- *
  */
 public class CompatibilityUtils {
 
@@ -204,53 +203,68 @@ public class CompatibilityUtils {
 	/**
 	 * Gets instruments which were added post-1.12
 	 * @return ArrayList of instruments
-	 * @deprecated Alternative not ready yet
+	 * @deprecated Use {@link #getVersionCustomInstruments(float)}
 	 */
 	public static ArrayList<CustomInstrument> get1_12Instruments(){
-		ArrayList<CustomInstrument> instruments = new ArrayList<>();
-		instruments.add(new CustomInstrument((byte) 0, "Guitar", "guitar.ogg"));
-		instruments.add(new CustomInstrument((byte) 0, "Flute", "flute.ogg"));
-		instruments.add(new CustomInstrument((byte) 0, "Bell", "bell.ogg"));
-		instruments.add(new CustomInstrument((byte) 0, "Chime", "icechime.ogg"));
-		instruments.add(new CustomInstrument((byte) 0, "Xylophone", "xylobone.ogg"));
-		return instruments;
+		return getVersionCustomInstruments(0.0112f);
 	}
 
-	/* NOT READY TO USE YET
+	/**
+	 * Return list of instuments which were added in specified version
+	 * @param serverVersion 1.12 = 0.0112f, 1.14 = 0.0114f,...
+	 * @return list of custom instruments, if no instuments were added in specified version returns empty list
+	 */
 	public static ArrayList<CustomInstrument> getVersionCustomInstruments(float serverVersion){
 		ArrayList<CustomInstrument> instruments = new ArrayList<>();
-		if (serverVersion < 0.0112f){
+		if (serverVersion == 0.0112f){
 			instruments.add(new CustomInstrument((byte) 0, "Guitar", "guitar.ogg"));
 			instruments.add(new CustomInstrument((byte) 0, "Flute", "flute.ogg"));
 			instruments.add(new CustomInstrument((byte) 0, "Bell", "bell.ogg"));
 			instruments.add(new CustomInstrument((byte) 0, "Chime", "icechime.ogg"));
 			instruments.add(new CustomInstrument((byte) 0, "Xylophone", "xylobone.ogg"));
+			return instruments;
 		}
 
-		if (serverVersion < 0.0114f){
+		if (serverVersion == 0.0114f){
 			instruments.add(new CustomInstrument((byte) 0, "Iron Xylophone", "iron_xylophone.ogg"));
 			instruments.add(new CustomInstrument((byte) 0, "Cow Bell", "cow_bell.ogg"));
 			instruments.add(new CustomInstrument((byte) 0, "Didgeridoo", "didgeridoo.ogg"));
 			instruments.add(new CustomInstrument((byte) 0, "Bit", "bit.ogg"));
 			instruments.add(new CustomInstrument((byte) 0, "Banjo", "banjo.ogg"));
 			instruments.add(new CustomInstrument((byte) 0, "Pling", "pling.ogg"));
+			return instruments;
 		}
 		return instruments;
 	}
 
+	/**
+	 * Return list of custom instruments based on song first custom instrument index and server version
+	 * @param firstCustomInstrumentIndex
+	 * @return
+	 */
 	public static ArrayList<CustomInstrument> getVersionCustomInstrumentsForSong(int firstCustomInstrumentIndex){
 		ArrayList<CustomInstrument> instruments = new ArrayList<>();
 
-		if (getServerVersion() < 0.0112f && firstCustomInstrumentIndex < 10){
-			instruments.addAll(getVersionCustomInstruments(0.0111f));
-		} else if (getServerVersion() < 0.0114f && firstCustomInstrumentIndex < 16){
-			instruments.addAll(getVersionCustomInstruments(0.0113f));
+		if (getServerVersion() < 0.0112f){
+			if (firstCustomInstrumentIndex == 10) {
+				instruments.addAll(getVersionCustomInstruments(0.0112f));
+			} else if (firstCustomInstrumentIndex == 16){
+				instruments.addAll(getVersionCustomInstruments(0.0112f));
+				instruments.addAll(getVersionCustomInstruments(0.0114f));
+			}
+		} else if (getServerVersion() < 0.0114f){
+			if (firstCustomInstrumentIndex == 16){
+				instruments.addAll(getVersionCustomInstruments(0.0114f));
+			}
 		}
 
 		return instruments;
-	}*/
+	}
 
-
+	/**
+	 * Returns server version as float less than 1 with two digits for each version part
+	 * @return e.g. 0.011401f for 1.14.1
+	 */
 	public static float getServerVersion(){
 		if (serverVersion != -1){
 			return serverVersion;

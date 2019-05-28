@@ -131,6 +131,8 @@ public abstract class SongPlayer {
 		fadeOut = new Fade(FadeType.NONE, 60);
 		fadeOut.setFadeStart(volume);
 		fadeOut.setFadeTarget((byte) 0);
+
+		plugin = NoteBlockAPI.getAPI();
 	}
 
 	void update(String key, Object value){

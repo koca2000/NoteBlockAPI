@@ -63,14 +63,14 @@ public class NBSDecoder {
 		try {
 			DataInputStream dataInputStream = new DataInputStream(inputStream);
 			short length = readShort(dataInputStream);
-			int firstcustominstrument = InstrumentUtils.getCustomInstrumentFirstIndex();
-			int firstcustominstrumentdiff = 0;
+			int firstcustominstrument = 10; //Backward compatibility - most of songs with old structure are from 1.12
+			int firstcustominstrumentdiff;
 			int nbsversion = 0;
 			if (length == 0){
 				nbsversion = dataInputStream.readByte();
 				firstcustominstrument = dataInputStream.readByte();
-				firstcustominstrumentdiff = InstrumentUtils.getCustomInstrumentFirstIndex() - firstcustominstrument;
 			}
+			firstcustominstrumentdiff = InstrumentUtils.getCustomInstrumentFirstIndex() - firstcustominstrument;
 			short songHeight = readShort(dataInputStream);
 			String title = readString(dataInputStream);
 			String author = readString(dataInputStream);
@@ -139,9 +139,11 @@ public class NBSDecoder {
 			}
 
 			if (firstcustominstrumentdiff < 0){
-				ArrayList<CustomInstrument> customInstruments = CompatibilityUtils.get1_12Instruments();//CompatibilityUtils.getVersionCustomInstrumentsForSong(firstcustominstrument);
+				ArrayList<CustomInstrument> customInstruments = CompatibilityUtils.getVersionCustomInstrumentsForSong(firstcustominstrument);
 				customInstruments.addAll(Arrays.asList(customInstrumentsArray));
 				customInstrumentsArray = customInstruments.toArray(customInstrumentsArray);
+			} else {
+				firstcustominstrument += firstcustominstrumentdiff;
 			}
 
 			return new Song(speed, layerHashMap, songHeight, length, title, 

@@ -21,7 +21,7 @@ import com.xxmicloxx.NoteBlockAPI.utils.InstrumentUtils;
  */
 @Deprecated
 public class NBSDecoder {
-	
+
 	/**
 	 * Parses a Song from a Note Block Studio project file (.nbs)
 	 * @see Song
@@ -60,6 +60,14 @@ public class NBSDecoder {
 		try {
 			DataInputStream dataInputStream = new DataInputStream(inputStream);
 			short length = readShort(dataInputStream);
+			int firstcustominstrument = 10; //Backward compatibility - most of songs with old structure are from 1.12
+			int firstcustominstrumentdiff;
+			int nbsversion = 0;
+			if (length == 0){
+				nbsversion = dataInputStream.readByte();
+				firstcustominstrument = dataInputStream.readByte();
+			}
+			firstcustominstrumentdiff = InstrumentUtils.getCustomInstrumentFirstIndex() - firstcustominstrument;
 			short songHeight = readShort(dataInputStream);
 			String title = readString(dataInputStream);
 			String author = readString(dataInputStream);
@@ -93,13 +101,19 @@ public class NBSDecoder {
 					layer += jumpLayers;
 					//System.out.println("Layer: " + layer);
 					byte instrument = dataInputStream.readByte();
-					if (instrument > biggestInstrumentIndex) {
-						biggestInstrumentIndex = instrument;
+
+					if (firstcustominstrumentdiff > 0 && instrument >= firstcustominstrument){
+						instrument += firstcustominstrumentdiff;
 					}
-					setNote(layer, tick, instrument /* instrument */, 
+					setNote(layer, tick, instrument /* instrument */,
 							dataInputStream.readByte() /* note */, layerHashMap);
 				}
 			}
+
+			if (nbsversion > 0) {
+				length = tick;
+			}
+
 			for (int i = 0; i < songHeight; i++) {
 				Layer layer = layerHashMap.get(i);
 
@@ -115,18 +129,22 @@ public class NBSDecoder {
 			CustomInstrument[] customInstrumentsArray = new CustomInstrument[customAmnt];
 
 			for (int index = 0; index < customAmnt; index++) {
-				customInstrumentsArray[index] = new CustomInstrument((byte) index, 
+				customInstrumentsArray[index] = new CustomInstrument((byte) index,
 						readString(dataInputStream), readString(dataInputStream));
+				dataInputStream.readByte();//pitch
+				dataInputStream.readByte();//key
 			}
 
-			if (InstrumentUtils.isCustomInstrument((byte) (biggestInstrumentIndex - customAmnt))) {
-				ArrayList<CustomInstrument> customInstruments = CompatibilityUtils.get1_12Instruments();
+			if (firstcustominstrumentdiff < 0){
+				ArrayList<CustomInstrument> customInstruments = CompatibilityUtils.getVersionCustomInstrumentsForSong(firstcustominstrument);
 				customInstruments.addAll(Arrays.asList(customInstrumentsArray));
 				customInstrumentsArray = customInstruments.toArray(customInstrumentsArray);
+			} else {
+				firstcustominstrument += firstcustominstrumentdiff;
 			}
 
-			return new Song(speed, layerHashMap, songHeight, length, title, 
-					author, description, songFile, customInstrumentsArray);
+			return new Song(speed, layerHashMap, songHeight, length, title,
+					author, description, songFile, firstcustominstrument, customInstrumentsArray);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (EOFException e) {
@@ -149,8 +167,8 @@ public class NBSDecoder {
 	 * @param key
 	 * @param layerHashMap
 	 */
-	private static void setNote(int layerIndex, int ticks, byte instrument, 
-			byte key, HashMap<Integer, Layer> layerHashMap) {
+	private static void setNote(int layerIndex, int ticks, byte instrument,
+								byte key, HashMap<Integer, Layer> layerHashMap) {
 		Layer layer = layerHashMap.get(layerIndex);
 		if (layer == null) {
 			layer = new Layer();
@@ -185,4 +203,5 @@ public class NBSDecoder {
 		}
 		return builder.toString();
 	}
+
 }
