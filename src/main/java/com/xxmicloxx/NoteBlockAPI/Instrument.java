@@ -26,42 +26,7 @@ public class Instrument {
 	 * @return Sound enum name (for the current server version)
 	 */
 	public static String getInstrumentName(byte instrument) {
-		switch (instrument) {
-			case 0:
-				return Sound.getFromBukkitName("BLOCK_NOTE_BLOCK_HARP").name();
-			case 1:
-				return Sound.getFromBukkitName("BLOCK_NOTE_BLOCK_BASS").name();
-			case 2:
-				return Sound.getFromBukkitName("BLOCK_NOTE_BLOCK_BASEDRUM").name();
-			case 3:
-				return Sound.getFromBukkitName("BLOCK_NOTE_BLOCK_SNARE").name();
-			case 4:
-				return Sound.getFromBukkitName("BLOCK_NOTE_BLOCK_HAT").name();
-			case 5:
-				return Sound.getFromBukkitName("BLOCK_NOTE_BLOCK_GUITAR").name();
-			case 6:
-				return Sound.getFromBukkitName("BLOCK_NOTE_BLOCK_FLUTE").name();
-			case 7:
-				return Sound.getFromBukkitName("BLOCK_NOTE_BLOCK_BELL").name();
-			case 8:
-				return Sound.getFromBukkitName("BLOCK_NOTE_BLOCK_CHIME").name();
-			case 9:
-				return Sound.getFromBukkitName("BLOCK_NOTE_BLOCK_XYLOPHONE").name();
-			case 10:
-				return Sound.getFromBukkitName("BLOCK_NOTE_BLOCK_IRON_XYLOPHONE").name();
-			case 11:
-				return Sound.getFromBukkitName("BLOCK_NOTE_BLOCK_COW_BELL").name();
-			case 12:
-				return Sound.getFromBukkitName("BLOCK_NOTE_BLOCK_DIDGERIDOO").name();
-			case 13:
-				return Sound.getFromBukkitName("BLOCK_NOTE_BLOCK_BIT").name();
-			case 14:
-				return Sound.getFromBukkitName("BLOCK_NOTE_BLOCK_BANJO").name();
-			case 15:
-				return Sound.getFromBukkitName("BLOCK_NOTE_BLOCK_PLING").name();
-			default:
-				return Sound.getFromBukkitName("BLOCK_NOTE_BLOCK_HARP").name();
-		}
+		return InstrumentUtils.getInstrumentName(instrument);
 }
 
 	/**

@@ -5,7 +5,7 @@
 
 	<groupId>com.xxmicloxx</groupId>
 	<artifactId>NoteBlockAPI</artifactId>
-	<version>1.3-SNAPSHOT</version>
+	<version>1.3</version>
 	<name>NoteBlockAPI</name>
 
 	<properties>
@@ -18,10 +18,6 @@
 		<repository>
 			<id>spigot-repo</id>
 			<url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
-		</repository>
-		<repository>
-			<id>jitpack.io</id>
-			<url>https://jitpack.io</url>
 		</repository>
 		<repository>
 			<id>CodeMC</id>
@@ -43,19 +39,6 @@
 			<scope>compile</scope>
 		</dependency>
 	</dependencies>
-
-	<distributionManagement>
-		<repository>
-			<id>sinndev-repo</id>
-			<name>Releases</name>
-			<url>http://repo.sinndev.com/content/repositories/releases/</url>
-		</repository>
-		<snapshotRepository>
-			<id>sinndev-repo</id>
-			<name>Snapshots</name>
-			<url>http://repo.sinndev.com/content/repositories/snapshots/</url>
-		</snapshotRepository>
-	</distributionManagement>
 
 	<build>
 		<plugins>
