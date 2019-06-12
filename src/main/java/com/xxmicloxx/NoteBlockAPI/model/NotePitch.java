@@ -1,5 +1,6 @@
 package com.xxmicloxx.NoteBlockAPI.model;
 
+import com.xxmicloxx.NoteBlockAPI.utils.CompatibilityUtils;
 import org.bukkit.Bukkit;
 
 /**
@@ -45,7 +46,7 @@ public enum NotePitch {
 	}
 
 	public static float getPitch(int note) {
-		boolean pre1_9 = Bukkit.getVersion().contains("1.8") || Bukkit.getVersion().contains("1.7");
+		boolean pre1_9 = CompatibilityUtils.getServerVersion() < 0.0109f;
 		for (NotePitch notePitch : values()) {
 			if (notePitch.note == note) {
 				return pre1_9 ? notePitch.pitchPre1_9 : notePitch.pitchPost1_9;

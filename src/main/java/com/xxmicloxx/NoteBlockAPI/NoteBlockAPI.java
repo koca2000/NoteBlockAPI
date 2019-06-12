@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
@@ -28,9 +29,8 @@ public class NoteBlockAPI extends JavaPlugin {
 
 	private static NoteBlockAPI plugin;
 	
-	private Map<UUID, ArrayList<SongPlayer>> playingSongs = 
-			Collections.synchronizedMap(new HashMap<UUID, ArrayList<SongPlayer>>());
-	private Map<UUID, Byte> playerVolume = Collections.synchronizedMap(new HashMap<UUID, Byte>());
+	private Map<UUID, ArrayList<SongPlayer>> playingSongs = new ConcurrentHashMap<UUID, ArrayList<SongPlayer>>();
+	private Map<UUID, Byte> playerVolume = new ConcurrentHashMap<UUID, Byte>();
 
 	private boolean disabling = false;
 	
@@ -42,8 +42,8 @@ public class NoteBlockAPI extends JavaPlugin {
 	 * @return is receiving a song
 	 */
 	public static boolean isReceivingSong(Player player) {
-		return ((plugin.playingSongs.get(player.getUniqueId()) != null) 
-				&& (!plugin.playingSongs.get(player.getUniqueId()).isEmpty()));
+		ArrayList<SongPlayer> songs = plugin.playingSongs.get(player.getUniqueId());
+		return (songs != null && !songs.isEmpty());
 	}
 
 	/**
@@ -51,10 +51,11 @@ public class NoteBlockAPI extends JavaPlugin {
 	 * @param player
 	 */
 	public static void stopPlaying(Player player) {
-		if (plugin.playingSongs.get(player.getUniqueId()) == null) {
+		ArrayList<SongPlayer> songs = plugin.playingSongs.get(player.getUniqueId());
+		if (songs == null) {
 			return;
 		}
-		for (SongPlayer songPlayer : plugin.playingSongs.get(player.getUniqueId())) {
+		for (SongPlayer songPlayer : songs) {
 			songPlayer.removePlayer(player);
 		}
 	}
@@ -74,10 +75,11 @@ public class NoteBlockAPI extends JavaPlugin {
 	 * @return volume (byte)
 	 */
 	public static byte getPlayerVolume(Player player) {
-		Byte byteObj = plugin.playerVolume.get(player.getUniqueId());
+		UUID uuid = player.getUniqueId();
+		Byte byteObj = plugin.playerVolume.get(uuid);
 		if (byteObj == null) {
 			byteObj = 100;
-			plugin.playerVolume.put(player.getUniqueId(), byteObj);
+			plugin.playerVolume.put(uuid, byteObj);
 		}
 		return byteObj;
 	}

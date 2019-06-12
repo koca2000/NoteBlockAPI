@@ -5,7 +5,7 @@
 
 	<groupId>com.xxmicloxx</groupId>
 	<artifactId>NoteBlockAPI</artifactId>
-	<version>1.4-SNAPSHOT</version>
+	<version>1.4</version>
 	<name>NoteBlockAPI</name>
 
 	<properties>

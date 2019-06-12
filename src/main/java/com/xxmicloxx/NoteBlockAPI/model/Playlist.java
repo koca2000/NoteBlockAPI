@@ -12,7 +12,7 @@ public class Playlist {
 		if (songs.length == 0){
 			throw new IllegalArgumentException("Cannot create empty playlist");
 		}
-		checkNull(songs);		
+		checkNull(songs);
 		this.songs.addAll(Arrays.asList(songs));
 	}
 	

@@ -4,6 +4,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -31,7 +32,7 @@ public abstract class SongPlayer {
 
 	protected boolean playing = false;
 	protected short tick = -1;
-	protected Map<UUID, Boolean> playerList = Collections.synchronizedMap(new HashMap<UUID, Boolean>());
+	protected Map<UUID, Boolean> playerList = new ConcurrentHashMap<UUID, Boolean>();
 
 	protected boolean autoDestroy = false;
 	protected boolean destroyed = false;
@@ -42,7 +43,7 @@ public abstract class SongPlayer {
 	protected RepeatMode repeat = RepeatMode.NO;
 	protected boolean random = false;
 
-	protected Map<Song, Boolean> songQueue = Collections.synchronizedMap(new HashMap<Song, Boolean>()); //True if already played
+	protected Map<Song, Boolean> songQueue = new ConcurrentHashMap<Song, Boolean>(); //True if already played
 
 	private final Lock lock = new ReentrantLock();
 	private Random rng = new Random();

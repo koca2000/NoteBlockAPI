@@ -148,7 +148,4 @@ public class NoteBlockSongPlayer extends RangeSongPlayer {
 			return true;
 		}
 	}
-
-	
-
 }
