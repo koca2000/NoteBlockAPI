@@ -134,11 +134,11 @@ public class InstrumentUtils {
 	 * @return index where an instrument can be added
 	 */
 	public static byte getCustomInstrumentFirstIndex() {
-		if (CompatibilityUtils.getServerVersion() >= 0.0112f) {
-			return 10;
-		}
 		if (CompatibilityUtils.getServerVersion() >= 0.0114f) {
 			return 16;
+		}
+		if (CompatibilityUtils.getServerVersion() >= 0.0112f) {
+			return 10;
 		}
 		return 5;
 	}
