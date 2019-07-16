@@ -119,6 +119,9 @@ public class NBSDecoder {
 
 				String name = readString(dataInputStream);
 				byte volume = dataInputStream.readByte();
+				if (nbsversion >= 2){
+					dataInputStream.readByte();
+				}
 				if (layer != null) {
 					layer.setName(name);
 					layer.setVolume(volume);
