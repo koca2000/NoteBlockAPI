@@ -1,15 +1,8 @@
 package com.xxmicloxx.NoteBlockAPI;
 
-import java.io.IOException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-
+import com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer;
+import com.xxmicloxx.NoteBlockAPI.utils.MathUtils;
+import com.xxmicloxx.NoteBlockAPI.utils.Updater;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -18,9 +11,14 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredListener;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer;
-import com.xxmicloxx.NoteBlockAPI.utils.MathUtils;
-import com.xxmicloxx.NoteBlockAPI.utils.Updater;
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Main class; contains methods for playing and adjusting songs for players
@@ -42,7 +40,16 @@ public class NoteBlockAPI extends JavaPlugin {
 	 * @return is receiving a song
 	 */
 	public static boolean isReceivingSong(Player player) {
-		ArrayList<SongPlayer> songs = plugin.playingSongs.get(player.getUniqueId());
+		return isReceivingSong(player.getUniqueId());
+	}
+
+	/**
+	 * Returns true if a Player with specified UUID is currently receiving a song
+	 * @param uuid
+	 * @return is receiving a song
+	 */
+	public static boolean isReceivingSong(UUID uuid) {
+		ArrayList<SongPlayer> songs = plugin.playingSongs.get(uuid);
 		return (songs != null && !songs.isEmpty());
 	}
 
@@ -51,12 +58,20 @@ public class NoteBlockAPI extends JavaPlugin {
 	 * @param player
 	 */
 	public static void stopPlaying(Player player) {
-		ArrayList<SongPlayer> songs = plugin.playingSongs.get(player.getUniqueId());
+		stopPlaying(player.getUniqueId());
+	}
+
+	/**
+	 * Stops the song for a Player
+	 * @param uuid
+	 */
+	public static void stopPlaying(UUID uuid) {
+		ArrayList<SongPlayer> songs = plugin.playingSongs.get(uuid);
 		if (songs == null) {
 			return;
 		}
 		for (SongPlayer songPlayer : songs) {
-			songPlayer.removePlayer(player);
+			songPlayer.removePlayer(uuid);
 		}
 	}
 
@@ -66,7 +81,16 @@ public class NoteBlockAPI extends JavaPlugin {
 	 * @param volume
 	 */
 	public static void setPlayerVolume(Player player, byte volume) {
-		plugin.playerVolume.put(player.getUniqueId(), volume);
+		setPlayerVolume(player.getUniqueId(), volume);
+	}
+
+	/**
+	 * Sets the volume for a given Player
+	 * @param uuid
+	 * @param volume
+	 */
+	public static void setPlayerVolume(UUID uuid, byte volume) {
+		plugin.playerVolume.put(uuid, volume);
 	}
 
 	/**
@@ -75,7 +99,15 @@ public class NoteBlockAPI extends JavaPlugin {
 	 * @return volume (byte)
 	 */
 	public static byte getPlayerVolume(Player player) {
-		UUID uuid = player.getUniqueId();
+		return getPlayerVolume(player.getUniqueId());
+	}
+
+	/**
+	 * Gets the volume for a given Player
+	 * @param uuid
+	 * @return volume (byte)
+	 */
+	public static byte getPlayerVolume(UUID uuid) {
 		Byte byteObj = plugin.playerVolume.get(uuid);
 		if (byteObj == null) {
 			byteObj = 100;
