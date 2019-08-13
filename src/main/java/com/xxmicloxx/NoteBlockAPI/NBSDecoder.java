@@ -63,9 +63,12 @@ public class NBSDecoder {
 			int firstcustominstrument = 10; //Backward compatibility - most of songs with old structure are from 1.12
 			int firstcustominstrumentdiff;
 			int nbsversion = 0;
-			if (length == 0){
+			if (length == 0) {
 				nbsversion = dataInputStream.readByte();
 				firstcustominstrument = dataInputStream.readByte();
+				if (nbsversion >= 3) {
+					length = readShort(dataInputStream);
+				}
 			}
 			firstcustominstrumentdiff = InstrumentUtils.getCustomInstrumentFirstIndex() - firstcustominstrument;
 			short songHeight = readShort(dataInputStream);
@@ -110,7 +113,7 @@ public class NBSDecoder {
 				}
 			}
 
-			if (nbsversion > 0) {
+			if (nbsversion > 0 && nbsversion < 3) {
 				length = tick;
 			}
 
