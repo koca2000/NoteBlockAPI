@@ -725,6 +725,18 @@ public abstract class SongPlayer {
 	}
 
 	/**
+	 * Start playing {@link Song} that is next in {@link Playlist} or random {@link Song} from {@link Playlist}
+	 */
+	public void playNextSong(){
+		lock.lock();
+		try {
+			tick = song.getLength();
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	/**
 	 * Gets the SoundCategory of this SongPlayer
 	 * @see SoundCategory
 	 * @return SoundCategory of this SongPlayer
