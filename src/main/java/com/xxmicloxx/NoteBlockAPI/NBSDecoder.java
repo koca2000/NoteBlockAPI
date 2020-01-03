@@ -74,7 +74,7 @@ public class NBSDecoder {
 			short songHeight = readShort(dataInputStream);
 			String title = readString(dataInputStream);
 			String author = readString(dataInputStream);
-			readString(dataInputStream);
+			readString(dataInputStream); // original author
 			String description = readString(dataInputStream);
 			float speed = readShort(dataInputStream) / 100f;
 			dataInputStream.readBoolean(); // auto-save
@@ -86,6 +86,11 @@ public class NBSDecoder {
 			readInt(dataInputStream); // blocks added
 			readInt(dataInputStream); // blocks removed
 			readString(dataInputStream); // .mid/.schematic file name
+			if (nbsversion >= 4) {
+				dataInputStream.readByte(); // loop on/off
+				dataInputStream.readByte(); // max loop count
+				readShort(dataInputStream); // loop start tick
+			}
 			short tick = -1;
 			while (true) {
 				short jumpTicks = readShort(dataInputStream); // jumps till next tick
@@ -108,8 +113,17 @@ public class NBSDecoder {
 					if (firstcustominstrumentdiff > 0 && instrument >= firstcustominstrument){
 						instrument += firstcustominstrumentdiff;
 					}
+
+					byte key = dataInputStream.readByte();
+
+					if (nbsversion >= 4) {
+						dataInputStream.readByte(); // note block velocity
+						dataInputStream.readByte(); // note block panning
+						readShort(dataInputStream); // note block pitch
+					}
+
 					setNote(layer, tick, instrument /* instrument */,
-							dataInputStream.readByte() /* note */, layerHashMap);
+							key/* note */, layerHashMap);
 				}
 			}
 
@@ -121,9 +135,13 @@ public class NBSDecoder {
 				Layer layer = layerHashMap.get(i);
 
 				String name = readString(dataInputStream);
+				if (nbsversion >= 4){
+					dataInputStream.readByte(); // layer lock
+				}
+
 				byte volume = dataInputStream.readByte();
 				if (nbsversion >= 2){
-					dataInputStream.readByte();
+					dataInputStream.readByte(); // layer stereo
 				}
 				if (layer != null) {
 					layer.setName(name);
