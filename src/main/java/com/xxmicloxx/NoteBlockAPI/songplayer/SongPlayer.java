@@ -805,6 +805,9 @@ public abstract class SongPlayer {
 	}
 
 	void CallUpdate(String key, Object value){
+		if (oldSongPlayer == null){
+			return;
+		}
 		try {
 			Method m = com.xxmicloxx.NoteBlockAPI.SongPlayer.class.getDeclaredMethod("update", String.class, Object.class);
 			m.setAccessible(true);
