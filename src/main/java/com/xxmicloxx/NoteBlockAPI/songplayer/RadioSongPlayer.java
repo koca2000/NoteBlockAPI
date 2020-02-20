@@ -1,5 +1,6 @@
 package com.xxmicloxx.NoteBlockAPI.songplayer;
 
+import com.xxmicloxx.NoteBlockAPI.utils.NoteUtils;
 import org.bukkit.entity.Player;
 
 import com.xxmicloxx.NoteBlockAPI.NoteBlockAPI;
@@ -56,7 +57,7 @@ public class RadioSongPlayer extends SongPlayer {
 			}
 
 			float volume = (layer.getVolume() * (int) this.volume * (int) playerVolume) / 1000000F;
-			float pitch = NotePitch.getPitch(note.getKey() - 33);
+			float pitch = NoteUtils.getPitch(note);
 
 			if (InstrumentUtils.isCustomInstrument(note.getInstrument())) {
 				CustomInstrument instrument = song.getCustomInstruments()

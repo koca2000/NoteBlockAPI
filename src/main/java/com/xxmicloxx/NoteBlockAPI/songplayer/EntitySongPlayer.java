@@ -5,6 +5,7 @@ import com.xxmicloxx.NoteBlockAPI.event.PlayerRangeStateChangeEvent;
 import com.xxmicloxx.NoteBlockAPI.model.*;
 import com.xxmicloxx.NoteBlockAPI.utils.CompatibilityUtils;
 import com.xxmicloxx.NoteBlockAPI.utils.InstrumentUtils;
+import com.xxmicloxx.NoteBlockAPI.utils.NoteUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -76,7 +77,7 @@ public class EntitySongPlayer extends RangeSongPlayer {
 
             float volume = ((layer.getVolume() * (int) this.volume * (int) playerVolume) / 1000000F)
                     * ((1F / 16F) * getDistance());
-            float pitch = NotePitch.getPitch(note.getKey() - 33);
+            float pitch = NoteUtils.getPitch(note);
 
             if (InstrumentUtils.isCustomInstrument(note.getInstrument())) {
                 CustomInstrument instrument = song.getCustomInstruments()

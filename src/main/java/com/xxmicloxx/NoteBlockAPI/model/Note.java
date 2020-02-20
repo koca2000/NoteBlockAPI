@@ -9,10 +9,13 @@ public class Note {
 
 	private byte instrument;
 	private byte key;
+
+	private short pitch;
 	
-	public Note(byte instrument, byte key) {
+	public Note(byte instrument, byte key, byte velocity, byte panning, short pitch) {
 		this.instrument = instrument;
 		this.key = key;
+		this.pitch = pitch;
 	}
 
 	/**
@@ -35,5 +38,13 @@ public class Note {
 
 	public void setKey(byte key) {
 		this.key = key;
+	}
+
+	public short getPitch() {
+		return pitch;
+	}
+
+	public void setPitch(short pitch) {
+		this.pitch = pitch;
 	}
 }
