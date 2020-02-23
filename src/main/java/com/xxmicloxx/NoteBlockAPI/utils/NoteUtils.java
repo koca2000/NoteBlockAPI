@@ -7,9 +7,9 @@ public class NoteUtils {
     private static float[] pitches = null;
 
     public static void generatePitchValues(){
-        pitches = new float[2400];
+        pitches = new float[2401];
 
-        for (int i = 0; i < 2400; i++){
+        for (int i = 0; i < 2401; i++){
             pitches[i] = (float) Math.pow(2, (i - 1200d) / 1200d);
         }
     }

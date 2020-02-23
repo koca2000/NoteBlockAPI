@@ -11,7 +11,11 @@ public class Note {
 	private byte key;
 
 	private short pitch;
-	
+
+	public Note(byte instrument, byte key) {
+		this(instrument, key, (byte) 100, (byte) 100, (short) 0);
+	}
+
 	public Note(byte instrument, byte key, byte velocity, byte panning, short pitch) {
 		this.instrument = instrument;
 		this.key = key;
