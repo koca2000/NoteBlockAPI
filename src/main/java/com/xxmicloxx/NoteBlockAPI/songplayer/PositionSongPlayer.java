@@ -89,7 +89,7 @@ public class PositionSongPlayer extends RangeSongPlayer {
 			Note note = layer.getNote(tick);
 			if (note == null) continue;
 
-			float volume = ((layer.getVolume() * (int) this.volume * (int) playerVolume) / 1000000F) 
+			float volume = ((layer.getVolume() * (int) this.volume * (int) playerVolume * note.getVelocity()) / 100_00_00_00F)
 					* ((1F / 16F) * getDistance());
 			float pitch = NoteUtils.getPitch(note);
 

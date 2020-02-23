@@ -100,7 +100,7 @@ public class NoteBlockSongPlayer extends RangeSongPlayer {
 			player.playNote(loc, InstrumentUtils.getBukkitInstrument(note.getInstrument()),
 					new org.bukkit.Note(note.getKey() - 33));
 
-			float volume = ((layer.getVolume() * (int) this.volume * (int) playerVolume) / 1000000F) 
+			float volume = ((layer.getVolume() * (int) this.volume * (int) playerVolume * note.getVelocity()) / 100_00_00_00F)
 					* ((1F / 16F) * getDistance());
 			float pitch = NoteUtils.getPitch(note);
 

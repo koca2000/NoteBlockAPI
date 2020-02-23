@@ -56,7 +56,7 @@ public class RadioSongPlayer extends SongPlayer {
 				continue;
 			}
 
-			float volume = (layer.getVolume() * (int) this.volume * (int) playerVolume) / 1000000F;
+			float volume = (layer.getVolume() * (int) this.volume * (int) playerVolume * note.getVelocity()) / 100_00_00_00F;
 			float pitch = NoteUtils.getPitch(note);
 
 			if (InstrumentUtils.isCustomInstrument(note.getInstrument())) {

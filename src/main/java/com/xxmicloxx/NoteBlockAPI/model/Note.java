@@ -9,7 +9,7 @@ public class Note {
 
 	private byte instrument;
 	private byte key;
-
+	private byte velocity;
 	private short pitch;
 
 	public Note(byte instrument, byte key) {
@@ -19,6 +19,7 @@ public class Note {
 	public Note(byte instrument, byte key, byte velocity, byte panning, short pitch) {
 		this.instrument = instrument;
 		this.key = key;
+		this.velocity = velocity;
 		this.pitch = pitch;
 	}
 
@@ -36,19 +37,58 @@ public class Note {
 		this.instrument = instrument;
 	}
 
+	/**
+	 * Returns note key number (Minecraft key 0 corresponds to key 33)
+	 * @return
+	 */
 	public byte getKey() {
 		return key;
 	}
 
+	/**
+	 * Sets note key number (Minecraft key 0 corresponds to key 33)
+	 * @param key
+	 */
 	public void setKey(byte key) {
 		this.key = key;
 	}
 
+	/**
+	 * Returns note pitch.
+	 * 100 = 1 key
+	 * 1200 = 1 octave
+ 	 * @return
+	 */
 	public short getPitch() {
 		return pitch;
 	}
 
+	/**
+	 * Sets note pitch.
+	 * 100 = 1 key
+	 * 1200 = 1 octave
+	 * @param pitch note pitch
+	 */
 	public void setPitch(short pitch) {
 		this.pitch = pitch;
+	}
+
+	/**
+	 * Returns note velocity (volume)
+	 * @return
+	 */
+	public byte getVelocity() {
+		return velocity;
+	}
+
+	/**
+	 * Sets note velocity (volume)
+	 * @param velocity number from 0 - 100
+	 */
+	public void setVelocity(byte velocity) {
+		if (velocity < 0) velocity = 0;
+		if (velocity > 100) velocity = 100;
+
+		this.velocity = velocity;
 	}
 }
