@@ -1,5 +1,6 @@
 package com.xxmicloxx.NoteBlockAPI.songplayer;
 
+import com.xxmicloxx.NoteBlockAPI.utils.NoteUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -99,25 +100,11 @@ public class NoteBlockSongPlayer extends RangeSongPlayer {
 			player.playNote(loc, InstrumentUtils.getBukkitInstrument(note.getInstrument()),
 					new org.bukkit.Note(note.getKey() - 33));
 
-			float volume = ((layer.getVolume() * (int) this.volume * (int) playerVolume) / 1000000F) 
+			float volume = ((layer.getVolume() * (int) this.volume * (int) playerVolume * note.getVelocity()) / 100_00_00_00F)
 					* ((1F / 16F) * getDistance());
-			float pitch = NotePitch.getPitch(note.getKey() - 33);
+			float pitch = NoteUtils.getPitch(note);
 
-			if (InstrumentUtils.isCustomInstrument(note.getInstrument())) {
-				CustomInstrument instrument = song.getCustomInstruments()
-						[note.getInstrument() - InstrumentUtils.getCustomInstrumentFirstIndex()];
-
-				if (instrument.getSound() != null) {
-					CompatibilityUtils.playSound(player, loc, 
-							instrument.getSound(), this.soundCategory, volume, pitch, false);
-				} else {
-					CompatibilityUtils.playSound(player, loc, 
-							instrument.getSoundFileName(), this.soundCategory, volume, pitch, false);
-				}
-			} else {
-				CompatibilityUtils.playSound(player, loc,
-						InstrumentUtils.getInstrument(note.getInstrument()), this.soundCategory, volume, pitch, false);
-			}
+            channelMode.play(player, loc, song, layer, note, soundCategory, volume, pitch);
 
 			if (isInRange(player)) {
 				if (!this.playerList.get(player.getUniqueId())) {

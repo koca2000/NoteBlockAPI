@@ -118,15 +118,18 @@ public class NBSDecoder {
 					}
 
 					byte key = dataInputStream.readByte();
-
+					byte velocity = 100;
+					int panning = 100;
+					short pitch = 0;
 					if (nbsversion >= 4) {
-						dataInputStream.readByte(); // note block velocity
-						dataInputStream.readByte(); // note block panning
-						readShort(dataInputStream); // note block pitch
+						velocity = dataInputStream.readByte(); // note block velocity
+						panning = 200 - dataInputStream.readUnsignedByte(); // note panning, 0 is right in nbs format
+						pitch = readShort(dataInputStream); // note block pitch
 					}
 
-					setNote(layer, tick, instrument /* instrument */, 
-							 key/* note */, layerHashMap);
+					setNote(layer, tick,
+							new Note(instrument /* instrument */, key/* note */, velocity, panning, pitch),
+							layerHashMap);
 				}
 			}
 
@@ -143,12 +146,14 @@ public class NBSDecoder {
 				}
 
 				byte volume = dataInputStream.readByte();
+				int panning = 100;
 				if (nbsversion >= 2){
-					dataInputStream.readByte(); // layer stereo
+					panning = 200 - dataInputStream.readUnsignedByte(); // layer stereo, 0 is right in nbs format
 				}
 				if (layer != null) {
 					layer.setName(name);
 					layer.setVolume(volume);
+					layer.setPanning(panning);
 				}
 			}
 			//count of custom instruments
@@ -190,18 +195,16 @@ public class NBSDecoder {
 	 * Sets a note at a tick in a song
 	 * @param layerIndex
 	 * @param ticks
-	 * @param instrument
-	 * @param key
+	 * @param note
 	 * @param layerHashMap
 	 */
-	private static void setNote(int layerIndex, int ticks, byte instrument, 
-			byte key, HashMap<Integer, Layer> layerHashMap) {
+	private static void setNote(int layerIndex, int ticks, Note note, HashMap<Integer, Layer> layerHashMap) {
 		Layer layer = layerHashMap.get(layerIndex);
 		if (layer == null) {
 			layer = new Layer();
 			layerHashMap.put(layerIndex, layer);
 		}
-		layer.setNote(ticks, new Note(instrument, key));
+		layer.setNote(ticks, note);
 	}
 
 	private static short readShort(DataInputStream dataInputStream) throws IOException {

@@ -1,5 +1,6 @@
 package com.xxmicloxx.NoteBlockAPI.songplayer;
 
+import com.xxmicloxx.NoteBlockAPI.utils.NoteUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -88,26 +89,11 @@ public class PositionSongPlayer extends RangeSongPlayer {
 			Note note = layer.getNote(tick);
 			if (note == null) continue;
 
-			float volume = ((layer.getVolume() * (int) this.volume * (int) playerVolume) / 1000000F) 
+			float volume = ((layer.getVolume() * (int) this.volume * (int) playerVolume * note.getVelocity()) / 100_00_00_00F)
 					* ((1F / 16F) * getDistance());
-			float pitch = NotePitch.getPitch(note.getKey() - 33);
+			float pitch = NoteUtils.getPitch(note);
 
-			if (InstrumentUtils.isCustomInstrument(note.getInstrument())) {
-				CustomInstrument instrument = song.getCustomInstruments()
-						[note.getInstrument() - InstrumentUtils.getCustomInstrumentFirstIndex()];
-
-				if (instrument.getSound() != null) {
-					CompatibilityUtils.playSound(player, targetLocation, instrument.getSound(),
-							this.soundCategory, volume, pitch, false);
-				} else {
-					CompatibilityUtils.playSound(player, targetLocation, instrument.getSoundFileName(),
-							this.soundCategory, volume, pitch, false);
-				}
-			} else {
-				CompatibilityUtils.playSound(player, targetLocation,
-						InstrumentUtils.getInstrument(note.getInstrument()), this.soundCategory, 
-						volume, pitch, false);
-			}
+			channelMode.play(player, targetLocation, song, layer, note, soundCategory, volume, pitch);
 
 			if (isInRange(player)) {
 				if (!this.playerList.get(player.getUniqueId())) {
@@ -132,7 +118,4 @@ public class PositionSongPlayer extends RangeSongPlayer {
 	public boolean isInRange(Player player) {
 		return player.getLocation().distance(targetLocation) <= getDistance();
 	}
-
-	
-
 }

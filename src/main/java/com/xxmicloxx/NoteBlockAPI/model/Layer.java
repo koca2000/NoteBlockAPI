@@ -11,6 +11,7 @@ public class Layer {
 
 	private HashMap<Integer, Note> notesAtTicks = new HashMap<Integer, Note>();
 	private byte volume = 100;
+	private int panning = 100;
 	private String name = "";
 
 	/**
@@ -72,4 +73,19 @@ public class Layer {
 		this.volume = volume;
 	}
 
+	/**
+	 * Gets the panning of all notes in the Layer
+	 * @return byte representing the panning
+	 */
+	public int getPanning() {
+		return panning;
+	}
+
+	/**
+	 * Sets the panning for all notes in the Layer
+	 * @param panning
+	 */
+	public void setPanning(int panning) {
+		this.panning = panning;
+	}
 }
