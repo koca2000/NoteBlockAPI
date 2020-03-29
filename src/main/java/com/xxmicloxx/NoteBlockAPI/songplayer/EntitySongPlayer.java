@@ -79,22 +79,7 @@ public class EntitySongPlayer extends RangeSongPlayer {
                     * ((1F / 16F) * getDistance());
             float pitch = NoteUtils.getPitch(note);
 
-            if (InstrumentUtils.isCustomInstrument(note.getInstrument())) {
-                CustomInstrument instrument = song.getCustomInstruments()
-                        [note.getInstrument() - InstrumentUtils.getCustomInstrumentFirstIndex()];
-
-                if (instrument.getSound() != null) {
-                    CompatibilityUtils.playSound(player, entity.getLocation(), instrument.getSound(),
-                            this.soundCategory, volume, pitch, false);
-                } else {
-                    CompatibilityUtils.playSound(player, entity.getLocation(), instrument.getSoundFileName(),
-                            this.soundCategory, volume, pitch, false);
-                }
-            } else {
-                CompatibilityUtils.playSound(player, entity.getLocation(),
-                        InstrumentUtils.getInstrument(note.getInstrument()), this.soundCategory,
-                        volume, pitch, false);
-            }
+            channelMode.play(player, entity.getLocation(), song, layer, note, soundCategory, volume, pitch);
 
             if (isInRange(player)) {
                 if (!this.playerList.get(player.getUniqueId())) {

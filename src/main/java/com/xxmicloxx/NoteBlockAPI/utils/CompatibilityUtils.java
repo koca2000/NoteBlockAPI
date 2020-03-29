@@ -3,7 +3,9 @@ package com.xxmicloxx.NoteBlockAPI.utils;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -20,6 +22,8 @@ public class CompatibilityUtils {
 	public static final String OBC_DIR = Bukkit.getServer().getClass().getPackage().getName();
 	public static final String NMS_DIR = OBC_DIR.replaceFirst("org.bukkit.craftbukkit", "net.minecraft.server");
 
+	private static Class<? extends Enum> soundCategoryClass;
+	private static HashMap<String, Method> playSoundMethod = new HashMap<>();
 
 	private static float serverVersion = -1;
 
@@ -51,6 +55,27 @@ public class CompatibilityUtils {
 		}
 	}
 
+	private static Class<? extends Enum> getSoundCategoryClass() throws ClassNotFoundException {
+		if (isSoundCategoryCompatible() && soundCategoryClass == null){
+			soundCategoryClass = (Class<? extends Enum>) Class.forName("org.bukkit.SoundCategory");
+		}
+		return soundCategoryClass;
+	}
+
+	private static Method getPlaySoundMethod(Class sound, boolean soundcategory) throws ClassNotFoundException, NoSuchMethodException {
+		Method method = playSoundMethod.get(sound.getName() + soundcategory);
+		if (method == null){
+			if (soundcategory) {
+				method = Player.class.getMethod("playSound", Location.class, sound,
+						getSoundCategoryClass(), float.class, float.class);
+			} else {
+				method = Player.class.getMethod("playSound", Location.class, sound, float.class, float.class);
+			}
+			playSoundMethod.put(sound.getName() + soundcategory, method);
+		}
+		return method;
+	}
+
 	/**
 	 * Returns whether the version of Bukkit is or is after 1.12
 	 * @return version is after 1.12
@@ -79,11 +104,11 @@ public class CompatibilityUtils {
 	 * @param volume
 	 * @param pitch
 	 * 
-	 * @deprecated stereo is set to false
+	 * @deprecated use {@link #playSound(Player, Location, String, SoundCategory, float, float, float)}
 	 */
 	public static void playSound(Player player, Location location, String sound, 
 			SoundCategory category, float volume, float pitch) {
-		playSound(player, location, sound, category, volume, pitch, false);
+		playSound(player, location, sound, category, volume, pitch, 0);
 	}
 
 	/**
@@ -94,45 +119,11 @@ public class CompatibilityUtils {
 	 * @param category
 	 * @param volume
 	 * @param pitch
+	 * @deprecated use {@link #playSound(Player, Location, String, SoundCategory, float, float, float)}
 	 */
 	public static void playSound(Player player, Location location, String sound, 
 			SoundCategory category, float volume, float pitch, boolean stereo) {
-		try {
-			if (isSoundCategoryCompatible()) {
-				Method method = Player.class.getMethod("playSound", Location.class, String.class, 
-						Class.forName("org.bukkit.SoundCategory"), float.class, float.class);
-				Class<? extends Enum> soundCategory = 
-						(Class<? extends Enum>) Class.forName("org.bukkit.SoundCategory");
-				Enum<?> soundCategoryEnum = Enum.valueOf(soundCategory, category.name());
-				if (!stereo){
-					method.invoke(player, location, sound, soundCategoryEnum, volume, pitch);
-				} else {
-					method.invoke(player, MathUtils.stereoSourceLeft(location, 2), sound, soundCategoryEnum, volume, pitch);
-					method.invoke(player, MathUtils.stereoSourceRight(location, 2), sound, soundCategoryEnum, volume, pitch);
-				}
-			} else {
-				Method method = Player.class.getMethod("playSound", Location.class, 
-						String.class, float.class, float.class);
-				if (!stereo){
-					method.invoke(player, location, sound, volume, pitch);
-				} else {
-					method.invoke(player, MathUtils.stereoSourceLeft(location, 2), sound, volume, pitch);
-					method.invoke(player, MathUtils.stereoSourceRight(location, 2), sound, volume, pitch);
-				}
-			}
-		} catch (NoSuchMethodException e) {
-			e.printStackTrace();
-		} catch (SecurityException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		}
+		playSound(player, location, sound, category, volume, pitch, stereo ? 2 : 0);
 	}
 
 	/**
@@ -144,11 +135,11 @@ public class CompatibilityUtils {
 	 * @param volume
 	 * @param pitch
 	 * 
-	 * @deprecated stereo is set to false
+	 * @deprecated use {@link #playSound(Player, Location, Sound, SoundCategory, float, float, float)}
 	 */
 	public static void playSound(Player player, Location location, Sound sound, 
 			SoundCategory category, float volume, float pitch) {
-		playSound(player, location, sound, category, volume, pitch, false);
+		playSound(player, location, sound, category, volume, pitch, 0);
 	}
 	
 	/**
@@ -159,43 +150,55 @@ public class CompatibilityUtils {
 	 * @param category
 	 * @param volume
 	 * @param pitch
+	 * @deprecated use {@link #playSound(Player, Location, Sound, SoundCategory, float, float, float)}
 	 */
 	public static void playSound(Player player, Location location, Sound sound, 
 			SoundCategory category, float volume, float pitch, boolean stereo) {
+		playSound(player, location, sound, category, volume, pitch, stereo ? 2 : 0);
+	}
+
+	/**
+	 * Plays a sound using NMS &amp; reflection
+	 * @param player
+	 * @param location
+	 * @param sound
+	 * @param category
+	 * @param volume
+	 * @param pitch
+	 * @param distance
+	 */
+	public static void playSound(Player player, Location location, String sound,
+								 SoundCategory category, float volume, float pitch, float distance) {
+		playSoundUniversal(player, location, sound, category, volume, pitch, distance);
+	}
+
+	/**
+	 * Plays a sound using NMS &amp; reflection
+	 * @param player
+	 * @param location
+	 * @param sound
+	 * @param category
+	 * @param volume
+	 * @param pitch
+	 * @param distance
+	 */
+	public static void playSound(Player player, Location location, Sound sound,
+								 SoundCategory category, float volume, float pitch, float distance) {
+		playSoundUniversal(player, location, sound, category, volume, pitch, distance);
+	}
+
+	private static void playSoundUniversal(Player player, Location location, Object sound,
+								 SoundCategory category, float volume, float pitch, float distance) {
 		try {
 			if (isSoundCategoryCompatible()) {
-				Method method = Player.class.getMethod("playSound", Location.class, Sound.class, 
-						Class.forName("org.bukkit.SoundCategory"), float.class, float.class);
-				Class<? extends Enum> soundCategory = 
-						(Class<? extends Enum>) Class.forName("org.bukkit.SoundCategory");
-				Enum<?> soundCategoryEnum = Enum.valueOf(soundCategory, category.name());
-				if (!stereo){
-					method.invoke(player, location, sound, soundCategoryEnum, volume, pitch);
-				} else {
-					method.invoke(player, MathUtils.stereoSourceLeft(location, 2), sound, soundCategoryEnum, volume, pitch);
-					method.invoke(player, MathUtils.stereoSourceRight(location, 2), sound, soundCategoryEnum, volume, pitch);
-				}
+				Method method = getPlaySoundMethod(sound.getClass(), true);
+				Enum<?> soundCategoryEnum = Enum.valueOf(getSoundCategoryClass(), category.name());
+				method.invoke(player, MathUtils.stereoPan(location, distance), sound, soundCategoryEnum, volume, pitch);
 			} else {
-				Method method = Player.class.getMethod("playSound", Location.class, 
-						Sound.class, float.class, float.class);
-				if (!stereo){
-					method.invoke(player, location, sound, volume, pitch);
-				} else {
-					method.invoke(player, MathUtils.stereoSourceLeft(location, 2), sound, volume, pitch);
-					method.invoke(player, MathUtils.stereoSourceRight(location, 2), sound, volume, pitch);
-				}
+				Method method = getPlaySoundMethod(sound.getClass(), false);
+				method.invoke(player, MathUtils.stereoPan(location, distance), sound, volume, pitch);
 			}
-		} catch (NoSuchMethodException e) {
-			e.printStackTrace();
-		} catch (SecurityException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
+		} catch (NoSuchMethodException | ClassNotFoundException | IllegalAccessException | InvocationTargetException e) {
 			e.printStackTrace();
 		}
 	}

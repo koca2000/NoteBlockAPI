@@ -10,16 +10,18 @@ public class Note {
 	private byte instrument;
 	private byte key;
 	private byte velocity;
+	private int panning;
 	private short pitch;
 
 	public Note(byte instrument, byte key) {
 		this(instrument, key, (byte) 100, (byte) 100, (short) 0);
 	}
 
-	public Note(byte instrument, byte key, byte velocity, byte panning, short pitch) {
+	public Note(byte instrument, byte key, byte velocity, int panning, short pitch) {
 		this.instrument = instrument;
 		this.key = key;
 		this.velocity = velocity;
+		this.panning = panning;
 		this.pitch = pitch;
 	}
 
@@ -90,5 +92,21 @@ public class Note {
 		if (velocity > 100) velocity = 100;
 
 		this.velocity = velocity;
+	}
+
+	/**
+	 * Returns stereo panning of this note
+	 * @return
+	 */
+	public int getPanning() {
+		return panning;
+	}
+
+	/**
+	 * Sets stereo panning of this note
+	 * @param panning
+	 */
+	public void setPanning(int panning) {
+		this.panning = panning;
 	}
 }

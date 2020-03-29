@@ -119,11 +119,11 @@ public class NBSDecoder {
 
 					byte key = dataInputStream.readByte();
 					byte velocity = 100;
-					byte panning = 100;
+					int panning = 100;
 					short pitch = 0;
 					if (nbsversion >= 4) {
 						velocity = dataInputStream.readByte(); // note block velocity
-						panning = dataInputStream.readByte(); // note block panning
+						panning = 200 - dataInputStream.readUnsignedByte(); // note panning, 0 is right in nbs format
 						pitch = readShort(dataInputStream); // note block pitch
 					}
 
@@ -146,12 +146,14 @@ public class NBSDecoder {
 				}
 
 				byte volume = dataInputStream.readByte();
+				int panning = 100;
 				if (nbsversion >= 2){
-					dataInputStream.readByte(); // layer stereo
+					panning = 200 - dataInputStream.readUnsignedByte(); // layer stereo, 0 is right in nbs format
 				}
 				if (layer != null) {
 					layer.setName(name);
 					layer.setVolume(volume);
+					layer.setPanning(panning);
 				}
 			}
 			//count of custom instruments

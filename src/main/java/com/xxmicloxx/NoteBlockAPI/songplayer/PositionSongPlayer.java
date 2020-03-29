@@ -93,22 +93,7 @@ public class PositionSongPlayer extends RangeSongPlayer {
 					* ((1F / 16F) * getDistance());
 			float pitch = NoteUtils.getPitch(note);
 
-			if (InstrumentUtils.isCustomInstrument(note.getInstrument())) {
-				CustomInstrument instrument = song.getCustomInstruments()
-						[note.getInstrument() - InstrumentUtils.getCustomInstrumentFirstIndex()];
-
-				if (instrument.getSound() != null) {
-					CompatibilityUtils.playSound(player, targetLocation, instrument.getSound(),
-							this.soundCategory, volume, pitch, false);
-				} else {
-					CompatibilityUtils.playSound(player, targetLocation, instrument.getSoundFileName(),
-							this.soundCategory, volume, pitch, false);
-				}
-			} else {
-				CompatibilityUtils.playSound(player, targetLocation,
-						InstrumentUtils.getInstrument(note.getInstrument()), this.soundCategory, 
-						volume, pitch, false);
-			}
+			channelMode.play(player, targetLocation, song, layer, note, soundCategory, volume, pitch);
 
 			if (isInRange(player)) {
 				if (!this.playerList.get(player.getUniqueId())) {
@@ -133,7 +118,4 @@ public class PositionSongPlayer extends RangeSongPlayer {
 	public boolean isInRange(Player player) {
 		return player.getLocation().distance(targetLocation) <= getDistance();
 	}
-
-	
-
 }

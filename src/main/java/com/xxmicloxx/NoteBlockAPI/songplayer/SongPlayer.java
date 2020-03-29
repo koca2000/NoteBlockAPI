@@ -9,6 +9,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.xxmicloxx.NoteBlockAPI.model.*;
+import com.xxmicloxx.NoteBlockAPI.model.playmode.ChannelMode;
+import com.xxmicloxx.NoteBlockAPI.model.playmode.MonoMode;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -51,6 +53,7 @@ public abstract class SongPlayer {
 	protected NoteBlockAPI plugin;
 
 	protected SoundCategory soundCategory;
+	protected ChannelMode channelMode = new MonoMode();
 	
 	com.xxmicloxx.NoteBlockAPI.SongPlayer oldSongPlayer;
 
@@ -802,6 +805,10 @@ public abstract class SongPlayer {
 	 */
 	public boolean isRandom(){
 		return random;
+	}
+
+	public ChannelMode getChannelMode(){
+		return channelMode;
 	}
 
 	void CallUpdate(String key, Object value){
