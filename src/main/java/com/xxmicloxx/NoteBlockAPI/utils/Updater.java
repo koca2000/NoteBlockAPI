@@ -21,8 +21,8 @@ public class Updater {
 		URLConnection con = new URL("https://api.spigotmc.org/legacy/update.php?resource=" + resource).openConnection();
 		String newVersionString = new BufferedReader(new InputStreamReader(con.getInputStream())).readLine();
 		int first = newVersionString.indexOf("(");
-		String newVersion = newVersionString.substring(0, first);
-		
+		String newVersion = first == -1 ? newVersionString : newVersionString.substring(0, first);
+
 		Float newVer = getVersionNumber(newVersion);
 
 		return snapshot ? newVer >= version : newVer > version;
