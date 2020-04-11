@@ -62,6 +62,7 @@ public abstract class SongPlayer {
 	SongPlayer(com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer songPlayer){
 		newSongPlayer = songPlayer;
 		song = createSongFromNew(songPlayer.getSong());
+		plugin = NoteBlockPlayerMain.plugin;
 	}
 	
 	private Song createSongFromNew(com.xxmicloxx.NoteBlockAPI.model.Song s){
