@@ -6,6 +6,9 @@ import com.xxmicloxx.NoteBlockAPI.utils.InstrumentUtils;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
+/**
+ * {@link Note} is played inside of {@link Player}'s head.
+ */
 public class MonoMode extends ChannelMode {
 
     @Override

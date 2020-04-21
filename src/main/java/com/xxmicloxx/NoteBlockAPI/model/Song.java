@@ -22,6 +22,7 @@ public class Song implements Cloneable {
 	private float delay;
 	private CustomInstrument[] customInstruments;
 	private int firstCustomInstrumentIndex;
+	private boolean isStereo = false;
 
 	/**
 	 * Create Song instance by copying other Song parameters
@@ -30,11 +31,11 @@ public class Song implements Cloneable {
 	public Song(Song other) {
 		this(other.getSpeed(), other.getLayerHashMap(), other.getSongHeight(), 
 				other.getLength(), other.getTitle(), other.getAuthor(), 
-				other.getDescription(), other.getPath(), other.getFirstCustomInstrumentIndex(), other.getCustomInstruments());
+				other.getDescription(), other.getPath(), other.getFirstCustomInstrumentIndex(), other.getCustomInstruments(), other.isStereo);
 	}
 
 	/**
-	 * @deprecated Use {@link #Song(float, HashMap, short, short, String, String, String, File, int)}
+	 * @deprecated Use {@link #Song(float, HashMap, short, short, String, String, String, File, int, boolean)}
 	 * @param speed
 	 * @param layerHashMap
 	 * @param songHeight
@@ -44,14 +45,15 @@ public class Song implements Cloneable {
 	 * @param description
 	 * @param path
 	 */
+	@Deprecated
 	public Song(float speed, HashMap<Integer, Layer> layerHashMap,
 			short songHeight, final short length, String title, String author,
 			String description, File path) {
-		this(speed, layerHashMap, songHeight, length, title, author, description, path, InstrumentUtils.getCustomInstrumentFirstIndex(), new CustomInstrument[0]);
+		this(speed, layerHashMap, songHeight, length, title, author, description, path, InstrumentUtils.getCustomInstrumentFirstIndex(), new CustomInstrument[0], false);
 	}
 
 	/**
-	 * @deprecated Use {@link #Song(float, HashMap, short, short, String, String, String, File, int, CustomInstrument[])}
+	 * @deprecated Use {@link #Song(float, HashMap, short, short, String, String, String, File, int, CustomInstrument[], boolean)}
 	 * @param speed
 	 * @param layerHashMap
 	 * @param songHeight
@@ -62,21 +64,61 @@ public class Song implements Cloneable {
 	 * @param path
 	 * @param customInstruments
 	 */
+	@Deprecated
 	public Song(float speed, HashMap<Integer, Layer> layerHashMap,
 				short songHeight, final short length, String title, String author,
 				String description, File path, CustomInstrument[] customInstruments) {
-		this(speed, layerHashMap, songHeight, length, title, author, description, path, InstrumentUtils.getCustomInstrumentFirstIndex(), customInstruments);
+		this(speed, layerHashMap, songHeight, length, title, author, description, path, InstrumentUtils.getCustomInstrumentFirstIndex(), customInstruments, false);
 	}
 
+	/**
+	 * @deprecated Use {@link #Song(float, HashMap, short, short, String, String, String, File, int, boolean)}
+	 * @param speed
+	 * @param layerHashMap
+	 * @param songHeight
+	 * @param length
+	 * @param title
+	 * @param author
+	 * @param description
+	 * @param path
+	 * @param firstCustomInstrumentIndex
+	 */
+	@Deprecated
 	public Song(float speed, HashMap<Integer, Layer> layerHashMap,
 				short songHeight, final short length, String title, String author,
 				String description, File path, int firstCustomInstrumentIndex) {
-		this(speed, layerHashMap, songHeight, length, title, author, description, path, firstCustomInstrumentIndex, new CustomInstrument[0]);
+		this(speed, layerHashMap, songHeight, length, title, author, description, path, firstCustomInstrumentIndex, new CustomInstrument[0], false);
+	}
+
+	/**
+	 * @deprecated Use {@link #Song(float, HashMap, short, short, String, String, String, File, int, CustomInstrument[], boolean)}
+	 * @param speed
+	 * @param layerHashMap
+	 * @param songHeight
+	 * @param length
+	 * @param title
+	 * @param author
+	 * @param description
+	 * @param path
+	 * @param firstCustomInstrumentIndex
+	 * @param customInstruments
+	 */
+	@Deprecated
+	public Song(float speed, HashMap<Integer, Layer> layerHashMap,
+				short songHeight, final short length, String title, String author,
+				String description, File path, int firstCustomInstrumentIndex, CustomInstrument[] customInstruments) {
+		this(speed, layerHashMap, songHeight, length, title, author, description, path, firstCustomInstrumentIndex, customInstruments, false);
+	}
+	
+	public Song(float speed, HashMap<Integer, Layer> layerHashMap,
+				short songHeight, final short length, String title, String author,
+				String description, File path, int firstCustomInstrumentIndex, boolean isStereo) {
+		this(speed, layerHashMap, songHeight, length, title, author, description, path, firstCustomInstrumentIndex, new CustomInstrument[0], isStereo);
 	}
 
 	public Song(float speed, HashMap<Integer, Layer> layerHashMap, 
 			short songHeight, final short length, String title, String author, 
-			String description, File path, int firstCustomInstrumentIndex, CustomInstrument[] customInstruments) {
+			String description, File path, int firstCustomInstrumentIndex, CustomInstrument[] customInstruments, boolean isStereo) {
 		this.speed = speed;
 		delay = 20 / speed;
 		this.layerHashMap = layerHashMap;
@@ -88,6 +130,7 @@ public class Song implements Cloneable {
 		this.path = path;
 		this.firstCustomInstrumentIndex = firstCustomInstrumentIndex;
 		this.customInstruments = customInstruments;
+		this.isStereo = isStereo;
 	}
 
 	/**
@@ -178,5 +221,13 @@ public class Song implements Cloneable {
 
 	public int getFirstCustomInstrumentIndex() {
 		return firstCustomInstrumentIndex;
+	}
+
+	/**
+	 * Returns true if song has at least one stereo {@link Note} or {@link Layer} in nbs file
+	 * @return
+	 */
+	public boolean isStereo() {
+		return isStereo;
 	}
 }

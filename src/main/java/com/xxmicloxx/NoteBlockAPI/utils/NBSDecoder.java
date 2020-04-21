@@ -60,6 +60,7 @@ public class NBSDecoder {
 	private static Song parse(InputStream inputStream, File songFile) {
 		HashMap<Integer, Layer> layerHashMap = new HashMap<Integer, Layer>();
 		byte biggestInstrumentIndex = -1;
+		boolean isStereo = false;
 		try {
 			DataInputStream dataInputStream = new DataInputStream(inputStream);
 			short length = readShort(dataInputStream);
@@ -127,6 +128,10 @@ public class NBSDecoder {
 						pitch = readShort(dataInputStream); // note block pitch
 					}
 
+					if (panning != 100){
+					    isStereo = true;
+                    }
+
 					setNote(layer, tick,
 							new Note(instrument /* instrument */, key/* note */, velocity, panning, pitch),
 							layerHashMap);
@@ -150,6 +155,11 @@ public class NBSDecoder {
 				if (nbsversion >= 2){
 					panning = 200 - dataInputStream.readUnsignedByte(); // layer stereo, 0 is right in nbs format
 				}
+
+                if (panning != 100){
+                    isStereo = true;
+                }
+
 				if (layer != null) {
 					layer.setName(name);
 					layer.setVolume(volume);
@@ -176,7 +186,7 @@ public class NBSDecoder {
 			}
 
 			return new Song(speed, layerHashMap, songHeight, length, title, 
-					author, description, songFile, firstcustominstrument, customInstrumentsArray);
+					author, description, songFile, firstcustominstrument, customInstrumentsArray, isStereo);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (EOFException e) {

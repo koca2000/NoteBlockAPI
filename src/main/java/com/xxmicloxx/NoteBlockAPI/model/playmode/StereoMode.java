@@ -6,12 +6,21 @@ import com.xxmicloxx.NoteBlockAPI.utils.InstrumentUtils;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
+/**
+ * Uses panning for individual {@link Note} and {@link Layer} based on data from nbs file.
+ */
 public class StereoMode extends ChannelMode {
 
-    float maxDistance = 2;
+    private float maxDistance = 2;
+    private ChannelMode fallbackChannelMode = null;
 
     @Override
     public void play(Player player, Location location, Song song, Layer layer, Note note, SoundCategory soundCategory, float volume, float pitch) {
+        if (!song.isStereo() && fallbackChannelMode != null){
+            fallbackChannelMode.play(player, location, song, layer, note, soundCategory, volume, pitch);
+            return;
+        }
+
         float distance = 0;
         if (layer.getPanning() == 100){
             distance = (note.getPanning() - 100) * maxDistance;
@@ -31,11 +40,38 @@ public class StereoMode extends ChannelMode {
         }
     }
 
+    /**
+     * Returns scale of panning in blocks. {@link Note} with maximum left panning will be played this distance from {@link Player}'s head on left side.
+     * @return
+     */
     public float getMaxDistance() {
         return maxDistance;
     }
 
+    /**
+     * Sets scale of panning in blocks. {@link Note} with maximum left panning will be played this distance from {@link Player}'s head on left side.
+     * @param maxDistance
+     */
     public void setMaxDistance(float maxDistance) {
         this.maxDistance = maxDistance;
+    }
+
+    /**
+     * Returns fallback {@link ChannelMode} used when song is not stereo.
+     * @return ChannelMode or null when fallback ChannelMode is disabled
+     */
+    public ChannelMode getFallbackChannelMode() {
+        return fallbackChannelMode;
+    }
+
+    /**
+     * Sets fallback {@link ChannelMode} which is used when song is not stereo. Set to null to disable.
+     * @param fallbackChannelMode
+     * @throws IllegalArgumentException if parameter is instance of StereoMode
+     */
+    public void setFallbackChannelMode(ChannelMode fallbackChannelMode) {
+        if (fallbackChannelMode instanceof StereoMode) throw new IllegalArgumentException("Fallback ChannelMode can't be instance of StereoMode!");
+
+        this.fallbackChannelMode = fallbackChannelMode;
     }
 }
