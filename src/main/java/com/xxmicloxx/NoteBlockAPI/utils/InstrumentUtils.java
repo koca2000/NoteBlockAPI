@@ -15,7 +15,7 @@ public class InstrumentUtils {
 	 * @return Sound enum (for the current server version)
 	 */
 	public static org.bukkit.Sound getInstrument(byte instrument) {
-		return org.bukkit.Sound.valueOf(getInstrumentName(instrument));
+		return Sound.getFromBukkitName(getInstrumentName(instrument));
 	}
 
 	/**

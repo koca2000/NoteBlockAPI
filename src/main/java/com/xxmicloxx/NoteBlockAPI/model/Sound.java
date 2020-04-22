@@ -1,5 +1,8 @@
 package com.xxmicloxx.NoteBlockAPI.model;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Version independent Spigot sounds.
  *
@@ -30,6 +33,7 @@ public enum Sound {
 
 	private String[] versionDependentNames;
 	private org.bukkit.Sound cached = null;
+	private static Map<String, org.bukkit.Sound> cachedSoundMap = new HashMap<>();
 
 	Sound(String... versionDependentNames) {
 		this.versionDependentNames = versionDependentNames;
@@ -41,11 +45,10 @@ public enum Sound {
 	 * @return org.bukkit.Sound enum
 	 */
 	public static org.bukkit.Sound getFromBukkitName(String bukkitSoundName) {
-		for (Sound sound : values()) {
-			for (String soundName : sound.versionDependentNames) {
-				if (soundName.equalsIgnoreCase(bukkitSoundName)) return sound.getSound();
-			}
-		}
+		org.bukkit.Sound sound = cachedSoundMap.get(bukkitSoundName.toUpperCase());
+		if (sound != null)
+			return sound;
+
 		return org.bukkit.Sound.valueOf(bukkitSoundName);
 	}
 
@@ -74,4 +77,10 @@ public enum Sound {
 		throw new IllegalArgumentException("Found no valid sound name for " + this.name());
 	}
 
+	static {
+		// Cache sound access.
+		for (Sound sound : values())
+			for (String soundName : sound.versionDependentNames)
+				cachedSoundMap.put(soundName.toUpperCase(), sound.getSound());
+	}
 }
