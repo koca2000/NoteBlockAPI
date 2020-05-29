@@ -38,41 +38,41 @@ public class InstrumentUtils {
 	public static String getSoundNameByInstrument(byte instrument) {
 		switch (instrument) {
 			case 0:
-				return "harp";
+				return "minecraft:block.note_block.harp";
 			case 1:
-				return "bass";
+				return "minecraft:block.note_block.bass";
 			case 2:
 				//noinspection SpellCheckingInspection
-				return "basedrum";
+				return "minecraft:block.note_block.basedrum";
 			case 3:
-				return "snare";
+				return "minecraft:block.note_block.snare";
 			case 4:
-				return "hat";
+				return "minecraft:block.note_block.hat";
 			case 5:
-				return "guitar";
+				return "minecraft:block.note_block.guitar";
 			case 6:
-				return "flute";
+				return "minecraft:block.note_block.flute";
 			case 7:
-				return "bell";
+				return "minecraft:block.note_block.bell";
 			case 8:
-				return "chime";
+				return "minecraft:block.note_block.chime";
 			case 9:
-				return "xylophone";
+				return "minecraft:block.note_block.xylophone";
 			case 10:
-				return "iron_xylophone";
+				return "minecraft:block.note_block.iron_xylophone";
 			case 11:
-				return "cow_bell";
+				return "minecraft:block.note_block.cow_bell";
 			case 12:
-				return "didgeridoo";
+				return "minecraft:block.note_block.didgeridoo";
 			case 13:
-				return "bit";
+				return "minecraft:block.note_block.bit";
 			case 14:
-				return "banjo";
+				return "minecraft:block.note_block.banjo";
 			case 15:
 				//noinspection SpellCheckingInspection
-				return "pling";
+				return "minecraft:block.note_block.pling";
 			default:
-				return "harp";
+				return "minecraft:block.note_block.harp";
 		}
 	}
 
