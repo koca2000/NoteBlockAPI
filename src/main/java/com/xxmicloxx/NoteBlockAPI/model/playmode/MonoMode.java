@@ -16,13 +16,9 @@ public class MonoMode extends ChannelMode {
         if (InstrumentUtils.isCustomInstrument(note.getInstrument())) {
             CustomInstrument instrument = song.getCustomInstruments()[note.getInstrument() - InstrumentUtils.getCustomInstrumentFirstIndex()];
 
-            if (instrument.getSound() != null) {
-                CompatibilityUtils.playSound(player, location, instrument.getSound(), soundCategory, volume, pitch, 0);
-            } else {
-                CompatibilityUtils.playSound(player, location, instrument.getSoundFileName(), soundCategory, volume, pitch, 0);
-            }
+            CompatibilityUtils.playSound(player, location, InstrumentUtils.warpNameOutOfRange(instrument.getSoundFileName(), note.getKey()), soundCategory, volume, pitch, 0);
         } else {
-            CompatibilityUtils.playSound(player, location, InstrumentUtils.getInstrument(note.getInstrument()), soundCategory, volume, pitch, 0);
+            CompatibilityUtils.playSound(player, location, InstrumentUtils.warpNameOutOfRange(note.getInstrument(), note.getKey()), soundCategory, volume, pitch, 0);
         }
     }
 }

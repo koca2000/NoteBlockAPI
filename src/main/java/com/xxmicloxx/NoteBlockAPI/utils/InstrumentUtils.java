@@ -10,19 +10,78 @@ public class InstrumentUtils {
 
 	/**
 	 * Returns the org.bukkit.Sound enum for the current server version
+	 *
 	 * @param instrument
-	 * @see Sound
 	 * @return Sound enum (for the current server version)
+	 * @see Sound
 	 */
 	public static org.bukkit.Sound getInstrument(byte instrument) {
 		return Sound.getFromBukkitName(getInstrumentName(instrument));
 	}
 
+	public static String warpNameOutOfRange(byte instrument, byte key) {
+		return warpNameOutOfRange(getSoundNameByInstrument(instrument), key);
+	}
+
+	public static String warpNameOutOfRange(String name, byte key) {
+		if (key <= 32) name += "_-1";
+		else if (key >= 58) name += "_1";
+		return name;
+	}
+
+	/**
+	 * Returns the name of vanilla instrument
+	 *
+	 * @param instrument
+	 * @return
+	 */
+	public static String getSoundNameByInstrument(byte instrument) {
+		switch (instrument) {
+			case 0:
+				return "harp";
+			case 1:
+				return "bass";
+			case 2:
+				//noinspection SpellCheckingInspection
+				return "basedrum";
+			case 3:
+				return "snare";
+			case 4:
+				return "hat";
+			case 5:
+				return "guitar";
+			case 6:
+				return "flute";
+			case 7:
+				return "bell";
+			case 8:
+				return "chime";
+			case 9:
+				return "xylophone";
+			case 10:
+				return "iron_xylophone";
+			case 11:
+				return "cow_bell";
+			case 12:
+				return "didgeridoo";
+			case 13:
+				return "bit";
+			case 14:
+				return "banjo";
+			case 15:
+				//noinspection SpellCheckingInspection
+				return "pling";
+			default:
+				return "harp";
+		}
+	}
+
 	/**
 	 * Returns the name of the org.bukkit.Sound enum for the current server version
+	 *
 	 * @param instrument
-	 * @see Sound
 	 * @return Sound enum name (for the current server version)
+	 * @see Sound
 	 */
 	public static String getInstrumentName(byte instrument) {
 		switch (instrument) {
