@@ -19,7 +19,12 @@ public class NoteUtils {
     }
 
     public static float getPitch(byte key, short pitch){
+
+        while (key < 33) key += 12;
+        while (key > 57) key -= 12;
+
         pitch += (key - 33) * 100;
+
         if (pitch < 0) pitch = 0;
 
         if (pitch > 2400) pitch = 2400;
