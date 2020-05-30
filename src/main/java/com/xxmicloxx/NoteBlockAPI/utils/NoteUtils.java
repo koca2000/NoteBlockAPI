@@ -29,4 +29,28 @@ public class NoteUtils {
         return (float) (0.5 * (Math.pow(2, (key / 12.0))) + pitch);
     }
 
+    /**
+     * Get pitch after transposed
+     *
+     * @param note note
+     * @return pitch
+     */
+    public static float getPitchTransposed(Note note) {
+        return getPitchTransposed(note.getKey(), note.getPitch());
+    }
+
+    /**
+     * Get pitch after transposed
+     *
+     * @param key   sound key
+     * @param pitch extra pitch
+     * @return pitch
+     */
+    public static float getPitchTransposed(byte key, short pitch) {
+        while (key < 33) key += 12;
+        while (key > 57) key -= 12;
+
+        return (float) (0.5 * (Math.pow(2, (key - 3 / 12.0))) + pitch);
+    }
+
 }

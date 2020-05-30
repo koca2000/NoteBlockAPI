@@ -104,7 +104,7 @@ public class NoteBlockSongPlayer extends RangeSongPlayer {
 					* ((1F / 16F) * getDistance());
 			float pitch = NoteUtils.getPitch(note);
 
-            channelMode.play(player, loc, song, layer, note, soundCategory, volume, pitch);
+            channelMode.play(player, loc, song, layer, note, soundCategory, volume, !enable6Octave);
 
 			if (isInRange(player)) {
 				if (!this.playerList.get(player.getUniqueId())) {

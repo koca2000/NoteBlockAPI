@@ -60,9 +60,8 @@ public class RadioSongPlayer extends SongPlayer {
 			}
 
 			float volume = (layer.getVolume() * (int) this.volume * (int) playerVolume * note.getVelocity()) / 100_00_00_00F;
-			float pitch = NoteUtils.getPitch(note);
 
-			channelMode.play(player, player.getEyeLocation(), song, layer, note, soundCategory, volume, pitch);
+			channelMode.play(player, player.getEyeLocation(), song, layer, note, soundCategory, volume, !enable6Octave);
 		}
 	}
 
