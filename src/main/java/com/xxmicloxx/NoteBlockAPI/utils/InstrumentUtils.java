@@ -19,10 +19,23 @@ public class InstrumentUtils {
 		return Sound.getFromBukkitName(getInstrumentName(instrument));
 	}
 
+	/**
+	 * Add suffix to vanilla instrument to use sound outside 2 octave range
+	 * @param instrument instrument id
+	 * @param key sound key
+	 * @return warped name
+	 */
 	public static String warpNameOutOfRange(byte instrument, byte key) {
 		return warpNameOutOfRange(getSoundNameByInstrument(instrument), key);
 	}
 
+	/**
+	 * Add suffix to qualified name to use sound outside 2 octave range
+	 *
+	 * @param name qualified name
+	 * @param key sound key
+	 * @return warped name
+	 */
 	public static String warpNameOutOfRange(String name, byte key) {
 		if (key <= 32) name += "_-1";
 		else if (key >= 58) name += "_1";
@@ -32,8 +45,8 @@ public class InstrumentUtils {
 	/**
 	 * Returns the name of vanilla instrument
 	 *
-	 * @param instrument
-	 * @return
+	 * @param instrument instrument identifier
+	 * @return Sound name with full qualified name
 	 */
 	public static String getSoundNameByInstrument(byte instrument) {
 		switch (instrument) {
