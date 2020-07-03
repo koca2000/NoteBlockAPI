@@ -29,7 +29,7 @@ public class MonoMode extends ChannelMode {
         if(doTranspose)
             pitch = NoteUtils.getPitchTransposed(note);
         else
-            pitch = NoteUtils.getPitch(note);
+            pitch = NoteUtils.getPitchInOctave(note);
         if (InstrumentUtils.isCustomInstrument(note.getInstrument())) {
             CustomInstrument instrument = song.getCustomInstruments()[note.getInstrument() - InstrumentUtils.getCustomInstrumentFirstIndex()];
 

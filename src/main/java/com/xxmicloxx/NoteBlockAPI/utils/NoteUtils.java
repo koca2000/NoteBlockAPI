@@ -4,14 +4,24 @@ import com.xxmicloxx.NoteBlockAPI.model.Note;
 
 public class NoteUtils {
 
+    @Deprecated
+    public static float getPitch(Note note){
+        return getPitch(note.getKey(), note.getPitch());
+    }
+
+    @Deprecated
+    public static float getPitch(byte key, short pitch){
+        return getPitchTransposed(key, pitch);
+    }
+
     /**
      * Get pitch in specific octave range
      *
      * @param note note
      * @return pitch
      */
-    public static float getPitch(Note note) {
-        return getPitch(note.getKey(), note.getPitch());
+    public static float getPitchInOctave(Note note) {
+        return getPitchInOctave(note.getKey(), note.getPitch());
     }
 
     /**
@@ -21,7 +31,7 @@ public class NoteUtils {
      * @param pitch extra pitch
      * @return pitch
      */
-    public static float getPitch(byte key, short pitch) {
+    public static float getPitchInOctave(byte key, short pitch) {
         if (key < 33) key -= 9;
         else if (key > 57) key -= 57;
         else key -= 33;

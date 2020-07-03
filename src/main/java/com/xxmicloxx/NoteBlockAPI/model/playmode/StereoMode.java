@@ -48,7 +48,7 @@ public class StereoMode extends ChannelMode {
         if(doTranspose)
             pitch = NoteUtils.getPitchTransposed(note);
         else
-            pitch = NoteUtils.getPitch(note);
+            pitch = NoteUtils.getPitchInOctave(note);
 
         float distance = 0;
         if (layer.getPanning() == 100){
