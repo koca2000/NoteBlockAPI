@@ -23,10 +23,11 @@ public class InstrumentUtils {
 	 * Add suffix to vanilla instrument to use sound outside 2 octave range
 	 * @param instrument instrument id
 	 * @param key sound key
+	 * @param pitch
 	 * @return warped name
 	 */
-	public static String warpNameOutOfRange(byte instrument, byte key) {
-		return warpNameOutOfRange(getSoundNameByInstrument(instrument), key);
+	public static String warpNameOutOfRange(byte instrument, byte key, short pitch) {
+		return warpNameOutOfRange(getSoundNameByInstrument(instrument), key, pitch);
 	}
 
 	/**
@@ -34,9 +35,11 @@ public class InstrumentUtils {
 	 *
 	 * @param name qualified name
 	 * @param key sound key
+	 * @param pitch
 	 * @return warped name
 	 */
-	public static String warpNameOutOfRange(String name, byte key) {
+	public static String warpNameOutOfRange(String name, byte key, short pitch) {
+		key = NoteUtils.applyPitchToKey(key, pitch);
 		if (key <= 32) name += "_-1";
 		else if (key >= 58) name += "_1";
 		return name;
@@ -49,8 +52,10 @@ public class InstrumentUtils {
 	 * @return Sound name with full qualified name
 	 */
 	public static String getSoundNameByInstrument(byte instrument) {
+		//noinspection RedundantSuppression
 		switch (instrument) {
 			case 0:
+				//noinspection DuplicateBranchesInSwitch
 				return "minecraft:block.note_block.harp";
 			case 1:
 				return "minecraft:block.note_block.bass";
