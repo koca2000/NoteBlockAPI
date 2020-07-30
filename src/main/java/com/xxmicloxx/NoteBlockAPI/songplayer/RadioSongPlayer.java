@@ -3,19 +3,14 @@ package com.xxmicloxx.NoteBlockAPI.songplayer;
 import com.xxmicloxx.NoteBlockAPI.model.playmode.ChannelMode;
 import com.xxmicloxx.NoteBlockAPI.model.playmode.MonoMode;
 import com.xxmicloxx.NoteBlockAPI.model.playmode.MonoStereoMode;
-import com.xxmicloxx.NoteBlockAPI.utils.NoteUtils;
 import org.bukkit.entity.Player;
 
 import com.xxmicloxx.NoteBlockAPI.NoteBlockAPI;
-import com.xxmicloxx.NoteBlockAPI.model.CustomInstrument;
 import com.xxmicloxx.NoteBlockAPI.model.Layer;
 import com.xxmicloxx.NoteBlockAPI.model.Note;
-import com.xxmicloxx.NoteBlockAPI.model.NotePitch;
 import com.xxmicloxx.NoteBlockAPI.model.Playlist;
 import com.xxmicloxx.NoteBlockAPI.model.Song;
 import com.xxmicloxx.NoteBlockAPI.model.SoundCategory;
-import com.xxmicloxx.NoteBlockAPI.utils.CompatibilityUtils;
-import com.xxmicloxx.NoteBlockAPI.utils.InstrumentUtils;
 
 /**
  * SongPlayer playing to everyone added to it no matter where he is
@@ -61,7 +56,7 @@ public class RadioSongPlayer extends SongPlayer {
 
 			float volume = (layer.getVolume() * (int) this.volume * (int) playerVolume * note.getVelocity()) / 100_00_00_00F;
 
-			channelMode.play(player, player.getEyeLocation(), song, layer, note, soundCategory, volume, !enable6Octave);
+			channelMode.play(player, player.getEyeLocation(), song, layer, note, soundCategory, volume, !enable10Octave);
 		}
 	}
 

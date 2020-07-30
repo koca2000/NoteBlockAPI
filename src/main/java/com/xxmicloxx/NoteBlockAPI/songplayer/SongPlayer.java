@@ -49,7 +49,7 @@ public abstract class SongPlayer {
 
 	protected SoundCategory soundCategory;
 	protected ChannelMode channelMode = new MonoMode();
-	protected boolean enable6Octave = true;
+	protected boolean enable10Octave = true;
 
 	com.xxmicloxx.NoteBlockAPI.SongPlayer oldSongPlayer;
 
@@ -288,8 +288,8 @@ public abstract class SongPlayer {
 	 *
 	 * @return true if enabled, false otherwise
 	 */
-	public boolean isEnable6Octave() {
-		return enable6Octave;
+	public boolean isEnable10Octave() {
+		return enable10Octave;
 	}
 
 	/**
@@ -297,10 +297,10 @@ public abstract class SongPlayer {
 	 * <p>
 	 * If not enabled, notes will be transposed to 2 octave range
 	 *
-	 * @param enable6Octave true if enabled, false otherwise
+	 * @param enable10Octave true if enabled, false otherwise
 	 */
-	public void setEnable6Octave(boolean enable6Octave) {
-		this.enable6Octave = enable6Octave;
+	public void setEnable10Octave(boolean enable10Octave) {
+		this.enable10Octave = enable10Octave;
 	}
 
 	/**

@@ -46,9 +46,17 @@ public class NoteUtils {
         key = applyPitchToKey(key, pitch);
         pitch %= 100;
 
-        if (key < 33) key -= 9;
-        else if (key > 57) key -= 57;
-        else key -= 33;
+        // -15 base_-2
+        // 9 base_-1
+        // 33 base
+        // 57 base_1
+        // 81 base_2
+        // 105 base_3
+        if(key < 9) key -= -15;
+        else if(key < 33) key -= 9;
+        else if(key < 57) key -= 33;
+        else if(key < 81) key -= 57;
+        else if(key < 105) key -= 81;
 
         return pitches[key * 100 + pitch];
     }

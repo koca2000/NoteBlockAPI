@@ -40,8 +40,18 @@ public class InstrumentUtils {
 	 */
 	public static String warpNameOutOfRange(String name, byte key, short pitch) {
 		key = NoteUtils.applyPitchToKey(key, pitch);
-		if (key <= 32) name += "_-1";
-		else if (key >= 58) name += "_1";
+		// -15 base_-2
+		// 9 base_-1
+		// 33 base
+		// 57 base_1
+		// 81 base_2
+		// 105 base_3
+		if(key < 9) name += "_-2";
+		else if(key < 33) name += "_-1";
+		else //noinspection StatementWithEmptyBody
+			if(key < 57);
+		else if(key < 81) name += "_1";
+		else if(key < 105) name += "_2";
 		return name;
 	}
 

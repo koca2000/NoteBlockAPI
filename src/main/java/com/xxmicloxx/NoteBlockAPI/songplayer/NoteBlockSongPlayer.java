@@ -10,14 +10,11 @@ import org.bukkit.entity.Player;
 import com.xxmicloxx.NoteBlockAPI.NoteBlockAPI;
 import com.xxmicloxx.NoteBlockAPI.SongPlayer;
 import com.xxmicloxx.NoteBlockAPI.event.PlayerRangeStateChangeEvent;
-import com.xxmicloxx.NoteBlockAPI.model.CustomInstrument;
 import com.xxmicloxx.NoteBlockAPI.model.Layer;
 import com.xxmicloxx.NoteBlockAPI.model.Note;
-import com.xxmicloxx.NoteBlockAPI.model.NotePitch;
 import com.xxmicloxx.NoteBlockAPI.model.Playlist;
 import com.xxmicloxx.NoteBlockAPI.model.Song;
 import com.xxmicloxx.NoteBlockAPI.model.SoundCategory;
-import com.xxmicloxx.NoteBlockAPI.utils.CompatibilityUtils;
 import com.xxmicloxx.NoteBlockAPI.utils.InstrumentUtils;
 
 /**
@@ -104,7 +101,7 @@ public class NoteBlockSongPlayer extends RangeSongPlayer {
 					* ((1F / 16F) * getDistance());
 			float pitch = NoteUtils.getPitch(note);
 
-            channelMode.play(player, loc, song, layer, note, soundCategory, volume, !enable6Octave);
+            channelMode.play(player, loc, song, layer, note, soundCategory, volume, !enable10Octave);
 
 			if (isInRange(player)) {
 				if (!this.playerList.get(player.getUniqueId())) {
