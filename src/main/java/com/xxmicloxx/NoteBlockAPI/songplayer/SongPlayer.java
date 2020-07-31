@@ -1,5 +1,13 @@
 package com.xxmicloxx.NoteBlockAPI.songplayer;
 
+import com.xxmicloxx.NoteBlockAPI.NoteBlockAPI;
+import com.xxmicloxx.NoteBlockAPI.event.*;
+import com.xxmicloxx.NoteBlockAPI.model.*;
+import com.xxmicloxx.NoteBlockAPI.model.playmode.ChannelMode;
+import com.xxmicloxx.NoteBlockAPI.model.playmode.MonoMode;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -7,19 +15,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
-import com.xxmicloxx.NoteBlockAPI.model.*;
-import com.xxmicloxx.NoteBlockAPI.model.playmode.ChannelMode;
-import com.xxmicloxx.NoteBlockAPI.model.playmode.MonoMode;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-
-import com.xxmicloxx.NoteBlockAPI.NoteBlockAPI;
-import com.xxmicloxx.NoteBlockAPI.event.SongDestroyingEvent;
-import com.xxmicloxx.NoteBlockAPI.event.SongEndEvent;
-import com.xxmicloxx.NoteBlockAPI.event.SongLoopEvent;
-import com.xxmicloxx.NoteBlockAPI.event.SongNextEvent;
-import com.xxmicloxx.NoteBlockAPI.event.SongStoppedEvent;
 
 
 /**
@@ -48,13 +43,14 @@ public abstract class SongPlayer {
 	protected Map<Song, Boolean> songQueue = new ConcurrentHashMap<Song, Boolean>(); //True if already played
 
 	private final Lock lock = new ReentrantLock();
-	private Random rng = new Random();
+	private final Random rng = new Random();
 
 	protected NoteBlockAPI plugin;
 
 	protected SoundCategory soundCategory;
 	protected ChannelMode channelMode = new MonoMode();
-	
+	protected boolean enable10Octave = false;
+
 	com.xxmicloxx.NoteBlockAPI.SongPlayer oldSongPlayer;
 
 	public SongPlayer(Song song) {
@@ -277,6 +273,7 @@ public abstract class SongPlayer {
 
 	/**
 	 * Sets the tick when fade will be finished
+	 *
 	 * @param fadeDone
 	 * @deprecated set fadeIn value
 	 */
@@ -284,6 +281,26 @@ public abstract class SongPlayer {
 	public void setFadeDone(int fadeDone) {
 		fadeIn.setFadeDone(fadeDone);
 		CallUpdate("fadeDone", fadeDone);
+	}
+
+	/**
+	 * Check if 6 octave range is enabled
+	 *
+	 * @return true if enabled, false otherwise
+	 */
+	public boolean isEnable10Octave() {
+		return enable10Octave;
+	}
+
+	/**
+	 * Enable or disable 6 octave range
+	 * <p>
+	 * If not enabled, notes will be transposed to 2 octave range
+	 *
+	 * @param enable10Octave true if enabled, false otherwise
+	 */
+	public void setEnable10Octave(boolean enable10Octave) {
+		this.enable10Octave = enable10Octave;
 	}
 
 	/**

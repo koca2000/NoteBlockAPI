@@ -6,7 +6,7 @@ public class NoteUtils {
 
     private static float[] pitches = null;
 
-    public static void generatePitchValues(){
+    static {
         pitches = new float[2401];
 
         for (int i = 0; i < 2401; i++){
@@ -14,19 +14,84 @@ public class NoteUtils {
         }
     }
 
+    @Deprecated
     public static float getPitch(Note note){
         return getPitch(note.getKey(), note.getPitch());
     }
 
+    @Deprecated
     public static float getPitch(byte key, short pitch){
-        pitch += (key - 33) * 100;
-        if (pitch < 0) pitch = 0;
+        return getPitchTransposed(key, pitch);
+    }
 
-        if (pitch > 2400) pitch = 2400;
+    /**
+     * Get pitch in specific octave range
+     *
+     * @param note note
+     * @return pitch
+     */
+    public static float getPitchInOctave(Note note) {
+        return getPitchInOctave(note.getKey(), note.getPitch());
+    }
 
-        if (pitches == null) generatePitchValues();
+    /**
+     * Get pitch in specific octave range
+     *
+     * @param key   sound key
+     * @param pitch extra pitch
+     * @return pitch
+     */
+    public static float getPitchInOctave(byte key, short pitch) {
+        // Apply pitch to key
+        key = applyPitchToKey(key, pitch);
+        pitch %= 100;
 
-        return pitches[pitch];
+        // -15 base_-2
+        // 9 base_-1
+        // 33 base
+        // 57 base_1
+        // 81 base_2
+        // 105 base_3
+        if(key < 9) key -= -15;
+        else if(key < 33) key -= 9;
+        else if(key < 57) key -= 33;
+        else if(key < 81) key -= 57;
+        else if(key < 105) key -= 81;
+
+        return pitches[key * 100 + pitch];
+    }
+
+    public static byte applyPitchToKey(byte key, short pitch) {
+        key += pitch / 100;
+        return key;
+    }
+
+    /**
+     * Get pitch after transposed
+     *
+     * @param note note
+     * @return pitch
+     */
+    public static float getPitchTransposed(Note note) {
+        return getPitchTransposed(note.getKey(), note.getPitch());
+    }
+
+    /**
+     * Get pitch after transposed
+     *
+     * @param key   sound key
+     * @param pitch extra pitch
+     * @return pitch
+     */
+    public static float getPitchTransposed(byte key, short pitch) {
+        // Apply pitch to key
+        key += pitch % 100;
+        pitch /= 100;
+
+        while (key < 33) key += 12;
+        while (key > 57) key -= 12;
+
+        return pitches[key * 100 + pitch];
     }
 
 }

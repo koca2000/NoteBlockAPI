@@ -3,9 +3,6 @@ package com.xxmicloxx.NoteBlockAPI.songplayer;
 import com.xxmicloxx.NoteBlockAPI.NoteBlockAPI;
 import com.xxmicloxx.NoteBlockAPI.event.PlayerRangeStateChangeEvent;
 import com.xxmicloxx.NoteBlockAPI.model.*;
-import com.xxmicloxx.NoteBlockAPI.utils.CompatibilityUtils;
-import com.xxmicloxx.NoteBlockAPI.utils.InstrumentUtils;
-import com.xxmicloxx.NoteBlockAPI.utils.NoteUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -77,9 +74,8 @@ public class EntitySongPlayer extends RangeSongPlayer {
 
             float volume = ((layer.getVolume() * (int) this.volume * (int) playerVolume * note.getVelocity()) / 100_00_00_00F)
                     * ((1F / 16F) * getDistance());
-            float pitch = NoteUtils.getPitch(note);
 
-            channelMode.play(player, entity.getLocation(), song, layer, note, soundCategory, volume, pitch);
+            channelMode.play(player, entity.getLocation(), song, layer, note, soundCategory, volume, !enable10Octave);
 
             if (isInRange(player)) {
                 if (!this.playerList.get(player.getUniqueId())) {
