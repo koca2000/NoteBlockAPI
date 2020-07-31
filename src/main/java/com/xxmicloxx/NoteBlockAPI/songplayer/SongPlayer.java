@@ -49,7 +49,7 @@ public abstract class SongPlayer {
 
 	protected SoundCategory soundCategory;
 	protected ChannelMode channelMode = new MonoMode();
-	protected boolean enable10Octave = true;
+	protected boolean enable10Octave = false;
 
 	com.xxmicloxx.NoteBlockAPI.SongPlayer oldSongPlayer;
 
