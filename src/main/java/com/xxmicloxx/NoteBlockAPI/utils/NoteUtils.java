@@ -91,7 +91,23 @@ public class NoteUtils {
         while (key < 33) key += 12;
         while (key > 57) key -= 12;
 
+        key -= 33;
+
         return pitches[key * 100 + pitch];
+    }
+
+    /**
+     * Returns true if combination of specified key and pitch is outside Minecraft octave range
+     * @param key
+     * @param pitch
+     * @return
+     */
+    public static boolean isOutOfRange(byte key, short pitch){
+        key = applyPitchToKey(key, pitch);
+
+        if(key < 33) return true;
+        else if(key < 57) return false;
+        else return true;
     }
 
 }
