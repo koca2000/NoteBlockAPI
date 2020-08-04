@@ -92,5 +92,8 @@ public class Fade {
 	protected void setFadeDone(int fadeDone){
 		this.fadeDone = fadeDone;
 	}
-	
+
+	public boolean isDone(){
+	    return fadeDone >= fadeDuration;
+    }
 }

@@ -28,6 +28,7 @@ public abstract class SongPlayer {
 	protected int actualSong = 0;
 
 	protected boolean playing = false;
+	protected boolean fading = false;
 	protected short tick = -1;
 	protected Map<UUID, Boolean> playerList = new ConcurrentHashMap<UUID, Boolean>();
 
@@ -37,6 +38,7 @@ public abstract class SongPlayer {
 	protected byte volume = 100;
 	protected Fade fadeIn;
 	protected Fade fadeOut;
+	protected Fade fadeTemp = null;
 	protected RepeatMode repeat = RepeatMode.NO;
 	protected boolean random = false;
 
@@ -316,8 +318,24 @@ public abstract class SongPlayer {
 						break;
 					}
 
-					if (playing) {
-						if (tick < fadeIn.getFadeDuration()){
+					if (playing || fading) {
+						if (fadeTemp != null){
+							if (fadeTemp.isDone()) {
+								fadeTemp = null;
+								fading = false;
+								if (!playing) {
+									SongStoppedEvent event = new SongStoppedEvent(this);
+									plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
+									volume = fadeIn.getFadeTarget();
+									continue;
+								}
+							}else {
+								int fade = fadeTemp.calculateFade();
+								if (fade != -1){
+									volume = (byte) fade;
+								}
+							}
+						} else if (tick < fadeIn.getFadeDuration()){
 							int fade = fadeIn.calculateFade();
 							if (fade != -1){
 								volume = (byte) fade;
@@ -336,6 +354,7 @@ public abstract class SongPlayer {
 							fadeIn.setFadeDone(0);
 							CallUpdate("fadeDone", fadeIn.getFadeDone());
 							fadeOut.setFadeDone(0);
+							volume = fadeIn.getFadeTarget();
 							if (repeat == RepeatMode.ONE){
 								SongLoopEvent event = new SongLoopEvent(this);
 								plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
@@ -596,11 +615,32 @@ public abstract class SongPlayer {
 	 * @param playing
 	 */
 	public void setPlaying(boolean playing) {
+		setPlaying(playing, null);
+	}
+
+	/**
+	 * Sets whether the SongPlayer is playing and whether it should fade if previous value was different
+	 * @param playing
+	 * @param fade
+	 */
+	public void setPlaying(boolean playing, boolean fade) {
+		setPlaying(playing, fade ? (playing ? fadeIn : fadeOut) : null);
+	}
+
+	public void setPlaying(boolean playing, Fade fade) {
+		if (this.playing == playing) return;
+
 		this.playing = playing;
-		if (!playing) {
-			SongStoppedEvent event = new SongStoppedEvent(this);
-			plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
+		if (fade != null && fade.getType() != FadeType.NONE) {
+			fadeTemp = new Fade(fade.getType(), fade.getFadeDuration());
+			fadeTemp.setFadeStart(playing ? 0 : volume);
+			fadeTemp.setFadeTarget(playing ? volume : 0);
+			fading = true;
+		} else {
+			fading = false;
+			volume = fadeIn.getFadeTarget();
 		}
+
 		CallUpdate("playing", playing);
 	}
 
@@ -686,6 +726,10 @@ public abstract class SongPlayer {
 		
 		fadeIn.setFadeTarget(volume);
 		fadeOut.setFadeStart(volume);
+		if (fadeTemp != null) {
+			if (playing) fadeTemp.setFadeTarget(volume);
+			else fadeTemp.setFadeStart(volume);
+		}
 		
 		CallUpdate("volume", volume);
 	}
