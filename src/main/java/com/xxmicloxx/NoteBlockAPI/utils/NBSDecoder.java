@@ -78,7 +78,7 @@ public class NBSDecoder {
 			short songHeight = readShort(dataInputStream);
 			String title = readString(dataInputStream);
 			String author = readString(dataInputStream);
-			readString(dataInputStream); // original author
+			String originalAuthor = readString(dataInputStream); // original author
 			String description = readString(dataInputStream);
 			float speed = readShort(dataInputStream) / 100f;
 			dataInputStream.readBoolean(); // auto-save
@@ -186,7 +186,7 @@ public class NBSDecoder {
 			}
 
 			return new Song(speed, layerHashMap, songHeight, length, title, 
-					author, description, songFile, firstcustominstrument, customInstrumentsArray, isStereo);
+					author, originalAuthor, description, songFile, firstcustominstrument, customInstrumentsArray, isStereo);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (EOFException e) {

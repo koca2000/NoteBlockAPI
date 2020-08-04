@@ -17,6 +17,7 @@ public class Song implements Cloneable {
 	private String title;
 	private File path;
 	private String author;
+	private String originalAuthor;
 	private String description;
 	private float speed;
 	private float delay;
@@ -30,7 +31,7 @@ public class Song implements Cloneable {
 	 */
 	public Song(Song other) {
 		this(other.getSpeed(), other.getLayerHashMap(), other.getSongHeight(), 
-				other.getLength(), other.getTitle(), other.getAuthor(), 
+				other.getLength(), other.getTitle(), other.getAuthor(), other.getOriginalAuthor(),
 				other.getDescription(), other.getPath(), other.getFirstCustomInstrumentIndex(), other.getCustomInstruments(), other.isStereo);
 	}
 
@@ -47,8 +48,8 @@ public class Song implements Cloneable {
 	 */
 	@Deprecated
 	public Song(float speed, HashMap<Integer, Layer> layerHashMap,
-			short songHeight, final short length, String title, String author,
-			String description, File path) {
+				short songHeight, final short length, String title, String author,
+				String description, File path) {
 		this(speed, layerHashMap, songHeight, length, title, author, description, path, InstrumentUtils.getCustomInstrumentFirstIndex(), new CustomInstrument[0], false);
 	}
 
@@ -109,16 +110,30 @@ public class Song implements Cloneable {
 				String description, File path, int firstCustomInstrumentIndex, CustomInstrument[] customInstruments) {
 		this(speed, layerHashMap, songHeight, length, title, author, description, path, firstCustomInstrumentIndex, customInstruments, false);
 	}
-	
+
+	@Deprecated
 	public Song(float speed, HashMap<Integer, Layer> layerHashMap,
 				short songHeight, final short length, String title, String author,
 				String description, File path, int firstCustomInstrumentIndex, boolean isStereo) {
-		this(speed, layerHashMap, songHeight, length, title, author, description, path, firstCustomInstrumentIndex, new CustomInstrument[0], isStereo);
+		this(speed, layerHashMap, songHeight, length, title, author, "", description, path, firstCustomInstrumentIndex, new CustomInstrument[0], isStereo);
 	}
 
+	@Deprecated
 	public Song(float speed, HashMap<Integer, Layer> layerHashMap, 
-			short songHeight, final short length, String title, String author, 
-			String description, File path, int firstCustomInstrumentIndex, CustomInstrument[] customInstruments, boolean isStereo) {
+				short songHeight, final short length, String title, String author,
+				String description, File path, int firstCustomInstrumentIndex, CustomInstrument[] customInstruments, boolean isStereo) {
+		this(speed, layerHashMap, songHeight, length, title, author, "", description, path, firstCustomInstrumentIndex, customInstruments, isStereo);
+	}
+
+	public Song(float speed, HashMap<Integer, Layer> layerHashMap,
+				short songHeight, final short length, String title, String author, String originalAuthor,
+				String description, File path, int firstCustomInstrumentIndex, boolean isStereo) {
+		this(speed, layerHashMap, songHeight, length, title, author, originalAuthor, description, path, firstCustomInstrumentIndex, new CustomInstrument[0], isStereo);
+	}
+
+	public Song(float speed, HashMap<Integer, Layer> layerHashMap,
+		short songHeight, final short length, String title, String author, String originalAuthor,
+				String description, File path, int firstCustomInstrumentIndex, CustomInstrument[] customInstruments, boolean isStereo) {
 		this.speed = speed;
 		delay = 20 / speed;
 		this.layerHashMap = layerHashMap;
@@ -126,6 +141,7 @@ public class Song implements Cloneable {
 		this.length = length;
 		this.title = title;
 		this.author = author;
+		this.originalAuthor = originalAuthor;
 		this.description = description;
 		this.path = path;
 		this.firstCustomInstrumentIndex = firstCustomInstrumentIndex;
@@ -171,6 +187,14 @@ public class Song implements Cloneable {
 	 */
 	public String getAuthor() {
 		return author;
+	}
+
+	/**
+	 * Gets the original author of the Song
+	 * @return author
+	 */
+	public String getOriginalAuthor() {
+		return originalAuthor;
 	}
 
 	/**
