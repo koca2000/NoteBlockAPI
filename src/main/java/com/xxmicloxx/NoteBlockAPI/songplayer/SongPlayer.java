@@ -430,17 +430,15 @@ public abstract class SongPlayer {
 							continue;
 						}
 						CallUpdate("tick", tick);
-						
-						plugin.doSync(() -> {
-							for (UUID uuid : playerList.keySet()) {
-								Player player = Bukkit.getPlayer(uuid);
-								if (player == null) {
-									// offline...
-									continue;
-								}
-								playTick(player, tick);
+
+						for (UUID uuid : playerList.keySet()) {
+							Player player = Bukkit.getPlayer(uuid);
+							if (player == null) {
+								// offline...
+								continue;
 							}
-						});
+							playTick(player, tick);
+						}
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
