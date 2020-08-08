@@ -638,7 +638,10 @@ public abstract class SongPlayer {
 			fading = true;
 		} else {
 			fading = false;
+			fadeTemp = null;
 			volume = fadeIn.getFadeTarget();
+			SongStoppedEvent event = new SongStoppedEvent(this);
+			plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
 		}
 
 		CallUpdate("playing", playing);
