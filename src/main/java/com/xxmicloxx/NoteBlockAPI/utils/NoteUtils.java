@@ -84,16 +84,15 @@ public class NoteUtils {
      * @return pitch
      */
     public static float getPitchTransposed(byte key, short pitch) {
-        // Apply pitch to key
-        key += pitch % 100;
-        pitch /= 100;
+        // Apply key to pitch
+        pitch += key * 100;
 
-        while (key < 33) key += 12;
-        while (key > 57) key -= 12;
+        while (pitch < 3300) pitch += 1200;
+        while (pitch > 5700) pitch -= 1200;
 
-        key -= 33;
+        pitch -= 3300;
 
-        return pitches[key * 100 + pitch];
+        return pitches[pitch];
     }
 
     /**
