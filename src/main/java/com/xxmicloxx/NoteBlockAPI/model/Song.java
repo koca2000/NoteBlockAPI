@@ -19,8 +19,8 @@ public class Song implements Cloneable {
 	private String author;
 	private String originalAuthor;
 	private String description;
-	private float speed;
-	private float delay;
+	private double speed;
+	private double delay;
 	private CustomInstrument[] customInstruments;
 	private int firstCustomInstrumentIndex;
 	private boolean isStereo = false;
@@ -131,11 +131,11 @@ public class Song implements Cloneable {
 		this(speed, layerHashMap, songHeight, length, title, author, originalAuthor, description, path, firstCustomInstrumentIndex, new CustomInstrument[0], isStereo);
 	}
 
-	public Song(float speed, HashMap<Integer, Layer> layerHashMap,
+	public Song(double speed, HashMap<Integer, Layer> layerHashMap,
 		short songHeight, final short length, String title, String author, String originalAuthor,
 				String description, File path, int firstCustomInstrumentIndex, CustomInstrument[] customInstruments, boolean isStereo) {
 		this.speed = speed;
-		delay = 20 / speed;
+		delay = 20.0 / speed;
 		this.layerHashMap = layerHashMap;
 		this.songHeight = songHeight;
 		this.length = length;
@@ -217,7 +217,7 @@ public class Song implements Cloneable {
 	 * Gets the speed (ticks per second) of this Song
 	 * @return
 	 */
-	public float getSpeed() {
+	public double getSpeed() {
 		return speed;
 	}
 
@@ -225,7 +225,7 @@ public class Song implements Cloneable {
 	 * Gets the delay of this Song
 	 * @return delay
 	 */
-	public float getDelay() {
+	public double getDelay() {
 		return delay;
 	}
 

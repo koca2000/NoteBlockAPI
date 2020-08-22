@@ -451,7 +451,7 @@ public abstract class SongPlayer {
 				}
 
 				long duration = System.currentTimeMillis() - startTime;
-				float delayMillis = song.getDelay() * 50;
+				double delayMillis = song.getDelay() * 50;
 				if (duration < delayMillis) {
 					try {
 						Thread.sleep((long) (delayMillis - duration));

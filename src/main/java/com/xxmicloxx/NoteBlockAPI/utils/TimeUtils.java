@@ -42,25 +42,25 @@ public class TimeUtils {
 		return getTime(format, songPlayer.getSong().getLength(), songPlayer.getSong().getSpeed());
 	}
 	
-	private static String getTime(String format, short ticks, float speed){
+	private static String getTime(String format, short ticks, double speed){
 		String time = format;
 		long milisTotal = (long) ((ticks / speed) * 1000);
 		
 		int hours = 0;
 		if (time.contains("h")){
-			hours = (int) Math.floor(milisTotal / 1000 / 60 / 60);
+			hours = (int) Math.floor(milisTotal / 1000.0 / 60.0 / 60.0);
 			milisTotal -= hours * 1000 * 60 * 60;
 		}
 		
 		int minutes = 0;
 		if (time.contains("m")){
-			minutes = (int) Math.floor(milisTotal / 1000 / 60);
+			minutes = (int) Math.floor(milisTotal / 1000.0 / 60.0);
 			milisTotal -= minutes * 1000 * 60;
 		}
 		
 		int seconds = 0;
 		if (time.contains("s")){
-			seconds = (int) Math.floor(milisTotal / 1000);
+			seconds = (int) Math.floor(milisTotal / 1000.0);
 			milisTotal -= seconds * 1000;
 		}
 		

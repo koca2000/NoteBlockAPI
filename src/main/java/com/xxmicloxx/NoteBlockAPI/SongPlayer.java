@@ -85,7 +85,7 @@ public abstract class SongPlayer {
 			instruments[i] = new CustomInstrument(ci.getIndex(), ci.getName(), ci.getSoundFileName());
 		}
 		
-		return new Song(s.getSpeed(), layerHashMap, s.getSongHeight(), s.getLength(), s.getTitle(), s.getAuthor(), s.getDescription(), s.getPath(), instruments);
+		return new Song((float) s.getSpeed(), layerHashMap, s.getSongHeight(), s.getLength(), s.getTitle(), s.getAuthor(), s.getDescription(), s.getPath(), instruments);
 	}
 
 	void update(String key, Object value){
