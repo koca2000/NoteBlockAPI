@@ -18,7 +18,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
 
 /**
  * Main class; contains methods for playing and adjusting songs for players
@@ -212,6 +214,10 @@ public class NoteBlockAPI extends JavaPlugin {
 	public void doSync(Runnable runnable) {
 		getServer().getScheduler().runTask(this, runnable);
 	}
+
+    public Future<?> doSyncBlock(Callable callable) {
+        return getServer().getScheduler().callSyncMethod(this, callable);
+    }
 
 	public void doAsync(Runnable runnable) {
 		getServer().getScheduler().runTaskAsynchronously(this, runnable);
