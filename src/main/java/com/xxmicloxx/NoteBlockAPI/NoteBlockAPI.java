@@ -142,7 +142,8 @@ public class NoteBlockAPI extends JavaPlugin {
 			}
 		}
 		
-		Metrics metrics = new Metrics(this);	
+		Metrics metrics = new Metrics(this, 1083);
+		
 		
 		new NoteBlockPlayerMain().onEnable();
 		
