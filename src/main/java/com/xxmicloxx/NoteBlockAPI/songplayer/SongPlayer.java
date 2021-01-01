@@ -314,7 +314,7 @@ public abstract class SongPlayer {
 			CompletableFuture<Void> midiFuture = null;
 			while (!destroyed) {
 				if(currentPlaying instanceof MidiSequence && midiFuture != null) {
-					while (!(destroyed || NoteBlockAPI.getAPI().isDisabling())) {
+					while (!(destroyed || NoteBlockAPI.getAPI().isDisabling()) && (playing)) {
 						try {
 							midiFuture.get(1, TimeUnit.SECONDS);
 							break;
@@ -323,6 +323,7 @@ public abstract class SongPlayer {
 							e.printStackTrace();
 						}
 					}
+					midiFuture.cancel(true);
 				}
 				long startTime = System.currentTimeMillis();
 				lock.lock();
@@ -459,42 +460,83 @@ public abstract class SongPlayer {
 							}
 						else if (currentPlaying instanceof MidiSequence) {
 							midiFuture = new CompletableFuture<>();
+							CompletableFuture<Void> finalMidiFuture = midiFuture;
 							final Sequencer sequencer = MidiSystem.getSequencer(false);
 							sequencer.getTransmitter().setReceiver(new Receiver() {
 
 								private final MidiInstruments.MidiInstrument[] channelPrograms = new MidiInstruments.MidiInstrument[16];
+								private final short[] channelPitchBends = new short[16];
+								private final byte[][] channelPolyPressures = new byte[16][128];
+								private final byte[] channelPressures = new byte[16];
 
 								{
+									reset();
+								}
+
+								private void reset() {
 									Arrays.fill(channelPrograms, MidiInstruments.instrumentMapping.get(0));
+									Arrays.fill(channelPitchBends, (short) 0);
+									for (byte[] bytes : channelPolyPressures) {
+										Arrays.fill(bytes, (byte) 127);
+									}
+									Arrays.fill(channelPressures, (byte) 127);
 								}
 
 								@Override
 								public void send(MidiMessage midiMessage, long l) {
-									if (midiMessage instanceof ShortMessage) {
-										ShortMessage shortMessage = (ShortMessage) midiMessage.clone();
-										if (shortMessage.getCommand() == ShortMessage.NOTE_ON && shortMessage.getData2() == 0) {
-											try {
-												shortMessage.setMessage(ShortMessage.NOTE_OFF, shortMessage.getData1(), 64);
-											} catch (InvalidMidiDataException e) {
-												e.printStackTrace();
-											}
+									try {
+										if(finalMidiFuture.isCancelled()) {
+											sequencer.close();
+											return;
 										}
-										switch (shortMessage.getCommand()) {
-											case ShortMessage.NOTE_ON:
-												for (UUID uuid : playerList.keySet()) {
-													Player player = Bukkit.getPlayer(uuid);
-													if (player == null) {
-														// offline...
-														continue;
-													}
-													playNote(player, new Note((byte) channelPrograms[shortMessage.getChannel()].mcInstrument, (byte) (shortMessage.getData1() + (channelPrograms[shortMessage.getChannel()].octaveModifier * 12)), (byte) (shortMessage.getData2() / 127.0 * 100), 100, (short) 0));
+										if (midiMessage instanceof ShortMessage) {
+											ShortMessage shortMessage = (ShortMessage) midiMessage.clone();
+											if (shortMessage.getCommand() == ShortMessage.NOTE_ON && shortMessage.getData2() == 0) {
+												try {
+													shortMessage.setMessage(ShortMessage.NOTE_OFF, shortMessage.getData1(), 64);
+												} catch (InvalidMidiDataException e) {
+													e.printStackTrace();
 												}
-												break;
-											case ShortMessage.PROGRAM_CHANGE:
-												channelPrograms[shortMessage.getChannel()] = MidiInstruments.instrumentMapping.get(shortMessage.getData1());
-										}
+											}
+											switch (shortMessage.getCommand()) {
+												case ShortMessage.NOTE_ON:
+													if(channelPrograms[shortMessage.getChannel()] == null) break;
+													final Note note = new Note((byte) channelPrograms[shortMessage.getChannel()].mcInstrument,
+															(byte) (shortMessage.getData1() + (channelPrograms[shortMessage.getChannel()].octaveModifier * 12)),
+															(byte) ((shortMessage.getData2() / 127.0 * 100) * (channelPolyPressures[shortMessage.getChannel()][shortMessage.getData1()] / 127.0 * 100) * (channelPressures[shortMessage.getChannel()] / 127.0 * 100) / 1_00_00),
+															100,
+															(short) (channelPitchBends[shortMessage.getChannel()] / 4096.0 * 100));
+													for (UUID uuid : playerList.keySet()) {
+														Player player = Bukkit.getPlayer(uuid);
+														if (player == null) {
+															// offline...
+															continue;
+														}
+														playNote(player,
+																note);
+													}
+													break;
+												case ShortMessage.PROGRAM_CHANGE:
+													channelPrograms[shortMessage.getChannel()] = MidiInstruments.instrumentMapping.get(shortMessage.getData1());
+													break;
+												case ShortMessage.PITCH_BEND:
+													channelPitchBends[shortMessage.getChannel()] = (short) ((shortMessage.getData1() + shortMessage.getData2() * 128) - 8192);
+													break;
+												case ShortMessage.POLY_PRESSURE:
+													channelPolyPressures[shortMessage.getChannel()][shortMessage.getData1()] = (byte) shortMessage.getData2();
+													break;
+												case ShortMessage.CHANNEL_PRESSURE:
+													channelPressures[shortMessage.getChannel()] = (byte) shortMessage.getData1();
+													break;
+												case ShortMessage.SYSTEM_RESET:
+													reset();
+													break;
+											}
 
-									} else System.err.println("Invalid message");
+										} else System.err.println("Invalid message: " + midiMessage);
+									} catch (Throwable t) {
+										t.printStackTrace();
+									}
 								}
 
 								@Override
@@ -502,8 +544,11 @@ public abstract class SongPlayer {
 
 								}
 							});
-							CompletableFuture<Void> finalMidiFuture = midiFuture;
 							sequencer.addMetaEventListener(metaMessage -> {
+								if(finalMidiFuture.isCancelled()) {
+									sequencer.close();
+									return;
+								}
 								if (metaMessage.getType() == 0x2f && sequencer.getTickPosition() == sequencer.getTickLength()) {
 									finalMidiFuture.complete(null);
 									sequencer.close();

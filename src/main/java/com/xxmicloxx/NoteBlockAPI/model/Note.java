@@ -109,4 +109,15 @@ public class Note {
 	public void setPanning(int panning) {
 		this.panning = panning;
 	}
+
+	@Override
+	public String toString() {
+		return "Note{" +
+				"instrument=" + instrument +
+				", key=" + key +
+				", velocity=" + velocity +
+				", panning=" + panning +
+				", pitch=" + pitch +
+				'}';
+	}
 }

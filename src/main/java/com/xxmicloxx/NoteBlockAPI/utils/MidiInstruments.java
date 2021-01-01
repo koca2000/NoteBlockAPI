@@ -50,7 +50,7 @@ public class MidiInstruments {
         mapping.put(6, new MidiInstrument(0, 1));
         mapping.put(7, new MidiInstrument(0, 0));
         // Chromatic Percussion
-        mapping.put(8, new MidiInstrument(11, 0));
+        mapping.put(8, new MidiInstrument(11, -1));
         mapping.put(9, new MidiInstrument(11, 0));
         mapping.put(10, new MidiInstrument(11, 0));
         mapping.put(11, new MidiInstrument(11, 0));
@@ -77,14 +77,14 @@ public class MidiInstruments {
         mapping.put(30, new MidiInstrument(5, -1));
         mapping.put(31, new MidiInstrument(5, 0));
         // Bass
-        mapping.put(32, new MidiInstrument(1, 0));
-        mapping.put(33, new MidiInstrument(1, 1));
-        mapping.put(34, new MidiInstrument(1, 1));
-        mapping.put(35, new MidiInstrument(1, 1));
-        mapping.put(36, new MidiInstrument(1, 1));
-        mapping.put(37, new MidiInstrument(1, 1));
-        mapping.put(38, new MidiInstrument(1, 1));
-        mapping.put(39, new MidiInstrument(1, 1));
+        mapping.put(32, new MidiInstrument(1, 1));
+        mapping.put(33, new MidiInstrument(1, 2));
+        mapping.put(34, new MidiInstrument(1, 2));
+        mapping.put(35, new MidiInstrument(1, 2));
+        mapping.put(36, new MidiInstrument(1, 2));
+        mapping.put(37, new MidiInstrument(1, 2));
+        mapping.put(38, new MidiInstrument(1, 2));
+        mapping.put(39, new MidiInstrument(1, 2));
         // Strings
         mapping.put(40, new MidiInstrument(6, 0));
         mapping.put(41, new MidiInstrument(6, 0));
