@@ -1,5 +1,6 @@
 package com.xxmicloxx.NoteBlockAPI.songplayer;
 
+import com.xxmicloxx.NoteBlockAPI.model.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -7,11 +8,6 @@ import org.bukkit.entity.Player;
 import com.xxmicloxx.NoteBlockAPI.NoteBlockAPI;
 import com.xxmicloxx.NoteBlockAPI.SongPlayer;
 import com.xxmicloxx.NoteBlockAPI.event.PlayerRangeStateChangeEvent;
-import com.xxmicloxx.NoteBlockAPI.model.Layer;
-import com.xxmicloxx.NoteBlockAPI.model.Note;
-import com.xxmicloxx.NoteBlockAPI.model.Playlist;
-import com.xxmicloxx.NoteBlockAPI.model.Song;
-import com.xxmicloxx.NoteBlockAPI.model.SoundCategory;
 
 /**
  * SongPlayer created at a specified Location
@@ -21,13 +17,13 @@ public class PositionSongPlayer extends RangeSongPlayer {
 
 	private Location targetLocation;
 
-	public PositionSongPlayer(Song song) {
-		super(song);
+	public PositionSongPlayer(Playable playable) {
+		super(playable);
 		makeNewClone(com.xxmicloxx.NoteBlockAPI.PositionSongPlayer.class);
 	}
 
-	public PositionSongPlayer(Song song, SoundCategory soundCategory) {
-		super(song, soundCategory);
+	public PositionSongPlayer(Playable playable, SoundCategory soundCategory) {
+		super(playable, soundCategory);
 		makeNewClone(com.xxmicloxx.NoteBlockAPI.PositionSongPlayer.class);
 	}
 	
@@ -74,20 +70,22 @@ public class PositionSongPlayer extends RangeSongPlayer {
 
 	@Override
 	public void playTick(Player player, int tick) {
+		if (!(currentPlaying instanceof Song))
+			throw new IllegalStateException("Unexpected call to playTick");
 		if (!player.getWorld().getName().equals(targetLocation.getWorld().getName())) {
 			return; // not in same world
 		}
 
 		byte playerVolume = NoteBlockAPI.getPlayerVolume(player);
 
-		for (Layer layer : song.getLayerHashMap().values()) {
+		for (Layer layer : ((Song) currentPlaying).getLayerHashMap().values()) {
 			Note note = layer.getNote(tick);
 			if (note == null) continue;
 
 			float volume = ((layer.getVolume() * (int) this.volume * (int) playerVolume * note.getVelocity()) / 100_00_00_00F)
 					* ((1F / 16F) * getDistance());
 
-			channelMode.play(player, targetLocation, song, layer, note, soundCategory, volume, !enable10Octave);
+			channelMode.play(player, targetLocation, (Song) currentPlaying, layer, note, soundCategory, volume, !enable10Octave);
 
 			if (isInRange(player)) {
 				if (!this.playerList.get(player.getUniqueId())) {
@@ -102,7 +100,35 @@ public class PositionSongPlayer extends RangeSongPlayer {
 			}
 		}
 	}
-	
+
+	@Override
+	public void playNote(Player player, Note note) {
+		if (!player.getWorld().getName().equals(targetLocation.getWorld().getName())) {
+			return; // not in same world
+		}
+
+		byte playerVolume = NoteBlockAPI.getPlayerVolume(player);
+
+		if (note == null) return;
+
+		float volume = (((int) this.volume * (int) playerVolume * note.getVelocity()) / 100_00_00F)
+				* ((1F / 16F) * getDistance());
+
+		channelMode.play(player, targetLocation, note, soundCategory, volume, !enable10Octave);
+
+		if (isInRange(player)) {
+			if (!this.playerList.get(player.getUniqueId())) {
+				playerList.put(player.getUniqueId(), true);
+				Bukkit.getPluginManager().callEvent(new PlayerRangeStateChangeEvent(this, player, true));
+			}
+		} else {
+			if (this.playerList.get(player.getUniqueId())) {
+				playerList.put(player.getUniqueId(), false);
+				Bukkit.getPluginManager().callEvent(new PlayerRangeStateChangeEvent(this, player, false));
+			}
+		}
+	}
+
 	/**
 	 * Returns true if the Player is able to hear the current PositionSongPlayer 
 	 * @param player in range

@@ -66,6 +66,7 @@ public abstract class SongPlayer {
 	}
 	
 	private Song createSongFromNew(com.xxmicloxx.NoteBlockAPI.model.Song s){
+		if(s == null) return null;
 		HashMap<Integer, Layer> layerHashMap = new HashMap<Integer, Layer>();
 		for (Integer i : s.getLayerHashMap().keySet()){
 			com.xxmicloxx.NoteBlockAPI.model.Layer l = s.getLayerHashMap().get(i);

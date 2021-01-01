@@ -1,9 +1,9 @@
 package com.xxmicloxx.NoteBlockAPI.songplayer;
 
+import com.xxmicloxx.NoteBlockAPI.model.Playable;
 import org.bukkit.entity.Player;
 
 import com.xxmicloxx.NoteBlockAPI.model.Playlist;
-import com.xxmicloxx.NoteBlockAPI.model.Song;
 import com.xxmicloxx.NoteBlockAPI.model.SoundCategory;
 
 /**
@@ -14,12 +14,12 @@ public abstract class RangeSongPlayer extends SongPlayer{
 
 	private int distance = 16;
 	
-	public RangeSongPlayer(Song song, SoundCategory soundCategory) {
-		super(song, soundCategory);
+	public RangeSongPlayer(Playable playable, SoundCategory soundCategory) {
+		super(playable, soundCategory);
 	}
 
-	public RangeSongPlayer(Song song) {
-		super(song);
+	public RangeSongPlayer(Playable playable) {
+		super(playable);
 	}	
 
 	protected RangeSongPlayer(com.xxmicloxx.NoteBlockAPI.SongPlayer songPlayer) {

@@ -1,5 +1,6 @@
 package com.xxmicloxx.NoteBlockAPI.songplayer;
 
+import com.xxmicloxx.NoteBlockAPI.model.*;
 import com.xxmicloxx.NoteBlockAPI.utils.NoteUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -10,11 +11,6 @@ import org.bukkit.entity.Player;
 import com.xxmicloxx.NoteBlockAPI.NoteBlockAPI;
 import com.xxmicloxx.NoteBlockAPI.SongPlayer;
 import com.xxmicloxx.NoteBlockAPI.event.PlayerRangeStateChangeEvent;
-import com.xxmicloxx.NoteBlockAPI.model.Layer;
-import com.xxmicloxx.NoteBlockAPI.model.Note;
-import com.xxmicloxx.NoteBlockAPI.model.Playlist;
-import com.xxmicloxx.NoteBlockAPI.model.Song;
-import com.xxmicloxx.NoteBlockAPI.model.SoundCategory;
 import com.xxmicloxx.NoteBlockAPI.utils.InstrumentUtils;
 
 /**
@@ -25,13 +21,13 @@ public class NoteBlockSongPlayer extends RangeSongPlayer {
 
 	private Block noteBlock;
 
-	public NoteBlockSongPlayer(Song song) {
-		super(song);
+	public NoteBlockSongPlayer(Playable playable) {
+		super(playable);
 		makeNewClone(com.xxmicloxx.NoteBlockAPI.NoteBlockSongPlayer.class);
 	}
 
-	public NoteBlockSongPlayer(Song song, SoundCategory soundCategory) {
-		super(song, soundCategory);
+	public NoteBlockSongPlayer(Playable playable, SoundCategory soundCategory) {
+		super(playable, soundCategory);
 		makeNewClone(com.xxmicloxx.NoteBlockAPI.NoteBlockSongPlayer.class);
 	}
 
@@ -78,6 +74,8 @@ public class NoteBlockSongPlayer extends RangeSongPlayer {
 
 	@Override
 	public void playTick(Player player, int tick) {
+		if (!(currentPlaying instanceof Song))
+			throw new IllegalStateException("Unexpected call to playTick");
 		if (noteBlock.getType() != Material.NOTE_BLOCK) {
 			return;
 		}
@@ -89,7 +87,7 @@ public class NoteBlockSongPlayer extends RangeSongPlayer {
 		Location loc = noteBlock.getLocation();
 		loc = new Location(loc.getWorld(), loc.getX() + 0.5f, loc.getY() - 0.5f, loc.getZ() + 0.5f);
 		
-		for (Layer layer : song.getLayerHashMap().values()) {
+		for (Layer layer : ((Song) currentPlaying).getLayerHashMap().values()) {
 			Note note = layer.getNote(tick);
 			if (note == null) {
 				continue;
@@ -101,7 +99,7 @@ public class NoteBlockSongPlayer extends RangeSongPlayer {
 					* ((1F / 16F) * getDistance());
 			float pitch = NoteUtils.getPitch(note);
 
-            channelMode.play(player, loc, song, layer, note, soundCategory, volume, !enable10Octave);
+            channelMode.play(player, loc, (Song) currentPlaying, layer, note, soundCategory, volume, !enable10Octave);
 
 			if (isInRange(player)) {
 				if (!this.playerList.get(player.getUniqueId())) {
@@ -116,7 +114,45 @@ public class NoteBlockSongPlayer extends RangeSongPlayer {
 			}
 		}
 	}
-	
+
+	@Override
+	public void playNote(Player player, Note note) {
+		if (noteBlock.getType() != Material.NOTE_BLOCK) {
+			return;
+		}
+		if (!player.getWorld().getName().equals(noteBlock.getWorld().getName())) {
+			// not in same world
+			return;
+		}
+		byte playerVolume = NoteBlockAPI.getPlayerVolume(player);
+		Location loc = noteBlock.getLocation();
+		loc = new Location(loc.getWorld(), loc.getX() + 0.5f, loc.getY() - 0.5f, loc.getZ() + 0.5f);
+
+		if (note == null) {
+			return;
+		}
+		player.playNote(loc, InstrumentUtils.getBukkitInstrument(note.getInstrument()),
+				new org.bukkit.Note(note.getKey() - 33));
+
+		float volume = (((int) this.volume * (int) playerVolume * note.getVelocity()) / 100_00_00F)
+				* ((1F / 16F) * getDistance());
+		float pitch = NoteUtils.getPitch(note);
+
+		channelMode.play(player, loc, note, soundCategory, volume, !enable10Octave);
+
+		if (isInRange(player)) {
+			if (!this.playerList.get(player.getUniqueId())) {
+				playerList.put(player.getUniqueId(), true);
+				Bukkit.getPluginManager().callEvent(new PlayerRangeStateChangeEvent(this, player, true));
+			}
+		} else {
+			if (this.playerList.get(player.getUniqueId())) {
+				playerList.put(player.getUniqueId(), false);
+				Bukkit.getPluginManager().callEvent(new PlayerRangeStateChangeEvent(this, player, false));
+			}
+		}
+	}
+
 	/**
 	 * Returns true if the Player is able to hear the current NoteBlockSongPlayer 
 	 * @param player in range

@@ -11,12 +11,12 @@ public class EntitySongPlayer extends RangeSongPlayer {
 
     private Entity entity;
 
-    public EntitySongPlayer(Song song) {
-        super(song);
+    public EntitySongPlayer(Playable playable) {
+        super(playable);
     }
 
-    public EntitySongPlayer(Song song, SoundCategory soundCategory) {
-        super(song, soundCategory);
+    public EntitySongPlayer(Playable playable, SoundCategory soundCategory) {
+        super(playable, soundCategory);
     }
 
     public EntitySongPlayer(Playlist playlist, SoundCategory soundCategory) {
@@ -55,8 +55,10 @@ public class EntitySongPlayer extends RangeSongPlayer {
 
     @Override
     public void playTick(Player player, int tick) {
-        if (entity.isDead()){
-            if (autoDestroy){
+        if (!(currentPlaying instanceof Song))
+            throw new IllegalStateException("Unexpected call to playTick");
+        if (entity.isDead()) {
+            if (autoDestroy) {
                 destroy();
             } else {
                 setPlaying(false);
@@ -68,14 +70,14 @@ public class EntitySongPlayer extends RangeSongPlayer {
 
         byte playerVolume = NoteBlockAPI.getPlayerVolume(player);
 
-        for (Layer layer : song.getLayerHashMap().values()) {
+        for (Layer layer : ((Song) currentPlaying).getLayerHashMap().values()) {
             Note note = layer.getNote(tick);
             if (note == null) continue;
 
             float volume = ((layer.getVolume() * (int) this.volume * (int) playerVolume * note.getVelocity()) / 100_00_00_00F)
                     * ((1F / 16F) * getDistance());
 
-            channelMode.play(player, entity.getLocation(), song, layer, note, soundCategory, volume, !enable10Octave);
+            channelMode.play(player, entity.getLocation(), (Song) currentPlaying, layer, note, soundCategory, volume, !enable10Octave);
 
             if (isInRange(player)) {
                 if (!this.playerList.get(player.getUniqueId())) {
@@ -87,6 +89,41 @@ public class EntitySongPlayer extends RangeSongPlayer {
                     playerList.put(player.getUniqueId(), false);
                     Bukkit.getPluginManager().callEvent(new PlayerRangeStateChangeEvent(this, player, false));
                 }
+            }
+        }
+    }
+
+    @Override
+    public void playNote(Player player, Note note) {
+        if (entity.isDead()) {
+            if (autoDestroy) {
+                destroy();
+            } else {
+                setPlaying(false);
+            }
+        }
+        if (!player.getWorld().getName().equals(entity.getWorld().getName())) {
+            return; // not in same world
+        }
+
+        byte playerVolume = NoteBlockAPI.getPlayerVolume(player);
+
+        if (note == null) return;
+
+        float volume = (((int) this.volume * (int) playerVolume * note.getVelocity()) / 100_00_00F)
+                * ((1F / 16F) * getDistance());
+
+        channelMode.play(player, entity.getLocation(), note, soundCategory, volume, !enable10Octave);
+
+        if (isInRange(player)) {
+            if (!this.playerList.get(player.getUniqueId())) {
+                playerList.put(player.getUniqueId(), true);
+                Bukkit.getPluginManager().callEvent(new PlayerRangeStateChangeEvent(this, player, true));
+            }
+        } else {
+            if (this.playerList.get(player.getUniqueId())) {
+                playerList.put(player.getUniqueId(), false);
+                Bukkit.getPluginManager().callEvent(new PlayerRangeStateChangeEvent(this, player, false));
             }
         }
     }

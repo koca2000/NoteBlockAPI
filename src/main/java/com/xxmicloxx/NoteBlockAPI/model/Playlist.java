@@ -6,62 +6,62 @@ import java.util.List;
 
 public class Playlist {
 
-	ArrayList<Song> songs = new ArrayList<>();
+	ArrayList<Playable> playables = new ArrayList<>();
 	
-	public Playlist(Song ...songs){
-		if (songs.length == 0){
+	public Playlist(Playable... playables){
+		if (playables.length == 0){
 			throw new IllegalArgumentException("Cannot create empty playlist");
 		}
-		checkNull(songs);
-		this.songs.addAll(Arrays.asList(songs));
+		checkNull(playables);
+		this.playables.addAll(Arrays.asList(playables));
 	}
 	
 	/**
 	 * Add array of {@link Song} to playlist
-	 * @param songs
+	 * @param playables
 	 */
-	public void add(Song ...songs){
-		if (songs.length == 0){
+	public void add(Playable... playables){
+		if (playables.length == 0){
 			return;
 		}
-		checkNull(songs);
-		this.songs.addAll(Arrays.asList(songs));
+		checkNull(playables);
+		this.playables.addAll(Arrays.asList(playables));
 	}
 
 	/**
 	 * Insert array of {@link Song} at a specified index
 	 * @param index
-	 * @param songs
+	 * @param playables
 	 */
-	public void insert(int index, Song ...songs){
-		if (songs.length == 0){
+	public void insert(int index, Playable... playables){
+		if (playables.length == 0){
 			return;
 		}
-		if (index > this.songs.size()){
+		if (index > this.playables.size()){
 			throw new IllegalArgumentException("Index is higher than playlist size");
 		}
-		checkNull(songs);
-		this.songs.addAll(index, Arrays.asList(songs));
+		checkNull(playables);
+		this.playables.addAll(index, Arrays.asList(playables));
 	}
 	
-	private void checkNull(Song ...songs){
-		List<Song> songList = Arrays.asList(songs);
-		if (songList.contains(null)){
+	private void checkNull(Playable... playables){
+		List<Playable> playableList = Arrays.asList(playables);
+		if (playableList.contains(null)){
 			throw new IllegalArgumentException("Cannot add null to playlist");
 		}
 	}
 	
 	/**
 	 * Removes songs from playlist
-	 * @param songs
+	 * @param playables
 	 * @throws IllegalArgumentException when you try to remove all {@link Song} from {@link Playlist}
 	 */
-	public void remove(Song ...songs){
-		ArrayList<Song> songsTemp = new ArrayList<>();
-		songsTemp.addAll(this.songs);
-		songsTemp.removeAll(Arrays.asList(songs));
+	public void remove(Playable... playables){
+		ArrayList<Playable> songsTemp = new ArrayList<>();
+		songsTemp.addAll(this.playables);
+		songsTemp.removeAll(Arrays.asList(playables));
 		if (songsTemp.size() > 0){
-			this.songs = songsTemp;
+			this.playables = songsTemp;
 		} else {
 			throw new IllegalArgumentException("Cannot remove all songs from playlist");
 		}
@@ -72,8 +72,8 @@ public class Playlist {
 	 * @param songNumber - song index
 	 * @return
 	 */
-	public Song get(int songNumber){
-		return songs.get(songNumber);
+	public Playable get(int songNumber){
+		return playables.get(songNumber);
 	}
 	
 	/**
@@ -81,7 +81,7 @@ public class Playlist {
 	 * @return
 	 */
 	public int getCount(){
-		return songs.size();
+		return playables.size();
 	}
 	
 	/**
@@ -90,7 +90,7 @@ public class Playlist {
 	 * @return true if there is another {@link Song} after specified index
 	 */
 	public boolean hasNext(int songNumber){
-		return songs.size() > (songNumber + 1);
+		return playables.size() > (songNumber + 1);
 	}
 	
 	/**
@@ -99,28 +99,28 @@ public class Playlist {
 	 * @return
 	 */
 	public boolean exist(int songNumber){
-		return songs.size() > songNumber;
+		return playables.size() > songNumber;
 	}
 
 	/**
 	 * Returns index of song.
-	 * @param song
+	 * @param playable
 	 * @return Index of song. -1 if song is not in playelist
 	 */
-	public int getIndex(Song song){	return songs.indexOf(song);	}
+	public int getIndex(Playable playable){	return playables.indexOf(playable);	}
 
 	/**
 	 * Check whether playlist contains song.
-	 * @param song
+	 * @param playable
 	 * @return
 	 */
-	public boolean contains(Song song) { return songs.contains(song); }
+	public boolean contains(Playable playable) { return playables.contains(playable); }
 
 	/**
 	 * Returns list of Songs in Playlist
 	 * @return
 	 */	
-	public ArrayList<Song> getSongList(){
-		return (ArrayList<Song>) songs.clone();
+	public ArrayList<Playable> getSongList(){
+		return (ArrayList<Playable>) playables.clone();
 	}
 }
