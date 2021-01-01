@@ -500,12 +500,24 @@ public abstract class SongPlayer {
 											}
 											switch (shortMessage.getCommand()) {
 												case ShortMessage.NOTE_ON:
-													if(channelPrograms[shortMessage.getChannel()] == null) break;
-													final Note note = new Note((byte) channelPrograms[shortMessage.getChannel()].mcInstrument,
-															(byte) (shortMessage.getData1() + (channelPrograms[shortMessage.getChannel()].octaveModifier * 12)),
-															(byte) ((shortMessage.getData2() / 127.0 * 100) * (channelPolyPressures[shortMessage.getChannel()][shortMessage.getData1()] / 127.0 * 100) * (channelPressures[shortMessage.getChannel()] / 127.0 * 100) / 1_00_00),
-															100,
-															(short) (channelPitchBends[shortMessage.getChannel()] / 4096.0 * 100));
+													if (channelPrograms[shortMessage.getChannel()] == null) break;
+													final Note note;
+													if (shortMessage.getChannel() != 9)
+														note = new Note(
+																(byte) channelPrograms[shortMessage.getChannel()].mcInstrument,
+																(byte) (shortMessage.getData1() + (channelPrograms[shortMessage.getChannel()].octaveModifier * 12)),
+																(byte) ((shortMessage.getData2() / 127.0 * 100) * (channelPolyPressures[shortMessage.getChannel()][shortMessage.getData1()] / 127.0 * 100) * (channelPressures[shortMessage.getChannel()] / 127.0 * 100) / 1_00_00),
+																100,
+																(short) (channelPitchBends[shortMessage.getChannel()] / 4096.0 * 100));
+													else {
+														final MidiInstruments.MidiPercussion percussion = MidiInstruments.percussionMapping.get(shortMessage.getData1());
+														note = new Note(
+																(byte) percussion.mcInstrument,
+																(byte) percussion.midiKey,
+																(byte) ((shortMessage.getData2() / 127.0 * 100) * (channelPolyPressures[shortMessage.getChannel()][shortMessage.getData1()] / 127.0 * 100) * (channelPressures[shortMessage.getChannel()] / 127.0 * 100) / 1_00_00),
+																100,
+																(short) 0);
+													}
 													for (UUID uuid : playerList.keySet()) {
 														Player player = Bukkit.getPlayer(uuid);
 														if (player == null) {
