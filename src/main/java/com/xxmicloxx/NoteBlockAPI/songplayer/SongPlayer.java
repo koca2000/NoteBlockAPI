@@ -317,6 +317,7 @@ public abstract class SongPlayer {
 					while (!(destroyed || NoteBlockAPI.getAPI().isDisabling())) {
 						try {
 							midiFuture.get(1, TimeUnit.SECONDS);
+							break;
 						} catch (InterruptedException | TimeoutException ignored) {
 						} catch (ExecutionException e) {
 							e.printStackTrace();

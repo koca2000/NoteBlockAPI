@@ -50,7 +50,7 @@ public class MidiSequence implements Playable {
      */
     @Override
     public String getTitle() {
-        return String.valueOf(format.getProperty("title"));
+        return format.getProperty("title") != null ? String.valueOf(format.getProperty("title")) : "";
     }
 
     /**
@@ -60,7 +60,7 @@ public class MidiSequence implements Playable {
      */
     @Override
     public String getAuthor() {
-        return String.valueOf(format.getProperty("author"));
+        return format.getProperty("author") != null ? String.valueOf(format.getProperty("author")) : "";
     }
 
     /**
