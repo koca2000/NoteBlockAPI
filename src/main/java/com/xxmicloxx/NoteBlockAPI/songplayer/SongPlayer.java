@@ -311,19 +311,19 @@ public abstract class SongPlayer {
 	 */
 	private void start() {
 		plugin.doAsync(() -> {
-			CompletableFuture<Void> midiFuture = null;
+			Sequencer lastSequencer = null;
 			while (!destroyed) {
-				if(currentPlaying instanceof MidiSequence && midiFuture != null) {
-					while (!(destroyed || NoteBlockAPI.getAPI().isDisabling()) && (playing)) {
+				if(currentPlaying instanceof MidiSequence && lastSequencer != null) {
+					while (!(destroyed || NoteBlockAPI.getAPI().isDisabling()) && lastSequencer.isRunning()) {
 						try {
-							midiFuture.get(1, TimeUnit.SECONDS);
+							//noinspection BusyWait
+							Thread.sleep(50);
+						} catch (InterruptedException e) {
 							break;
-						} catch (InterruptedException | TimeoutException ignored) {
-						} catch (ExecutionException e) {
-							e.printStackTrace();
 						}
 					}
-					midiFuture.cancel(true);
+					lastSequencer.close();
+					lastSequencer = null;
 				}
 				long startTime = System.currentTimeMillis();
 				lock.lock();
@@ -459,9 +459,8 @@ public abstract class SongPlayer {
 								playTick(player, tick);
 							}
 						else if (currentPlaying instanceof MidiSequence) {
-							midiFuture = new CompletableFuture<>();
-							CompletableFuture<Void> finalMidiFuture = midiFuture;
 							final Sequencer sequencer = MidiSystem.getSequencer(false);
+							lastSequencer = sequencer;
 							sequencer.getTransmitter().setReceiver(new Receiver() {
 
 								private final MidiInstruments.MidiInstrument[] channelPrograms = new MidiInstruments.MidiInstrument[16];
@@ -485,10 +484,6 @@ public abstract class SongPlayer {
 								@Override
 								public void send(MidiMessage midiMessage, long l) {
 									try {
-										if(finalMidiFuture.isCancelled()) {
-											sequencer.close();
-											return;
-										}
 										if (midiMessage instanceof ShortMessage) {
 											ShortMessage shortMessage = (ShortMessage) midiMessage.clone();
 											if (shortMessage.getCommand() == ShortMessage.NOTE_ON && shortMessage.getData2() == 0) {
@@ -500,17 +495,18 @@ public abstract class SongPlayer {
 											}
 											switch (shortMessage.getCommand()) {
 												case ShortMessage.NOTE_ON:
-													if (channelPrograms[shortMessage.getChannel()] == null) break;
 													final Note note;
-													if (shortMessage.getChannel() != 9)
+													if (shortMessage.getChannel() != 9) {
+														if (channelPrograms[shortMessage.getChannel()] == null) break;
 														note = new Note(
 																(byte) channelPrograms[shortMessage.getChannel()].mcInstrument,
 																(byte) (shortMessage.getData1() + (channelPrograms[shortMessage.getChannel()].octaveModifier * 12)),
 																(byte) ((shortMessage.getData2() / 127.0 * 100) * (channelPolyPressures[shortMessage.getChannel()][shortMessage.getData1()] / 127.0 * 100) * (channelPressures[shortMessage.getChannel()] / 127.0 * 100) / 1_00_00),
 																100,
 																(short) (channelPitchBends[shortMessage.getChannel()] / 4096.0 * 100));
-													else {
+													} else {
 														final MidiInstruments.MidiPercussion percussion = MidiInstruments.percussionMapping.get(shortMessage.getData1());
+														if (percussion == null) break;
 														note = new Note(
 																(byte) percussion.mcInstrument,
 																(byte) percussion.midiKey,
@@ -556,18 +552,9 @@ public abstract class SongPlayer {
 
 								}
 							});
-							sequencer.addMetaEventListener(metaMessage -> {
-								if(finalMidiFuture.isCancelled()) {
-									sequencer.close();
-									return;
-								}
-								if (metaMessage.getType() == 0x2f && sequencer.getTickPosition() == sequencer.getTickLength()) {
-									finalMidiFuture.complete(null);
-									sequencer.close();
-								}
-							});
+							final Sequence sequence = ((MidiSequence) currentPlaying).sequence;
 							sequencer.open();
-							sequencer.setSequence(((MidiSequence) currentPlaying).sequence);
+							sequencer.setSequence(sequence);
 							sequencer.start();
 						}
 					}
