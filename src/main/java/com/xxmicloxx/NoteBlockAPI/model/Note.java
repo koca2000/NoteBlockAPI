@@ -8,16 +8,16 @@ package com.xxmicloxx.NoteBlockAPI.model;
 public class Note {
 
 	private byte instrument;
-	private byte key;
+	private short key;
 	private byte velocity;
 	private int panning;
 	private short pitch;
 
-	public Note(byte instrument, byte key) {
+	public Note(byte instrument, short key) {
 		this(instrument, key, (byte) 100, (byte) 100, (short) 0);
 	}
 
-	public Note(byte instrument, byte key, byte velocity, int panning, short pitch) {
+	public Note(byte instrument, short key, byte velocity, int panning, short pitch) {
 		this.instrument = instrument;
 		this.key = key;
 		this.velocity = velocity;
@@ -43,7 +43,7 @@ public class Note {
 	 * Returns note key number (Minecraft key 0 corresponds to key 33)
 	 * @return
 	 */
-	public byte getKey() {
+	public short getKey() {
 		return key;
 	}
 
@@ -51,7 +51,7 @@ public class Note {
 	 * Sets note key number (Minecraft key 0 corresponds to key 33)
 	 * @param key
 	 */
-	public void setKey(byte key) {
+	public void setKey(short key) {
 		this.key = key;
 	}
 

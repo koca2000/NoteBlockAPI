@@ -73,7 +73,7 @@ public class NoteBlockSongPlayer extends RangeSongPlayer {
 	}
 
 	@Override
-	public void playTick(Player player, int tick) {
+	public void playTick(Player player, long tick) {
 		if (!(currentPlaying instanceof Song))
 			throw new IllegalStateException("Unexpected call to playTick");
 		if (noteBlock.getType() != Material.NOTE_BLOCK) {
@@ -88,7 +88,7 @@ public class NoteBlockSongPlayer extends RangeSongPlayer {
 		loc = new Location(loc.getWorld(), loc.getX() + 0.5f, loc.getY() - 0.5f, loc.getZ() + 0.5f);
 		
 		for (Layer layer : ((Song) currentPlaying).getLayerHashMap().values()) {
-			Note note = layer.getNote(tick);
+			Note note = layer.getNote((int) tick);
 			if (note == null) {
 				continue;
 			}

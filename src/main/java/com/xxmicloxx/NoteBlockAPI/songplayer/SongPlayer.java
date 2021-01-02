@@ -30,7 +30,7 @@ public abstract class SongPlayer {
 
 	protected boolean playing = false;
 	protected boolean fading = false;
-	protected short tick = -1;
+	protected long tick = -1;
 	protected Map<UUID, Boolean> playerList = new ConcurrentHashMap<UUID, Boolean>();
 
 	protected boolean autoDestroy = false;
@@ -313,19 +313,21 @@ public abstract class SongPlayer {
 		plugin.doAsync(() -> {
 			Sequencer lastSequencer = null;
 			while (!destroyed) {
+				long startTime = System.currentTimeMillis();
 				if(currentPlaying instanceof MidiSequence && lastSequencer != null) {
 					while (!(destroyed || NoteBlockAPI.getAPI().isDisabling()) && lastSequencer.isRunning()) {
 						try {
 							//noinspection BusyWait
 							Thread.sleep(50);
+							tick = lastSequencer.getTickPosition();
 						} catch (InterruptedException e) {
 							break;
 						}
 					}
+					tick = currentPlaying.getLengthInTicks() + 1;
 					lastSequencer.close();
 					lastSequencer = null;
 				}
-				long startTime = System.currentTimeMillis();
 				lock.lock();
 				try {
 					if (destroyed || NoteBlockAPI.getAPI().isDisabling()){
@@ -355,7 +357,7 @@ public abstract class SongPlayer {
 								volume = (byte) fade;
 							}
 							CallUpdate("fadeDone", fadeIn.getFadeDone());
-						} else if (tick >= currentPlaying.getLength() - fadeOut.getFadeDuration()) {
+						} else if (tick >= currentPlaying.getLengthInTicks() - fadeOut.getFadeDuration()) {
 							int fade = fadeOut.calculateFade();
 							if (fade != -1) {
 								volume = (byte) fade;
@@ -363,7 +365,7 @@ public abstract class SongPlayer {
 						}
 
 						tick++;
-						if ((currentPlaying instanceof MidiSequence && tick != 0) || tick > currentPlaying.getLengthInTicks()) {
+						if (tick > currentPlaying.getLengthInTicks()) {
 							tick = -1;
 							fadeIn.setFadeDone(0);
 							CallUpdate("fadeDone", fadeIn.getFadeDone());
@@ -500,7 +502,7 @@ public abstract class SongPlayer {
 														if (channelPrograms[shortMessage.getChannel()] == null) break;
 														note = new Note(
 																(byte) channelPrograms[shortMessage.getChannel()].mcInstrument,
-																(byte) (shortMessage.getData1() + (channelPrograms[shortMessage.getChannel()].octaveModifier * 12)),
+																(short) (shortMessage.getData1() + (channelPrograms[shortMessage.getChannel()].octaveModifier * 12)),
 																(byte) ((shortMessage.getData2() / 127.0 * 100) * (channelPolyPressures[shortMessage.getChannel()][shortMessage.getData1()] / 127.0 * 100) * (channelPressures[shortMessage.getChannel()] / 127.0 * 100) / 1_00_00),
 																100,
 																(short) (channelPitchBends[shortMessage.getChannel()] / 4096.0 * 100));
@@ -509,7 +511,7 @@ public abstract class SongPlayer {
 														if (percussion == null) break;
 														note = new Note(
 																(byte) percussion.mcInstrument,
-																(byte) percussion.midiKey,
+																(short) percussion.midiKey,
 																(byte) ((shortMessage.getData2() / 127.0 * 100) * (channelPolyPressures[shortMessage.getChannel()][shortMessage.getData1()] / 127.0 * 100) * (channelPressures[shortMessage.getChannel()] / 127.0 * 100) / 1_00_00),
 																100,
 																(short) 0);
@@ -691,11 +693,10 @@ public abstract class SongPlayer {
 
 	/**
 	 * Plays the Song for the specific player
-	 *
-	 * @param player to play this SongPlayer for
+	 *  @param player to play this SongPlayer for
 	 * @param tick   to play at
 	 */
-	public abstract void playTick(Player player, int tick);
+	public abstract void playTick(Player player, long tick);
 
 	public abstract void playNote(Player player, Note note);
 
@@ -770,7 +771,7 @@ public abstract class SongPlayer {
 	 * Gets the current tick of this SongPlayer
 	 * @return
 	 */
-	public short getTick() {
+	public long getTick() {
 		return tick;
 	}
 

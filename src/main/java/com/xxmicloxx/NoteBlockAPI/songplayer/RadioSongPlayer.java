@@ -41,13 +41,13 @@ public class RadioSongPlayer extends SongPlayer {
 	}
 
 	@Override
-	public void playTick(Player player, int tick) {
+	public void playTick(Player player, long tick) {
 		if (!(currentPlaying instanceof Song))
 			throw new IllegalStateException("Unexpected call to playTick");
 		byte playerVolume = NoteBlockAPI.getPlayerVolume(player);
 
 		for (Layer layer : ((Song) currentPlaying).getLayerHashMap().values()) {
-			Note note = layer.getNote(tick);
+			Note note = layer.getNote((int) tick);
 			if (note == null) {
 				continue;
 			}

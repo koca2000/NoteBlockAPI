@@ -39,10 +39,10 @@ public class TimeUtils {
 	 * @return formatted string
 	 */
 	public static String getLength(String format, SongPlayer songPlayer){
-		return getTime(format, songPlayer.getSong().getLength(), songPlayer.getSong().getSpeed());
+		return getTime(format, songPlayer.getPlaying().getLengthInTicks(), songPlayer.getSong().getSpeed());
 	}
 	
-	private static String getTime(String format, short ticks, double speed){
+	private static String getTime(String format, long ticks, double speed){
 		String time = format;
 		long milisTotal = (long) ((ticks / speed) * 1000);
 		
