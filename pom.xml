@@ -5,7 +5,7 @@
 
 	<groupId>com.xxmicloxx</groupId>
 	<artifactId>NoteBlockAPI</artifactId>
-	<version>1.6.1-SNAPSHOT</version>
+	<version>1.6.2-SNAPSHOT</version>
 	<name>NoteBlockAPI</name>
 
 	<properties>
@@ -45,7 +45,7 @@
 		<dependency>
 			<groupId>org.bstats</groupId>
 			<artifactId>bstats-bukkit</artifactId>
-			<version>1.5</version>
+			<version>1.8</version>
 			<scope>compile</scope>
 		</dependency>
 	</dependencies>
@@ -55,7 +55,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.7</version>
+				<version>3.2.0</version>
 				<executions>
 					<execution>
 						<id>attach-javadocs</id>
@@ -68,7 +68,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
-				<version>3.1.0</version>
+				<version>3.2.4</version>
 				<configuration>
 					<relocations>
 						<relocation>

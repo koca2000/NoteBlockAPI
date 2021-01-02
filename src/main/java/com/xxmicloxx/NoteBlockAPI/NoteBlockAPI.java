@@ -144,7 +144,7 @@ public class NoteBlockAPI extends JavaPlugin {
 			}
 		}
 		
-		Metrics metrics = new Metrics(this);
+		Metrics metrics = new Metrics(this, 1003);
 		if (getServer().getPluginManager().getPlugin("ProtocolLib") != null) {
 			hook = new ProtocolLibHook();
 			getLogger().info("Hooked into ProtocolLib!");
