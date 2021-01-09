@@ -1,5 +1,6 @@
 package com.xxmicloxx.NoteBlockAPI.songplayer;
 
+import com.google.common.collect.Sets;
 import com.xxmicloxx.NoteBlockAPI.NoteBlockAPI;
 import com.xxmicloxx.NoteBlockAPI.event.*;
 import com.xxmicloxx.NoteBlockAPI.model.*;
@@ -14,7 +15,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -47,6 +48,7 @@ public abstract class SongPlayer {
 
 	private final Lock lock = new ReentrantLock();
 	private final Random rng = new Random();
+	private final MinecraftMidiSynthesizer midiSynthesizer = new MinecraftMidiSynthesizer();
 
 	protected NoteBlockAPI plugin;
 
@@ -317,15 +319,20 @@ public abstract class SongPlayer {
 				if(currentPlaying instanceof MidiSequence && lastSequencer != null) {
 					while (!(destroyed || NoteBlockAPI.getAPI().isDisabling()) && lastSequencer.isRunning()) {
 						try {
-							//noinspection BusyWait
-							Thread.sleep(50);
+							midiSynthesizer.tick();
 							tick = lastSequencer.getTickPosition();
+							long duration = System.currentTimeMillis() - startTime;
+							if (duration < 30)
+								//noinspection BusyWait
+								Thread.sleep(30 - duration);
+							startTime = System.currentTimeMillis();
 						} catch (InterruptedException e) {
 							break;
 						}
 					}
 					tick = currentPlaying.getLengthInTicks() + 1;
 					lastSequencer.close();
+					midiSynthesizer.reset();
 					lastSequencer = null;
 				}
 				lock.lock();
@@ -463,97 +470,8 @@ public abstract class SongPlayer {
 						else if (currentPlaying instanceof MidiSequence) {
 							final Sequencer sequencer = MidiSystem.getSequencer(false);
 							lastSequencer = sequencer;
-							sequencer.getTransmitter().setReceiver(new Receiver() {
-
-								private final MidiInstruments.MidiInstrument[] channelPrograms = new MidiInstruments.MidiInstrument[16];
-								private final short[] channelPitchBends = new short[16];
-								private final byte[][] channelPolyPressures = new byte[16][128];
-								private final byte[] channelPressures = new byte[16];
-
-								{
-									reset();
-								}
-
-								private void reset() {
-									Arrays.fill(channelPrograms, MidiInstruments.instrumentMapping.get(0));
-									Arrays.fill(channelPitchBends, (short) 0);
-									for (byte[] bytes : channelPolyPressures) {
-										Arrays.fill(bytes, (byte) 127);
-									}
-									Arrays.fill(channelPressures, (byte) 127);
-								}
-
-								@Override
-								public void send(MidiMessage midiMessage, long l) {
-									try {
-										if (midiMessage instanceof ShortMessage) {
-											ShortMessage shortMessage = (ShortMessage) midiMessage.clone();
-											if (shortMessage.getCommand() == ShortMessage.NOTE_ON && shortMessage.getData2() == 0) {
-												try {
-													shortMessage.setMessage(ShortMessage.NOTE_OFF, shortMessage.getData1(), 64);
-												} catch (InvalidMidiDataException e) {
-													e.printStackTrace();
-												}
-											}
-											switch (shortMessage.getCommand()) {
-												case ShortMessage.NOTE_ON:
-													final Note note;
-													if (shortMessage.getChannel() != 9) {
-														if (channelPrograms[shortMessage.getChannel()] == null) break;
-														note = new Note(
-																(byte) channelPrograms[shortMessage.getChannel()].mcInstrument,
-																(short) (shortMessage.getData1() + (channelPrograms[shortMessage.getChannel()].octaveModifier * 12)),
-																(byte) ((shortMessage.getData2() / 127.0 * 100) * (channelPolyPressures[shortMessage.getChannel()][shortMessage.getData1()] / 127.0 * 100) * (channelPressures[shortMessage.getChannel()] / 127.0 * 100) / 1_00_00),
-																100,
-																(short) (channelPitchBends[shortMessage.getChannel()] / 4096.0 * 100));
-													} else {
-														final MidiInstruments.MidiPercussion percussion = MidiInstruments.percussionMapping.get(shortMessage.getData1());
-														if (percussion == null) break;
-														note = new Note(
-																(byte) percussion.mcInstrument,
-																(short) percussion.midiKey,
-																(byte) ((shortMessage.getData2() / 127.0 * 100) * (channelPolyPressures[shortMessage.getChannel()][shortMessage.getData1()] / 127.0 * 100) * (channelPressures[shortMessage.getChannel()] / 127.0 * 100) / 1_00_00),
-																100,
-																(short) 0);
-													}
-													for (UUID uuid : playerList.keySet()) {
-														Player player = Bukkit.getPlayer(uuid);
-														if (player == null) {
-															// offline...
-															continue;
-														}
-														playNote(player,
-																note);
-													}
-													break;
-												case ShortMessage.PROGRAM_CHANGE:
-													channelPrograms[shortMessage.getChannel()] = MidiInstruments.instrumentMapping.get(shortMessage.getData1());
-													break;
-												case ShortMessage.PITCH_BEND:
-													channelPitchBends[shortMessage.getChannel()] = (short) ((shortMessage.getData1() + shortMessage.getData2() * 128) - 8192);
-													break;
-												case ShortMessage.POLY_PRESSURE:
-													channelPolyPressures[shortMessage.getChannel()][shortMessage.getData1()] = (byte) shortMessage.getData2();
-													break;
-												case ShortMessage.CHANNEL_PRESSURE:
-													channelPressures[shortMessage.getChannel()] = (byte) shortMessage.getData1();
-													break;
-												case ShortMessage.SYSTEM_RESET:
-													reset();
-													break;
-											}
-
-										} else System.err.println("Invalid message: " + midiMessage);
-									} catch (Throwable t) {
-										t.printStackTrace();
-									}
-								}
-
-								@Override
-								public void close() {
-
-								}
-							});
+							midiSynthesizer.reset();
+							sequencer.getTransmitter().setReceiver(midiSynthesizer);
 							final Sequence sequence = ((MidiSequence) currentPlaying).sequence;
 							sequencer.open();
 							sequencer.setSequence(sequence);
@@ -1030,11 +948,250 @@ public abstract class SongPlayer {
 		try {
 			Constructor c = newClass.getDeclaredConstructor(new Class[] { SongPlayer.class });
 			c.setAccessible(true);
-			oldSongPlayer = (com.xxmicloxx.NoteBlockAPI.SongPlayer) c.newInstance(new Object[]{this});
+			oldSongPlayer = (com.xxmicloxx.NoteBlockAPI.SongPlayer) c.newInstance(new Object[] { this });
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
 				| NoSuchMethodException | SecurityException e) {
 			e.printStackTrace();
 		}
 	}
 
+	private class MinecraftMidiSynthesizer implements Receiver {
+
+		private final MidiInstruments.MidiInstrument[] channelPrograms = new MidiInstruments.MidiInstrument[16];
+		private final short[] channelPitchBends = new short[16];
+		private final byte[][] channelPolyPressures = new byte[16][128];
+		private final byte[] channelPressures = new byte[16];
+		@SuppressWarnings("unchecked")
+		private final Set<SimpleNote>[] runningNotes = new Set[16];
+		@SuppressWarnings("unchecked")
+		private final Set<SimpleNote>[] pendingOffNotes = new Set[16];
+
+		private final boolean[] holdPedal = new boolean[16];
+
+		{
+			reset();
+		}
+
+		private void reset() {
+			Arrays.fill(channelPrograms, MidiInstruments.instrumentMapping.get(0));
+			Arrays.fill(channelPitchBends, (short) 0);
+			for (byte[] bytes : channelPolyPressures) {
+				Arrays.fill(bytes, (byte) 127);
+			}
+			Arrays.fill(channelPressures, (byte) 127);
+			Arrays.fill(runningNotes, Sets.newConcurrentHashSet());
+			Arrays.fill(pendingOffNotes, Sets.newConcurrentHashSet());
+			resetControllers();
+		}
+
+		private void resetControllers() {
+			Arrays.fill(holdPedal, false);
+		}
+
+		@Override
+		public void send(MidiMessage midiMessage, long l) {
+			try {
+				if (midiMessage instanceof ShortMessage) {
+					ShortMessage shortMessage = (ShortMessage) midiMessage.clone();
+					if (shortMessage.getCommand() == ShortMessage.NOTE_ON && shortMessage.getData2() == 0) {
+						try {
+							shortMessage.setMessage(ShortMessage.NOTE_OFF, shortMessage.getData1(), 64);
+						} catch (InvalidMidiDataException e) {
+							e.printStackTrace();
+						}
+					}
+					switch (shortMessage.getCommand()) {
+						case ShortMessage.NOTE_ON:
+							noteOn(shortMessage);
+							break;
+						case ShortMessage.NOTE_OFF:
+							noteOff(shortMessage);
+							break;
+						case ShortMessage.PROGRAM_CHANGE:
+							programChange(shortMessage);
+							break;
+						case ShortMessage.PITCH_BEND:
+							pitchBend(shortMessage);
+							break;
+						case ShortMessage.POLY_PRESSURE:
+							polyPressure(shortMessage);
+							break;
+						case ShortMessage.CHANNEL_PRESSURE:
+							channelPressure(shortMessage);
+							break;
+						case ShortMessage.SYSTEM_RESET:
+							reset();
+							break;
+						case ShortMessage.CONTROL_CHANGE:
+							controlChange(shortMessage);
+							break;
+					}
+
+				} else //noinspection StatementWithEmptyBody
+					if (midiMessage instanceof SysexMessage) {
+
+					} else System.err.println("Invalid message: " + midiMessage);
+			} catch (Throwable t) {
+				t.printStackTrace();
+			}
+		}
+
+		private void controlChange(ShortMessage shortMessage) {
+			switch (shortMessage.getData1()) {
+				case 64: // Hold Pedal
+					holdPedal[shortMessage.getChannel()] = shortMessage.getData2() >= 64;
+					handleHoldPedal(shortMessage);
+					break;
+				case 123: // All Notes Off
+				case 124:
+				case 125:
+				case 126:
+				case 127:
+					if (holdPedal[shortMessage.getChannel()]) {
+						for (SimpleNote note : runningNotes[shortMessage.getChannel()])
+							pendingOffNotes[shortMessage.getChannel()].add(note);
+					} else {
+						runningNotes[shortMessage.getChannel()].clear();
+					}
+					break;
+				case 121:
+					holdPedal[shortMessage.getChannel()] = false;
+					handleHoldPedal(shortMessage);
+					break;
+			}
+		}
+
+		private void handleHoldPedal(ShortMessage shortMessage) {
+			if (!holdPedal[shortMessage.getChannel()]) {
+				for (Iterator<SimpleNote> iterator = pendingOffNotes[shortMessage.getChannel()].iterator(); iterator.hasNext(); ) {
+					SimpleNote note = iterator.next();
+					runningNotes[shortMessage.getChannel()].remove(note);
+					iterator.remove();
+				}
+			}
+		}
+
+		private void noteOff(ShortMessage shortMessage) {
+			final Optional<SimpleNote> found = runningNotes[shortMessage.getChannel()].stream().filter(simpleNote -> simpleNote.note == shortMessage.getData1()).findFirst();
+			if(!found.isPresent()) return;
+			if (holdPedal[shortMessage.getChannel()])
+				pendingOffNotes[shortMessage.getChannel()].add(found.get());
+			else
+				runningNotes[shortMessage.getChannel()].remove(found.get());
+		}
+
+		public void channelPressure(ShortMessage shortMessage) {
+			channelPressures[shortMessage.getChannel()] = (byte) shortMessage.getData1();
+		}
+
+		public void polyPressure(ShortMessage shortMessage) {
+			channelPolyPressures[shortMessage.getChannel()][shortMessage.getData1()] = (byte) shortMessage.getData2();
+		}
+
+		public void pitchBend(ShortMessage shortMessage) {
+			channelPitchBends[shortMessage.getChannel()] = (short) ((shortMessage.getData1() + shortMessage.getData2() * 128) - 8192);
+		}
+
+		public void programChange(ShortMessage shortMessage) {
+			channelPrograms[shortMessage.getChannel()] = MidiInstruments.instrumentMapping.get(shortMessage.getData1());
+			Arrays.fill(channelPolyPressures[shortMessage.getChannel()], (byte) 127);
+			runningNotes[shortMessage.getChannel()].clear();
+		}
+
+		public void noteOn(ShortMessage shortMessage) {
+			final Note note;
+			if (shortMessage.getChannel() != 9) {
+				final MidiInstruments.MidiInstrument channelProgram = channelPrograms[shortMessage.getChannel()];
+				if (channelProgram == null) return;
+				note = new Note(
+						(byte) channelProgram.mcInstrument,
+						(short) (shortMessage.getData1() + (channelProgram.octaveModifier * 12)),
+						(byte) ((shortMessage.getData2() / 127.0) * (channelPolyPressures[shortMessage.getChannel()][shortMessage.getData1()] / 127.0) * (channelPressures[shortMessage.getChannel()] / 127.0) * 100),
+						100,
+						(short) (channelPitchBends[shortMessage.getChannel()] / 4096.0 * 100));
+				if (channelProgram.isLongSound) {
+					runningNotes[shortMessage.getChannel()].remove(new SimpleNote(shortMessage.getData1(), shortMessage.getData2()));
+					runningNotes[shortMessage.getChannel()].add(new SimpleNote(shortMessage.getData1(), shortMessage.getData2()));
+				}
+			} else {
+				final MidiInstruments.MidiPercussion percussion = MidiInstruments.percussionMapping.get(shortMessage.getData1());
+				if (percussion == null) return;
+				note = new Note(
+						(byte) percussion.mcInstrument,
+						(short) percussion.midiKey,
+						(byte) ((shortMessage.getData2() / 127.0) * (channelPolyPressures[shortMessage.getChannel()][shortMessage.getData1()] / 127.0) * (channelPressures[shortMessage.getChannel()] / 127.0) * 100),
+						100,
+						(short) 0);
+			}
+			playNote(note);
+		}
+
+		private void playNote(Note note) {
+			for (UUID uuid : playerList.keySet()) {
+				Player player = Bukkit.getPlayer(uuid);
+				if (player == null) {
+					// offline...
+					continue;
+				}
+				SongPlayer.this.playNote(player, note);
+			}
+		}
+
+		@Override
+		public void close() {
+
+		}
+
+		public void tick() {
+			for (int channel = 0, runningNotesLength = runningNotes.length; channel < runningNotesLength; channel++) {
+				Set<SimpleNote> channelRunningNotes = runningNotes[channel];
+				for (SimpleNote note : channelRunningNotes) {
+					final MidiInstruments.MidiInstrument channelProgram = channelPrograms[channel];
+					if (channelProgram == null) return;
+					playNote(
+							new Note(
+									(byte) channelProgram.mcInstrument,
+									(short) (note.note + (channelProgram.octaveModifier * 12)),
+									(byte) Math.max(((note.velocity / 127.0) * (channelPolyPressures[channel][note.note] / 127.0) * (channelPressures[channel] / 127.0)) * 10, 1),
+									100,
+									(short) (channelPitchBends[channel] / 4096.0 * 100))
+					);
+				}
+
+			}
+
+		}
+
+		private class SimpleNote {
+
+			public final int note;
+			public final int velocity;
+
+			private SimpleNote(int note, int velocity) {
+				this.note = note;
+				this.velocity = velocity;
+			}
+
+			@Override
+			public boolean equals(Object o) {
+				if (this == o) return true;
+				if (o == null || getClass() != o.getClass()) return false;
+				SimpleNote that = (SimpleNote) o;
+				return note == that.note;
+			}
+
+			@Override
+			public int hashCode() {
+				return Objects.hash(note);
+			}
+
+			@Override
+			public String toString() {
+				return "SimpleNote{" +
+						"note=" + note +
+						", velocity=" + velocity +
+						'}';
+			}
+		}
+	}
 }
