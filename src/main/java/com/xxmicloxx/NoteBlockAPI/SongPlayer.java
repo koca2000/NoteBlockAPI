@@ -66,13 +66,14 @@ public abstract class SongPlayer {
 	}
 	
 	private Song createSongFromNew(com.xxmicloxx.NoteBlockAPI.model.Song s){
+		if(s == null) return null;
 		HashMap<Integer, Layer> layerHashMap = new HashMap<Integer, Layer>();
 		for (Integer i : s.getLayerHashMap().keySet()){
 			com.xxmicloxx.NoteBlockAPI.model.Layer l = s.getLayerHashMap().get(i);
 			HashMap<Integer, Note> noteHashMap = new HashMap<Integer, Note>();
 			for (Integer iL : l.getNotesAtTicks().keySet()){
 				com.xxmicloxx.NoteBlockAPI.model.Note note = l.getNotesAtTicks().get(iL);
-				noteHashMap.put(iL, new Note(note.getInstrument(), note.getKey()));
+				noteHashMap.put(iL, new Note(note.getInstrument(), (byte) note.getKey()));
 			}
 			Layer layer = new Layer();
 			layer.setHashMap(noteHashMap);
@@ -85,7 +86,7 @@ public abstract class SongPlayer {
 			instruments[i] = new CustomInstrument(ci.getIndex(), ci.getName(), ci.getSoundFileName());
 		}
 		
-		return new Song(s.getSpeed(), layerHashMap, s.getSongHeight(), s.getLength(), s.getTitle(), s.getAuthor(), s.getDescription(), s.getPath(), instruments);
+		return new Song((float) s.getSpeed(), layerHashMap, s.getSongHeight(), s.getLength(), s.getTitle(), s.getAuthor(), s.getDescription(), s.getPath(), instruments);
 	}
 
 	void update(String key, Object value){
@@ -109,7 +110,7 @@ public abstract class SongPlayer {
 				fadeDone = (int) value;
 				break;
 			case "tick":
-				tick = (short) value;
+				tick = Short.parseShort(String.valueOf(value));
 				break;
 			case "addplayer":
 				addPlayer((Player) value, false);

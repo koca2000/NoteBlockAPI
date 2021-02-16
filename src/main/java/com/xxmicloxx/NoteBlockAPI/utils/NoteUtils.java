@@ -20,7 +20,7 @@ public class NoteUtils {
     }
 
     @Deprecated
-    public static float getPitch(byte key, short pitch){
+    public static float getPitch(short key, short pitch){
         return getPitchTransposed(key, pitch);
     }
 
@@ -41,10 +41,11 @@ public class NoteUtils {
      * @param pitch extra pitch
      * @return pitch
      */
-    public static float getPitchInOctave(byte key, short pitch) {
+    public static float getPitchInOctave(short key, short pitch) {
         // Apply pitch to key
         key = applyPitchToKey(key, pitch);
         pitch %= 100;
+        if(pitch < 0) pitch = (short) (100 + pitch);
 
         // -15 base_-2
         // 9 base_-1
@@ -52,18 +53,18 @@ public class NoteUtils {
         // 57 base_1
         // 81 base_2
         // 105 base_3
-        if(key < 9) key -= -15;
-        else if(key < 33) key -= 9;
-        else if(key < 57) key -= 33;
-        else if(key < 81) key -= 57;
-        else if(key < 105) key -= 81;
+        while (key < 33) key += 24;
+        while (key > 56) key -= 24;
+
+        key -= 33;
 
         return pitches[key * 100 + pitch];
     }
 
-    public static byte applyPitchToKey(byte key, short pitch) {
-        key += pitch / 100;
-        return key;
+    public static short applyPitchToKey(short key, short pitch) {
+        if(pitch == 0) return key;
+        if(pitch < 0) return (short) (key - (-pitch / 100) - (Math.abs(pitch) % 100 != 0 ? 1 : 0));
+        return (short) (key + (pitch / 100));
     }
 
     /**
@@ -83,7 +84,7 @@ public class NoteUtils {
      * @param pitch extra pitch
      * @return pitch
      */
-    public static float getPitchTransposed(byte key, short pitch) {
+    public static float getPitchTransposed(short key, short pitch) {
         // Apply key to pitch
         pitch += key * 100;
 
@@ -101,7 +102,7 @@ public class NoteUtils {
      * @param pitch
      * @return
      */
-    public static boolean isOutOfRange(byte key, short pitch){
+    public static boolean isOutOfRange(short key, short pitch){
         key = applyPitchToKey(key, pitch);
 
         if(key < 33) return true;

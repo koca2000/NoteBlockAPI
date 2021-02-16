@@ -7,9 +7,8 @@ import java.util.HashMap;
 
 /**
  * Represents a Note Block Studio project
- *
  */
-public class Song implements Cloneable {
+public class Song implements Playable {
 
 	private HashMap<Integer, Layer> layerHashMap = new HashMap<Integer, Layer>();
 	private short songHeight;
@@ -19,8 +18,8 @@ public class Song implements Cloneable {
 	private String author;
 	private String originalAuthor;
 	private String description;
-	private float speed;
-	private float delay;
+	private double speed;
+	private double delay;
 	private CustomInstrument[] customInstruments;
 	private int firstCustomInstrumentIndex;
 	private boolean isStereo = false;
@@ -131,11 +130,11 @@ public class Song implements Cloneable {
 		this(speed, layerHashMap, songHeight, length, title, author, originalAuthor, description, path, firstCustomInstrumentIndex, new CustomInstrument[0], isStereo);
 	}
 
-	public Song(float speed, HashMap<Integer, Layer> layerHashMap,
+	public Song(double speed, HashMap<Integer, Layer> layerHashMap,
 		short songHeight, final short length, String title, String author, String originalAuthor,
 				String description, File path, int firstCustomInstrumentIndex, CustomInstrument[] customInstruments, boolean isStereo) {
 		this.speed = speed;
-		delay = 20 / speed;
+		delay = 20.0 / speed;
 		this.layerHashMap = layerHashMap;
 		this.songHeight = songHeight;
 		this.length = length;
@@ -169,14 +168,26 @@ public class Song implements Cloneable {
 	 * Gets the length in ticks of this Song
 	 * @return length of this Song
 	 */
+	@Override
 	public short getLength() {
 		return length;
+	}
+
+	/**
+	 * Gets the length in ticks of this Song
+	 *
+	 * @return length of this song in ticks
+	 */
+	@Override
+	public long getLengthInTicks() {
+		return getLength();
 	}
 
 	/**
 	 * Gets the title / name of this Song
 	 * @return title of the Song
 	 */
+	@Override
 	public String getTitle() {
 		return title;
 	}
@@ -185,6 +196,7 @@ public class Song implements Cloneable {
 	 * Gets the author of the Song
 	 * @return author
 	 */
+	@Override
 	public String getAuthor() {
 		return author;
 	}
@@ -193,6 +205,7 @@ public class Song implements Cloneable {
 	 * Gets the original author of the Song
 	 * @return author
 	 */
+	@Override
 	public String getOriginalAuthor() {
 		return originalAuthor;
 	}
@@ -201,6 +214,7 @@ public class Song implements Cloneable {
 	 * Returns the File from which this Song is sourced
 	 * @return file of this Song
 	 */
+	@Override
 	public File getPath() {
 		return path;
 	}
@@ -209,15 +223,17 @@ public class Song implements Cloneable {
 	 * Gets the description of this Song
 	 * @return description
 	 */
+	@Override
 	public String getDescription() {
 		return description;
 	}
 
 	/**
 	 * Gets the speed (ticks per second) of this Song
-	 * @return
+	 * @return speed
 	 */
-	public float getSpeed() {
+	@Override
+	public double getSpeed() {
 		return speed;
 	}
 
@@ -225,7 +241,7 @@ public class Song implements Cloneable {
 	 * Gets the delay of this Song
 	 * @return delay
 	 */
-	public float getDelay() {
+	public double getDelay() {
 		return delay;
 	}
 
@@ -239,7 +255,7 @@ public class Song implements Cloneable {
 	}
 
 	@Override
-	public Song clone() {
+	public Playable clone() {
 		return new Song(this);
 	}
 

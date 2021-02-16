@@ -7,3 +7,6 @@ api-version: 1.13
 
 description: a developer interface to play nbs-files ingame
 authors: [xxmicloxx, michidk, koca2000, Luck]
+
+softdepend:
+  - ProtocolLib

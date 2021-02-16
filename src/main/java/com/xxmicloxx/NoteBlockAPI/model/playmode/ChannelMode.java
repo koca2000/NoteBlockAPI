@@ -18,4 +18,7 @@ public abstract class ChannelMode {
 
     public abstract void play(Player player, Location location, Song song, Layer layer, Note note,
                               SoundCategory soundCategory, float volume, boolean doTranspose);
+
+    public abstract void play(Player player, Location location, Note note, SoundCategory soundCategory,
+                              float volume, boolean doTranspose);
 }

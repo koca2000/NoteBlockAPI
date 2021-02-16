@@ -1,16 +1,12 @@
 package com.xxmicloxx.NoteBlockAPI.songplayer;
 
+import com.xxmicloxx.NoteBlockAPI.model.*;
 import com.xxmicloxx.NoteBlockAPI.model.playmode.ChannelMode;
 import com.xxmicloxx.NoteBlockAPI.model.playmode.MonoMode;
 import com.xxmicloxx.NoteBlockAPI.model.playmode.MonoStereoMode;
 import org.bukkit.entity.Player;
 
 import com.xxmicloxx.NoteBlockAPI.NoteBlockAPI;
-import com.xxmicloxx.NoteBlockAPI.model.Layer;
-import com.xxmicloxx.NoteBlockAPI.model.Note;
-import com.xxmicloxx.NoteBlockAPI.model.Playlist;
-import com.xxmicloxx.NoteBlockAPI.model.Song;
-import com.xxmicloxx.NoteBlockAPI.model.SoundCategory;
 
 /**
  * SongPlayer playing to everyone added to it no matter where he is
@@ -20,13 +16,13 @@ public class RadioSongPlayer extends SongPlayer {
 	
 	//protected boolean stereo = true;
 	
-	public RadioSongPlayer(Song song) {
-		super(song);
+	public RadioSongPlayer(Playable playable) {
+		super(playable);
 		makeNewClone(com.xxmicloxx.NoteBlockAPI.RadioSongPlayer.class);
 	}
 
-	public RadioSongPlayer(Song song, SoundCategory soundCategory) {
-		super(song, soundCategory);
+	public RadioSongPlayer(Playable playable, SoundCategory soundCategory) {
+		super(playable, soundCategory);
 		makeNewClone(com.xxmicloxx.NoteBlockAPI.RadioSongPlayer.class);
 	}
 
@@ -45,19 +41,34 @@ public class RadioSongPlayer extends SongPlayer {
 	}
 
 	@Override
-	public void playTick(Player player, int tick) {
+	public void playTick(Player player, long tick) {
+		if (!(currentPlaying instanceof Song))
+			throw new IllegalStateException("Unexpected call to playTick");
 		byte playerVolume = NoteBlockAPI.getPlayerVolume(player);
 
-		for (Layer layer : song.getLayerHashMap().values()) {
-			Note note = layer.getNote(tick);
+		for (Layer layer : ((Song) currentPlaying).getLayerHashMap().values()) {
+			Note note = layer.getNote((int) tick);
 			if (note == null) {
 				continue;
 			}
 
 			float volume = (layer.getVolume() * (int) this.volume * (int) playerVolume * note.getVelocity()) / 100_00_00_00F;
 
-			channelMode.play(player, player.getEyeLocation(), song, layer, note, soundCategory, volume, !enable10Octave);
+			channelMode.play(player, player.getEyeLocation(), (Song) currentPlaying, layer, note, soundCategory, volume, !enable10Octave);
 		}
+	}
+
+	@Override
+	public void playNote(Player player, Note note) {
+		byte playerVolume = NoteBlockAPI.getPlayerVolume(player);
+
+		if (note == null) {
+			return;
+		}
+
+		float volume = ((int) this.volume * (int) playerVolume * note.getVelocity()) / 100_00_00F;
+
+		channelMode.play(player, player.getEyeLocation(), note, soundCategory, volume, !enable10Octave);
 	}
 
 	/**

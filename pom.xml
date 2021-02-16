@@ -5,7 +5,7 @@
 
 	<groupId>com.xxmicloxx</groupId>
 	<artifactId>NoteBlockAPI</artifactId>
-	<version>1.6.1.1-SNAPSHOT</version>
+	<version>1.6.2-SNAPSHOT</version>
 	<name>NoteBlockAPI</name>
 
 	<properties>
@@ -23,6 +23,10 @@
 			<id>CodeMC</id>
 			<url>https://repo.codemc.org/repository/maven-public</url>
 		</repository>
+		<repository>
+			<id>dmulloy2-repo</id>
+			<url>https://repo.dmulloy2.net/nexus/repository/public/</url>
+		</repository>
 	</repositories>
 
 	<dependencies>
@@ -30,6 +34,12 @@
 			<groupId>org.spigotmc</groupId>
 			<artifactId>spigot-api</artifactId>
 			<version>1.16.1-R0.1-SNAPSHOT</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.comphenix.protocol</groupId>
+			<artifactId>ProtocolLib</artifactId>
+			<version>4.5.1</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>

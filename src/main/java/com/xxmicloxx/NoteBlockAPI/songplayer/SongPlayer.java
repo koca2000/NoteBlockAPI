@@ -1,13 +1,16 @@
 package com.xxmicloxx.NoteBlockAPI.songplayer;
 
+import com.google.common.collect.Sets;
 import com.xxmicloxx.NoteBlockAPI.NoteBlockAPI;
 import com.xxmicloxx.NoteBlockAPI.event.*;
 import com.xxmicloxx.NoteBlockAPI.model.*;
 import com.xxmicloxx.NoteBlockAPI.model.playmode.ChannelMode;
 import com.xxmicloxx.NoteBlockAPI.model.playmode.MonoMode;
+import com.xxmicloxx.NoteBlockAPI.utils.MidiInstruments;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
+import javax.sound.midi.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -19,17 +22,16 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Plays a Song for a list of Players
- *
  */
 public abstract class SongPlayer {
 
-	protected Song song;
+	protected Playable currentPlaying;
 	protected Playlist playlist;
 	protected int actualSong = 0;
 
 	protected boolean playing = false;
 	protected boolean fading = false;
-	protected short tick = -1;
+	protected long tick = -1;
 	protected Map<UUID, Boolean> playerList = new ConcurrentHashMap<UUID, Boolean>();
 
 	protected boolean autoDestroy = false;
@@ -42,74 +44,75 @@ public abstract class SongPlayer {
 	protected RepeatMode repeat = RepeatMode.NO;
 	protected boolean random = false;
 
-	protected Map<Song, Boolean> songQueue = new ConcurrentHashMap<Song, Boolean>(); //True if already played
+	protected Map<Playable, Boolean> songQueue = new ConcurrentHashMap<Playable, Boolean>(); //True if already played
 
 	private final Lock lock = new ReentrantLock();
 	private final Random rng = new Random();
+	private final MinecraftMidiSynthesizer midiSynthesizer = new MinecraftMidiSynthesizer();
 
 	protected NoteBlockAPI plugin;
 
 	protected SoundCategory soundCategory;
 	protected ChannelMode channelMode = new MonoMode();
-	protected boolean enable10Octave = false;
+	protected boolean enable10Octave = true;
 
 	com.xxmicloxx.NoteBlockAPI.SongPlayer oldSongPlayer;
 
-	public SongPlayer(Song song) {
-		this(new Playlist(song), SoundCategory.MASTER);
+	public SongPlayer(Playable playable) {
+		this(new Playlist(playable), SoundCategory.MASTER);
 	}
 
-	public SongPlayer(Song song, SoundCategory soundCategory) {
-		this(new Playlist(song), soundCategory);
+	public SongPlayer(Playable playable, SoundCategory soundCategory) {
+		this(new Playlist(playable), soundCategory);
 	}
 
-	public SongPlayer(Song song, SoundCategory soundCategory, boolean random) {
-		this(new Playlist(song), soundCategory, random);
+	public SongPlayer(Playable playable, SoundCategory soundCategory, boolean random) {
+		this(new Playlist(playable), soundCategory, random);
 	}
-	
-	public SongPlayer(Playlist playlist){
+
+	public SongPlayer(Playlist playlist) {
 		this(playlist, SoundCategory.MASTER);
 	}
 
-	public SongPlayer(Playlist playlist, SoundCategory soundCategory){
+	public SongPlayer(Playlist playlist, SoundCategory soundCategory) {
 		this(playlist, soundCategory, false);
 	}
 
-	public SongPlayer(Playlist playlist, SoundCategory soundCategory, boolean random){
+	public SongPlayer(Playlist playlist, SoundCategory soundCategory, boolean random) {
 		this.playlist = playlist;
 		this.random = random;
 		this.soundCategory = soundCategory;
 		plugin = NoteBlockAPI.getAPI();
-		
+
 		fadeIn = new Fade(FadeType.NONE, 60);
 		fadeIn.setFadeStart((byte) 0);
 		fadeIn.setFadeTarget(volume);
-		
+
 		fadeOut = new Fade(FadeType.NONE, 60);
 		fadeOut.setFadeStart(volume);
 		fadeOut.setFadeTarget((byte) 0);
 
-		if (random){
+		if (random) {
 			checkPlaylistQueue();
 			actualSong = rng.nextInt(playlist.getCount());
 		}
-		this.song = playlist.get(actualSong);
+		this.currentPlaying = playlist.get(actualSong);
 
 		start();
 	}
 
 	/**
-	 * @deprecated
 	 * @param songPlayer
+	 * @deprecated
 	 */
-	SongPlayer(com.xxmicloxx.NoteBlockAPI.SongPlayer songPlayer){
+	SongPlayer(com.xxmicloxx.NoteBlockAPI.SongPlayer songPlayer) {
 		oldSongPlayer = songPlayer;
 		com.xxmicloxx.NoteBlockAPI.Song s = songPlayer.getSong();
 		HashMap<Integer, Layer> layerHashMap = new HashMap<Integer, Layer>();
-		for (Integer i : s.getLayerHashMap().keySet()){
+		for (Integer i : s.getLayerHashMap().keySet()) {
 			com.xxmicloxx.NoteBlockAPI.Layer l = s.getLayerHashMap().get(i);
 			HashMap<Integer, Note> noteHashMap = new HashMap<Integer, Note>();
-			for (Integer iL : l.getHashMap().keySet()){
+			for (Integer iL : l.getHashMap().keySet()) {
 				com.xxmicloxx.NoteBlockAPI.Note note = l.getHashMap().get(iL);
 				noteHashMap.put(iL, new Note(note.getInstrument(), note.getKey()));
 			}
@@ -119,17 +122,17 @@ public abstract class SongPlayer {
 			layerHashMap.put(i, layer);
 		}
 		CustomInstrument[] instruments = new CustomInstrument[s.getCustomInstruments().length];
-		for (int i = 0; i < s.getCustomInstruments().length; i++){
+		for (int i = 0; i < s.getCustomInstruments().length; i++) {
 			com.xxmicloxx.NoteBlockAPI.CustomInstrument ci = s.getCustomInstruments()[i];
 			instruments[i] = new CustomInstrument(ci.getIndex(), ci.getName(), ci.getSoundfile());
 		}
-		song = new Song(s.getSpeed(), layerHashMap, s.getSongHeight(), s.getLength(), s.getTitle(), s.getAuthor(), s.getDescription(), s.getPath(), instruments);
-		playlist = new Playlist(song);
-		
+		currentPlaying = new Song(s.getSpeed(), layerHashMap, s.getSongHeight(), s.getLength(), s.getTitle(), s.getAuthor(), s.getDescription(), s.getPath(), instruments);
+		playlist = new Playlist(currentPlaying);
+
 		fadeIn = new Fade(FadeType.NONE, 60);
 		fadeIn.setFadeStart((byte) 0);
 		fadeIn.setFadeTarget(volume);
-		
+
 		fadeOut = new Fade(FadeType.NONE, 60);
 		fadeOut.setFadeStart(volume);
 		fadeOut.setFadeTarget((byte) 0);
@@ -310,8 +313,28 @@ public abstract class SongPlayer {
 	 */
 	private void start() {
 		plugin.doAsync(() -> {
+			Sequencer lastSequencer = null;
 			while (!destroyed) {
 				long startTime = System.currentTimeMillis();
+				if(currentPlaying instanceof MidiSequence && lastSequencer != null) {
+					while (!(destroyed || NoteBlockAPI.getAPI().isDisabling()) && lastSequencer.isRunning()) {
+						try {
+							midiSynthesizer.tick();
+							tick = lastSequencer.getTickPosition();
+							long duration = System.currentTimeMillis() - startTime;
+							if (duration < 30)
+								//noinspection BusyWait
+								Thread.sleep(30 - duration);
+							startTime = System.currentTimeMillis();
+						} catch (InterruptedException e) {
+							break;
+						}
+					}
+					tick = currentPlaying.getLengthInTicks() + 1;
+					lastSequencer.close();
+					midiSynthesizer.reset();
+					lastSequencer = null;
+				}
 				lock.lock();
 				try {
 					if (destroyed || NoteBlockAPI.getAPI().isDisabling()){
@@ -319,7 +342,7 @@ public abstract class SongPlayer {
 					}
 
 					if (playing || fading) {
-						if (fadeTemp != null){
+						if (fadeTemp != null) {
 							if (fadeTemp.isDone()) {
 								fadeTemp = null;
 								fading = false;
@@ -329,33 +352,33 @@ public abstract class SongPlayer {
 									volume = fadeIn.getFadeTarget();
 									continue;
 								}
-							}else {
+							} else {
 								int fade = fadeTemp.calculateFade();
-								if (fade != -1){
+								if (fade != -1) {
 									volume = (byte) fade;
 								}
 							}
-						} else if (tick < fadeIn.getFadeDuration()){
+						} else if (tick < fadeIn.getFadeDuration()) {
 							int fade = fadeIn.calculateFade();
-							if (fade != -1){
+							if (fade != -1) {
 								volume = (byte) fade;
 							}
 							CallUpdate("fadeDone", fadeIn.getFadeDone());
-						} else if (tick >= song.getLength() - fadeOut.getFadeDuration()){
+						} else if (tick >= currentPlaying.getLengthInTicks() - fadeOut.getFadeDuration()) {
 							int fade = fadeOut.calculateFade();
-							if (fade != -1){
+							if (fade != -1) {
 								volume = (byte) fade;
 							}
 						}
-						
+
 						tick++;
-						if (tick > song.getLength()) {
+						if (tick > currentPlaying.getLengthInTicks()) {
 							tick = -1;
 							fadeIn.setFadeDone(0);
 							CallUpdate("fadeDone", fadeIn.getFadeDone());
 							fadeOut.setFadeDone(0);
 							volume = fadeIn.getFadeTarget();
-							if (repeat == RepeatMode.ONE){
+							if (repeat == RepeatMode.ONE) {
 								SongLoopEvent event = new SongLoopEvent(this);
 								plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
 
@@ -364,10 +387,10 @@ public abstract class SongPlayer {
 								}
 							} else {
 								if (random) {
-									songQueue.put(song, true);
+									songQueue.put(currentPlaying, true);
 									checkPlaylistQueue();
-									ArrayList<Song> left = new ArrayList<>();
-									for (Song s : songQueue.keySet()) {
+									ArrayList<Playable> left = new ArrayList<>();
+									for (Playable s : songQueue.keySet()) {
 										if (!songQueue.get(s)) {
 											left.add(s);
 										}
@@ -375,12 +398,13 @@ public abstract class SongPlayer {
 
 									if (left.size() == 0) {
 										left.addAll(songQueue.keySet());
-										for (Song s : songQueue.keySet()) {
+										for (Playable s : songQueue.keySet()) {
 											songQueue.put(s, false);
 										}
-										song = left.get(rng.nextInt(left.size()));
-										actualSong = playlist.getIndex(song);
-										CallUpdate("song", song);
+										currentPlaying = left.get(rng.nextInt(left.size()));
+										actualSong = playlist.getIndex(currentPlaying);
+										if (currentPlaying instanceof Song)
+											CallUpdate("song", currentPlaying);
 										if (repeat == RepeatMode.ALL) {
 											SongLoopEvent event = new SongLoopEvent(this);
 											plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
@@ -390,10 +414,11 @@ public abstract class SongPlayer {
 											}
 										}
 									} else {
-										song = left.get(rng.nextInt(left.size()));
-										actualSong = playlist.getIndex(song);
+										currentPlaying = left.get(rng.nextInt(left.size()));
+										actualSong = playlist.getIndex(currentPlaying);
 
-										CallUpdate("song", song);
+										if (currentPlaying instanceof Song)
+											CallUpdate("song", currentPlaying);
 										SongNextEvent event = new SongNextEvent(this);
 										plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
 										continue;
@@ -401,15 +426,17 @@ public abstract class SongPlayer {
 								} else {
 									if (playlist.hasNext(actualSong)) {
 										actualSong++;
-										song = playlist.get(actualSong);
-										CallUpdate("song", song);
+										currentPlaying = playlist.get(actualSong);
+										if (currentPlaying instanceof Song)
+											CallUpdate("song", currentPlaying);
 										SongNextEvent event = new SongNextEvent(this);
 										plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
 										continue;
 									} else {
 										actualSong = 0;
-										song = playlist.get(actualSong);
-										CallUpdate("song", song);
+										currentPlaying = playlist.get(actualSong);
+										if (currentPlaying instanceof Song)
+											CallUpdate("song", currentPlaying);
 										if (repeat == RepeatMode.ALL) {
 											SongLoopEvent event = new SongLoopEvent(this);
 											plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
@@ -430,8 +457,8 @@ public abstract class SongPlayer {
 							continue;
 						}
 						CallUpdate("tick", tick);
-						
-						plugin.doSync(() -> {
+
+						if (currentPlaying instanceof Song)
 							for (UUID uuid : playerList.keySet()) {
 								Player player = Bukkit.getPlayer(uuid);
 								if (player == null) {
@@ -440,7 +467,16 @@ public abstract class SongPlayer {
 								}
 								playTick(player, tick);
 							}
-						});
+						else if (currentPlaying instanceof MidiSequence) {
+							final Sequencer sequencer = MidiSystem.getSequencer(false);
+							lastSequencer = sequencer;
+							midiSynthesizer.reset();
+							sequencer.getTransmitter().setReceiver(midiSynthesizer);
+							final Sequence sequence = ((MidiSequence) currentPlaying).sequence;
+							sequencer.open();
+							sequencer.setSequence(sequence);
+							sequencer.start();
+						}
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -453,7 +489,7 @@ public abstract class SongPlayer {
 				}
 
 				long duration = System.currentTimeMillis() - startTime;
-				float delayMillis = song.getDelay() * 50;
+				double delayMillis = currentPlaying instanceof Song ? ((Song) currentPlaying).getDelay() * 50 : 0;
 				if (duration < delayMillis) {
 					try {
 						Thread.sleep((long) (delayMillis - duration));
@@ -465,20 +501,20 @@ public abstract class SongPlayer {
 		});
 	}
 
-	private void checkPlaylistQueue(){
-		for (Song s : songQueue.keySet()){
-			if (!playlist.contains(s)){
+	private void checkPlaylistQueue() {
+		for (Playable s : songQueue.keySet()) {
+			if (!playlist.contains(s)) {
 				songQueue.remove(s);
 			}
 		}
 
-		for (Song s : playlist.getSongList()){
-			if (!songQueue.containsKey(s)){
+		for (Playable s : playlist.getSongList()) {
+			if (!songQueue.containsKey(s)) {
 				songQueue.put(s, false);
 			}
 		}
 	}
-	
+
 	/**
 	 * Returns {@link Fade} for Fade in effect
 	 * @return Fade
@@ -575,10 +611,12 @@ public abstract class SongPlayer {
 
 	/**
 	 * Plays the Song for the specific player
-	 * @param player to play this SongPlayer for
-	 * @param tick to play at
+	 *  @param player to play this SongPlayer for
+	 * @param tick   to play at
 	 */
-	public abstract void playTick(Player player, int tick);
+	public abstract void playTick(Player player, long tick);
+
+	public abstract void playNote(Player player, Note note);
 
 	/**
 	 * SongPlayer will destroy itself
@@ -653,7 +691,7 @@ public abstract class SongPlayer {
 	 * Gets the current tick of this SongPlayer
 	 * @return
 	 */
-	public short getTick() {
+	public long getTick() {
 		return tick;
 	}
 
@@ -735,56 +773,71 @@ public abstract class SongPlayer {
 			if (playing) fadeTemp.setFadeTarget(volume);
 			else fadeTemp.setFadeStart(volume);
 		}
-		
+
 		CallUpdate("volume", volume);
 	}
 
 	/**
 	 * Gets the Song being played by this SongPlayer
+	 *
 	 * @return
+	 * @deprecated see {@link SongPlayer#getPlaying()}
 	 */
+	@Deprecated
 	public Song getSong() {
-		return song;
+		return currentPlaying instanceof Song ? (Song) currentPlaying : null;
 	}
-	
+
+	/**
+	 * Gets the Playable being played by this SongPlayer
+	 *
+	 * @return the playable
+	 */
+	public Playable getPlaying() {
+		return currentPlaying;
+	}
+
 	/**
 	 * Gets the Playlist being played by this SongPlayer
+	 *
 	 * @return
 	 */
 	public Playlist getPlaylist() {
 		return playlist;
 	}
-	
+
 	/**
 	 * Sets the Playlist being played by this SongPlayer. Will affect next Song
 	 */
 	public void setPlaylist(Playlist playlist) {
 		this.playlist = playlist;
 	}
-	
+
 	/**
 	 * Get index of actually played {@link Song} in {@link Playlist}
 	 * @return
 	 */
-	public int getPlayedSongIndex(){
+	public int getPlayedSongIndex() {
 		return actualSong;
 	}
-	
+
 	/**
 	 * Start playing {@link Song} at specified index in {@link Playlist}
 	 * If there is no {@link Song} at this index, {@link SongPlayer} will continue playing current song
+	 *
 	 * @param index
 	 */
-	public void playSong(int index){
+	public void playSong(int index) {
 		lock.lock();
 		try {
-			if (playlist.exist(index)){
-				song = playlist.get(index);
+			if (playlist.exist(index)) {
+				currentPlaying = playlist.get(index);
 				actualSong = index;
 				tick = -1;
 				fadeIn.setFadeDone(0);
 				fadeOut.setFadeDone(0);
-				CallUpdate("song", song);
+				if (currentPlaying instanceof Song)
+				CallUpdate("song", currentPlaying);
 				CallUpdate("fadeDone", fadeIn.getFadeDone());
 				CallUpdate("tick", tick);
 			}
@@ -796,10 +849,10 @@ public abstract class SongPlayer {
 	/**
 	 * Start playing {@link Song} that is next in {@link Playlist} or random {@link Song} from {@link Playlist}
 	 */
-	public void playNextSong(){
+	public void playNextSong() {
 		lock.lock();
 		try {
-			tick = song.getLength();
+			tick = currentPlaying.getLength();
 		} finally {
 			lock.unlock();
 		}
@@ -895,11 +948,250 @@ public abstract class SongPlayer {
 		try {
 			Constructor c = newClass.getDeclaredConstructor(new Class[] { SongPlayer.class });
 			c.setAccessible(true);
-			oldSongPlayer = (com.xxmicloxx.NoteBlockAPI.SongPlayer) c.newInstance(new Object[]{this});
+			oldSongPlayer = (com.xxmicloxx.NoteBlockAPI.SongPlayer) c.newInstance(new Object[] { this });
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
 				| NoSuchMethodException | SecurityException e) {
 			e.printStackTrace();
 		}
 	}
 
+	private class MinecraftMidiSynthesizer implements Receiver {
+
+		private final MidiInstruments.MidiInstrument[] channelPrograms = new MidiInstruments.MidiInstrument[16];
+		private final short[] channelPitchBends = new short[16];
+		private final byte[][] channelPolyPressures = new byte[16][128];
+		private final byte[] channelPressures = new byte[16];
+		@SuppressWarnings("unchecked")
+		private final Set<SimpleNote>[] runningNotes = new Set[16];
+		@SuppressWarnings("unchecked")
+		private final Set<SimpleNote>[] pendingOffNotes = new Set[16];
+
+		private final boolean[] holdPedal = new boolean[16];
+
+		{
+			reset();
+		}
+
+		private void reset() {
+			Arrays.fill(channelPrograms, MidiInstruments.instrumentMapping.get(0));
+			Arrays.fill(channelPitchBends, (short) 0);
+			for (byte[] bytes : channelPolyPressures) {
+				Arrays.fill(bytes, (byte) 127);
+			}
+			Arrays.fill(channelPressures, (byte) 127);
+			Arrays.fill(runningNotes, Sets.newConcurrentHashSet());
+			Arrays.fill(pendingOffNotes, Sets.newConcurrentHashSet());
+			resetControllers();
+		}
+
+		private void resetControllers() {
+			Arrays.fill(holdPedal, false);
+		}
+
+		@Override
+		public void send(MidiMessage midiMessage, long l) {
+			try {
+				if (midiMessage instanceof ShortMessage) {
+					ShortMessage shortMessage = (ShortMessage) midiMessage.clone();
+					if (shortMessage.getCommand() == ShortMessage.NOTE_ON && shortMessage.getData2() == 0) {
+						try {
+							shortMessage.setMessage(ShortMessage.NOTE_OFF, shortMessage.getData1(), 64);
+						} catch (InvalidMidiDataException e) {
+							e.printStackTrace();
+						}
+					}
+					switch (shortMessage.getCommand()) {
+						case ShortMessage.NOTE_ON:
+							noteOn(shortMessage);
+							break;
+						case ShortMessage.NOTE_OFF:
+							noteOff(shortMessage);
+							break;
+						case ShortMessage.PROGRAM_CHANGE:
+							programChange(shortMessage);
+							break;
+						case ShortMessage.PITCH_BEND:
+							pitchBend(shortMessage);
+							break;
+						case ShortMessage.POLY_PRESSURE:
+							polyPressure(shortMessage);
+							break;
+						case ShortMessage.CHANNEL_PRESSURE:
+							channelPressure(shortMessage);
+							break;
+						case ShortMessage.SYSTEM_RESET:
+							reset();
+							break;
+						case ShortMessage.CONTROL_CHANGE:
+							controlChange(shortMessage);
+							break;
+					}
+
+				} else //noinspection StatementWithEmptyBody
+					if (midiMessage instanceof SysexMessage) {
+
+					} else System.err.println("Invalid message: " + midiMessage);
+			} catch (Throwable t) {
+				t.printStackTrace();
+			}
+		}
+
+		private void controlChange(ShortMessage shortMessage) {
+			switch (shortMessage.getData1()) {
+				case 64: // Hold Pedal
+					holdPedal[shortMessage.getChannel()] = shortMessage.getData2() >= 64;
+					handleHoldPedal(shortMessage);
+					break;
+				case 123: // All Notes Off
+				case 124:
+				case 125:
+				case 126:
+				case 127:
+					if (holdPedal[shortMessage.getChannel()]) {
+						for (SimpleNote note : runningNotes[shortMessage.getChannel()])
+							pendingOffNotes[shortMessage.getChannel()].add(note);
+					} else {
+						runningNotes[shortMessage.getChannel()].clear();
+					}
+					break;
+				case 121:
+					holdPedal[shortMessage.getChannel()] = false;
+					handleHoldPedal(shortMessage);
+					break;
+			}
+		}
+
+		private void handleHoldPedal(ShortMessage shortMessage) {
+			if (!holdPedal[shortMessage.getChannel()]) {
+				for (Iterator<SimpleNote> iterator = pendingOffNotes[shortMessage.getChannel()].iterator(); iterator.hasNext(); ) {
+					SimpleNote note = iterator.next();
+					runningNotes[shortMessage.getChannel()].remove(note);
+					iterator.remove();
+				}
+			}
+		}
+
+		private void noteOff(ShortMessage shortMessage) {
+			final Optional<SimpleNote> found = runningNotes[shortMessage.getChannel()].stream().filter(simpleNote -> simpleNote.note == shortMessage.getData1()).findFirst();
+			if(!found.isPresent()) return;
+			if (holdPedal[shortMessage.getChannel()])
+				pendingOffNotes[shortMessage.getChannel()].add(found.get());
+			else
+				runningNotes[shortMessage.getChannel()].remove(found.get());
+		}
+
+		public void channelPressure(ShortMessage shortMessage) {
+			channelPressures[shortMessage.getChannel()] = (byte) shortMessage.getData1();
+		}
+
+		public void polyPressure(ShortMessage shortMessage) {
+			channelPolyPressures[shortMessage.getChannel()][shortMessage.getData1()] = (byte) shortMessage.getData2();
+		}
+
+		public void pitchBend(ShortMessage shortMessage) {
+			channelPitchBends[shortMessage.getChannel()] = (short) ((shortMessage.getData1() + shortMessage.getData2() * 128) - 8192);
+		}
+
+		public void programChange(ShortMessage shortMessage) {
+			channelPrograms[shortMessage.getChannel()] = MidiInstruments.instrumentMapping.get(shortMessage.getData1());
+			Arrays.fill(channelPolyPressures[shortMessage.getChannel()], (byte) 127);
+			runningNotes[shortMessage.getChannel()].clear();
+		}
+
+		public void noteOn(ShortMessage shortMessage) {
+			final Note note;
+			if (shortMessage.getChannel() != 9) {
+				final MidiInstruments.MidiInstrument channelProgram = channelPrograms[shortMessage.getChannel()];
+				if (channelProgram == null) return;
+				note = new Note(
+						(byte) channelProgram.mcInstrument,
+						(short) (shortMessage.getData1() + (channelProgram.octaveModifier * 12)),
+						(byte) ((shortMessage.getData2() / 127.0) * (channelPolyPressures[shortMessage.getChannel()][shortMessage.getData1()] / 127.0) * (channelPressures[shortMessage.getChannel()] / 127.0) * 100),
+						100,
+						(short) (channelPitchBends[shortMessage.getChannel()] / 4096.0 * 100));
+				if (channelProgram.isLongSound) {
+					runningNotes[shortMessage.getChannel()].remove(new SimpleNote(shortMessage.getData1(), shortMessage.getData2()));
+					runningNotes[shortMessage.getChannel()].add(new SimpleNote(shortMessage.getData1(), shortMessage.getData2()));
+				}
+			} else {
+				final MidiInstruments.MidiPercussion percussion = MidiInstruments.percussionMapping.get(shortMessage.getData1());
+				if (percussion == null) return;
+				note = new Note(
+						(byte) percussion.mcInstrument,
+						(short) percussion.midiKey,
+						(byte) ((shortMessage.getData2() / 127.0) * (channelPolyPressures[shortMessage.getChannel()][shortMessage.getData1()] / 127.0) * (channelPressures[shortMessage.getChannel()] / 127.0) * 100),
+						100,
+						(short) 0);
+			}
+			playNote(note);
+		}
+
+		private void playNote(Note note) {
+			for (UUID uuid : playerList.keySet()) {
+				Player player = Bukkit.getPlayer(uuid);
+				if (player == null) {
+					// offline...
+					continue;
+				}
+				SongPlayer.this.playNote(player, note);
+			}
+		}
+
+		@Override
+		public void close() {
+
+		}
+
+		public void tick() {
+			for (int channel = 0, runningNotesLength = runningNotes.length; channel < runningNotesLength; channel++) {
+				Set<SimpleNote> channelRunningNotes = runningNotes[channel];
+				for (SimpleNote note : channelRunningNotes) {
+					final MidiInstruments.MidiInstrument channelProgram = channelPrograms[channel];
+					if (channelProgram == null) return;
+					playNote(
+							new Note(
+									(byte) channelProgram.mcInstrument,
+									(short) (note.note + (channelProgram.octaveModifier * 12)),
+									(byte) Math.max(((note.velocity / 127.0) * (channelPolyPressures[channel][note.note] / 127.0) * (channelPressures[channel] / 127.0)) * 10, 1),
+									100,
+									(short) (channelPitchBends[channel] / 4096.0 * 100))
+					);
+				}
+
+			}
+
+		}
+
+		private class SimpleNote {
+
+			public final int note;
+			public final int velocity;
+
+			private SimpleNote(int note, int velocity) {
+				this.note = note;
+				this.velocity = velocity;
+			}
+
+			@Override
+			public boolean equals(Object o) {
+				if (this == o) return true;
+				if (o == null || getClass() != o.getClass()) return false;
+				SimpleNote that = (SimpleNote) o;
+				return note == that.note;
+			}
+
+			@Override
+			public int hashCode() {
+				return Objects.hash(note);
+			}
+
+			@Override
+			public String toString() {
+				return "SimpleNote{" +
+						"note=" + note +
+						", velocity=" + velocity +
+						'}';
+			}
+		}
+	}
 }

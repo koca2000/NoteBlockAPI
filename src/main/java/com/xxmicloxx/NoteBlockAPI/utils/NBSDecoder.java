@@ -80,7 +80,7 @@ public class NBSDecoder {
 			String author = readString(dataInputStream);
 			String originalAuthor = readString(dataInputStream); // original author
 			String description = readString(dataInputStream);
-			float speed = readShort(dataInputStream) / 100f;
+			double speed = readShort(dataInputStream) / 100f;
 			dataInputStream.readBoolean(); // auto-save
 			dataInputStream.readByte(); // auto-save duration
 			dataInputStream.readByte(); // x/4ths, time signature
