@@ -1,11 +1,9 @@
 package com.xxmicloxx.NoteBlockAPI;
 
+import com.xxmicloxx.NoteBlockAPI.utils.InstrumentUtils;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-
-import com.xxmicloxx.NoteBlockAPI.utils.InstrumentUtils;
 
 /**
  * @deprecated {@link com.xxmicloxx.NoteBlockAPI.songplayer.NoteBlockSongPlayer}
@@ -62,7 +60,7 @@ public class NoteBlockSongPlayer extends SongPlayer {
 
 	@Override
 	public void playTick(Player player, int tick) {
-		if (noteBlock.getType() != Material.NOTE_BLOCK) {
+		if (noteBlock.getType() != com.xxmicloxx.NoteBlockAPI.utils.CompatibilityUtils.getNoteBlockMaterial()) {
 			return;
 		}
 		if (!player.getWorld().getName().equals(noteBlock.getWorld().getName())) {
