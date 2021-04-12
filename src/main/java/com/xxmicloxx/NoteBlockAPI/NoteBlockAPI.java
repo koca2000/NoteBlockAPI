@@ -200,8 +200,6 @@ public class NoteBlockAPI extends JavaPlugin {
 				}
 			}
 		}, 20*10, 20 * 60 * 60 * 24);
-		
-		new MathUtils();
 	}
 
 	@Override
