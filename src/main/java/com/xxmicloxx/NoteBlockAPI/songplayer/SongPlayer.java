@@ -22,36 +22,34 @@ import java.util.concurrent.locks.ReentrantLock;
  *
  */
 public abstract class SongPlayer {
+	protected NoteBlockAPI plugin;
 
 	protected Song song;
 	protected Playlist playlist;
 	protected int actualSong = 0;
 
+	protected short tick = -1;
+
 	protected boolean playing = false;
 	protected boolean fading = false;
-	protected short tick = -1;
-	protected Map<UUID, Boolean> playerList = new ConcurrentHashMap<UUID, Boolean>();
-
-	protected boolean autoDestroy = false;
 	protected boolean destroyed = false;
+
+	protected Map<UUID, Boolean> playerList = new ConcurrentHashMap<UUID, Boolean>();
+	protected Map<Song, Boolean> songQueue = new ConcurrentHashMap<Song, Boolean>(); //True if already played
 
 	protected byte volume = 100;
 	protected Fade fadeIn;
 	protected Fade fadeOut;
 	protected Fade fadeTemp = null;
+	protected SoundCategory soundCategory;
 	protected RepeatMode repeat = RepeatMode.NO;
+	protected ChannelMode channelMode = new MonoMode();
 	protected boolean random = false;
-
-	protected Map<Song, Boolean> songQueue = new ConcurrentHashMap<Song, Boolean>(); //True if already played
+	protected boolean enable10Octave = false;
+	protected boolean autoDestroy = false;
 
 	private final Lock lock = new ReentrantLock();
 	private final Random rng = new Random();
-
-	protected NoteBlockAPI plugin;
-
-	protected SoundCategory soundCategory;
-	protected ChannelMode channelMode = new MonoMode();
-	protected boolean enable10Octave = false;
 
 	public SongPlayer(Song song) {
 		this(new Playlist(song), SoundCategory.MASTER);
@@ -95,107 +93,6 @@ public abstract class SongPlayer {
 
 		start();
 	}
-	
-	/**
-	 * Gets the FadeType for this SongPlayer (unused)
-	 * @return FadeType
-	 * @deprecated returns fadeIn value
-	 */
-	@Deprecated
-	public FadeType getFadeType() {
-		return fadeIn.getType();
-	}
-
-	/**
-	 * Sets the FadeType for this SongPlayer
-	 * @param fadeType
-	 * @deprecated set fadeIn value
-	 */
-	@Deprecated
-	public void setFadeType(FadeType fadeType) {
-		fadeIn.setType(fadeType);
-	}
-
-	/**
-	 * Target volume for fade
-	 * @return byte representing fade target
-	 * @deprecated returns fadeIn value
-	 */
-	@Deprecated
-	public byte getFadeTarget() {
-		return fadeIn.getFadeTarget();
-	}
-
-	/**
-	 * Set target volume for fade
-	 * @param fadeTarget
-	 * @deprecated set fadeIn value
-	 */
-	@Deprecated
-	public void setFadeTarget(byte fadeTarget) {
-		fadeIn.setFadeTarget(fadeTarget);
-	}
-
-	/**
-	 * Gets the starting volume for the fade
-	 * @return
-	 * @deprecated returns fadeIn value
-	 */
-	@Deprecated
-	public byte getFadeStart() {
-		return fadeIn.getFadeStart();
-	}
-
-	/**
-	 * Sets the starting volume for the fade
-	 * @param fadeStart
-	 * @deprecated set fadeIn value
-	 */
-	@Deprecated
-	public void setFadeStart(byte fadeStart) {
-		fadeIn.setFadeStart(fadeStart);
-	}
-
-	/**
-	 * Gets the duration of the fade
-	 * @return duration of the fade
-	 * @deprecated returns fadeIn value
-	 */
-	@Deprecated
-	public int getFadeDuration() {
-		return fadeIn.getFadeDuration();
-	}
-
-	/**
-	 * Sets the duration of the fade
-	 * @param fadeDuration
-	 * @deprecated set fadeIn value
-	 */
-	@Deprecated
-	public void setFadeDuration(int fadeDuration) {
-		fadeIn.setFadeDuration(fadeDuration);
-	}
-
-	/**
-	 * Gets the tick when fade will be finished
-	 * @return tick
-	 * @deprecated returns fadeIn value
-	 */
-	@Deprecated
-	public int getFadeDone() {
-		return fadeIn.getFadeDone();
-	}
-
-	/**
-	 * Sets the tick when fade will be finished
-	 *
-	 * @param fadeDone
-	 * @deprecated set fadeIn value
-	 */
-	@Deprecated
-	public void setFadeDone(int fadeDone) {
-		fadeIn.setFadeDone(fadeDone);
-	}
 
 	/**
 	 * Check if 6 octave range is enabled
@@ -207,8 +104,8 @@ public abstract class SongPlayer {
 	}
 
 	/**
-	 * Enable or disable 6 octave range
-	 * <p>
+	 * Enable or disable 10 octave range
+	 *
 	 * If not enabled, notes will be transposed to 2 octave range
 	 *
 	 * @param enable10Octave true if enabled, false otherwise
@@ -693,24 +590,6 @@ public abstract class SongPlayer {
 	 */
 	public void setCategory(SoundCategory soundCategory) {
 		this.soundCategory = soundCategory;
-	}
-	
-	/**
-	 * Sets whether the SongPlayer will loop
-	 * @deprecated
-	 * @param loop
-	 */
-	public void setLoop(boolean loop){
-		this.repeat = RepeatMode.ALL;
-	}
-	
-	/**
-	 * Gets whether the SongPlayer will loop
-	 * @deprecated
-	 * @return is loop
-	 */
-	public boolean isLoop(){
-		return repeat == RepeatMode.ALL;
 	}
 
 	/**

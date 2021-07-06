@@ -76,15 +76,6 @@ public class CompatibilityUtils {
 	}
 
 	/**
-	 * Returns whether the version of Bukkit is or is after 1.12
-	 * @return version is after 1.12
-	 * @deprecated Compare {@link #getServerVersion()} with 0.0112f
-	 */
-	public static boolean isPost1_12() {
-		return getServerVersion() >= 0.0112f;
-	}
-
-	/**
 	 * Returns if SoundCategory is able to be used
 	 * @see org.bukkit.SoundCategory
 	 * @see SoundCategory
@@ -92,68 +83,6 @@ public class CompatibilityUtils {
 	 */
 	protected static boolean isSoundCategoryCompatible() {
 		return getServerVersion() >= 0.0111f;
-	}
-	
-	/**
-	 * Plays a sound using NMS &amp; reflection
-	 * @param player
-	 * @param location
-	 * @param sound
-	 * @param category
-	 * @param volume
-	 * @param pitch
-	 * 
-	 * @deprecated use {@link #playSound(Player, Location, String, SoundCategory, float, float, float)}
-	 */
-	public static void playSound(Player player, Location location, String sound, 
-			SoundCategory category, float volume, float pitch) {
-		playSound(player, location, sound, category, volume, pitch, 0);
-	}
-
-	/**
-	 * Plays a sound using NMS &amp; reflection
-	 * @param player
-	 * @param location
-	 * @param sound
-	 * @param category
-	 * @param volume
-	 * @param pitch
-	 * @deprecated use {@link #playSound(Player, Location, String, SoundCategory, float, float, float)}
-	 */
-	public static void playSound(Player player, Location location, String sound, 
-			SoundCategory category, float volume, float pitch, boolean stereo) {
-		playSound(player, location, sound, category, volume, pitch, stereo ? 2 : 0);
-	}
-
-	/**
-	 * Plays a sound using NMS &amp; reflection
-	 * @param player
-	 * @param location
-	 * @param sound
-	 * @param category
-	 * @param volume
-	 * @param pitch
-	 * 
-	 * @deprecated use {@link #playSound(Player, Location, Sound, SoundCategory, float, float, float)}
-	 */
-	public static void playSound(Player player, Location location, Sound sound, 
-			SoundCategory category, float volume, float pitch) {
-		playSound(player, location, sound, category, volume, pitch, 0);
-	}
-	
-	/**
-	 * Plays a sound using NMS &amp; reflection
-	 * @param player
-	 * @param location
-	 * @param sound
-	 * @param category
-	 * @param volume
-	 * @param pitch
-	 * @deprecated use {@link #playSound(Player, Location, Sound, SoundCategory, float, float, float)}
-	 */
-	public static void playSound(Player player, Location location, Sound sound, 
-			SoundCategory category, float volume, float pitch, boolean stereo) {
-		playSound(player, location, sound, category, volume, pitch, stereo ? 2 : 0);
 	}
 
 	/**
@@ -200,15 +129,6 @@ public class CompatibilityUtils {
 		} catch (NoSuchMethodException | ClassNotFoundException | IllegalAccessException | InvocationTargetException e) {
 			e.printStackTrace();
 		}
-	}
-
-	/**
-	 * Gets instruments which were added post-1.12
-	 * @return ArrayList of instruments
-	 * @deprecated Use {@link #getVersionCustomInstruments(float)}
-	 */
-	public static ArrayList<CustomInstrument> get1_12Instruments(){
-		return getVersionCustomInstruments(0.0112f);
 	}
 
 	/**

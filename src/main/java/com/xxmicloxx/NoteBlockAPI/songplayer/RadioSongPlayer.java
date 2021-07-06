@@ -51,26 +51,6 @@ public class RadioSongPlayer extends SongPlayer {
 	}
 
 	/**
-	 * Returns if the SongPlayer will play Notes from two sources as stereo
-	 * @return if is played stereo
-     * @deprecated
-	 */
-	@Deprecated
-	public boolean isStereo(){
-		return !(channelMode instanceof MonoMode);
-	}
-	
-	/**
-	 * Sets if the SongPlayer will play Notes from two sources as stereo
-	 * @param stereo
-     * @deprecated
-	 */
-	@Deprecated
-	public void setStereo(boolean stereo){
-		channelMode = stereo ? new MonoMode() : new MonoStereoMode();
-	}
-
-	/**
 	 * Sets how will be {@link Note} played to {@link Player} (eg. mono or stereo). Default is {@link MonoMode}.
 	 * @param mode
 	 */

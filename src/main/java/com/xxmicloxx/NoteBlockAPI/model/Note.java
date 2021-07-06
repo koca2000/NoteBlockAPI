@@ -2,7 +2,6 @@ package com.xxmicloxx.NoteBlockAPI.model;
 
 /**
  * Represents a note played; contains the instrument and the key
- * @see NotePitch
  *
  */
 public class Note {
