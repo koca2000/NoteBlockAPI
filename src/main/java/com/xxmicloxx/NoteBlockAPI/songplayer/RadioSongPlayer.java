@@ -17,31 +17,21 @@ import com.xxmicloxx.NoteBlockAPI.model.SoundCategory;
  *
  */
 public class RadioSongPlayer extends SongPlayer {
-	
-	//protected boolean stereo = true;
-	
+
 	public RadioSongPlayer(Song song) {
 		super(song);
-		makeNewClone(com.xxmicloxx.NoteBlockAPI.RadioSongPlayer.class);
 	}
 
 	public RadioSongPlayer(Song song, SoundCategory soundCategory) {
 		super(song, soundCategory);
-		makeNewClone(com.xxmicloxx.NoteBlockAPI.RadioSongPlayer.class);
-	}
-
-	private RadioSongPlayer(com.xxmicloxx.NoteBlockAPI.SongPlayer songPlayer) {
-		super(songPlayer);
 	}
 
 	public RadioSongPlayer(Playlist playlist, SoundCategory soundCategory) {
 		super(playlist, soundCategory);
-		makeNewClone(com.xxmicloxx.NoteBlockAPI.RadioSongPlayer.class);
 	}
 
 	public RadioSongPlayer(Playlist playlist) {
 		super(playlist);
-		makeNewClone(com.xxmicloxx.NoteBlockAPI.RadioSongPlayer.class);
 	}
 
 	@Override

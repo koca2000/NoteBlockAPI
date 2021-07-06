@@ -20,10 +20,6 @@ public abstract class RangeSongPlayer extends SongPlayer{
 
 	public RangeSongPlayer(Song song) {
 		super(song);
-	}	
-
-	protected RangeSongPlayer(com.xxmicloxx.NoteBlockAPI.SongPlayer songPlayer) {
-		super(songPlayer);
 	}
 
 	public RangeSongPlayer(Playlist playlist, SoundCategory soundCategory) {
@@ -34,24 +30,12 @@ public abstract class RangeSongPlayer extends SongPlayer{
 		super(playlist);
 	}
 
-	@Override
-	void update(String key, Object value) {
-		super.update(key, value);
-		
-		switch (key){
-			case "distance":
-				distance = (int) value;
-				break;
-		}
-	}
-
 	/**
 	 * Sets distance in blocks where would be player able to hear sound. 
 	 * @param distance (Default 16 blocks)
 	 */
 	public void setDistance(int distance) {
 		this.distance = distance;
-		CallUpdate("distance", distance);
 	}
 
 	public int getDistance() {

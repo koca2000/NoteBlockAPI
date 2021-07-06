@@ -8,7 +8,6 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
 import com.xxmicloxx.NoteBlockAPI.NoteBlockAPI;
-import com.xxmicloxx.NoteBlockAPI.SongPlayer;
 import com.xxmicloxx.NoteBlockAPI.event.PlayerRangeStateChangeEvent;
 import com.xxmicloxx.NoteBlockAPI.model.Layer;
 import com.xxmicloxx.NoteBlockAPI.model.Note;
@@ -27,37 +26,18 @@ public class NoteBlockSongPlayer extends RangeSongPlayer {
 
 	public NoteBlockSongPlayer(Song song) {
 		super(song);
-		makeNewClone(com.xxmicloxx.NoteBlockAPI.NoteBlockSongPlayer.class);
 	}
 
 	public NoteBlockSongPlayer(Song song, SoundCategory soundCategory) {
 		super(song, soundCategory);
-		makeNewClone(com.xxmicloxx.NoteBlockAPI.NoteBlockSongPlayer.class);
 	}
 
 	public NoteBlockSongPlayer(Playlist playlist, SoundCategory soundCategory) {
 		super(playlist, soundCategory);
-		makeNewClone(com.xxmicloxx.NoteBlockAPI.NoteBlockSongPlayer.class);
 	}
 
 	public NoteBlockSongPlayer(Playlist playlist) {
 		super(playlist);
-		makeNewClone(com.xxmicloxx.NoteBlockAPI.NoteBlockSongPlayer.class);
-	}
-
-	private NoteBlockSongPlayer(SongPlayer songPlayer) {
-		super(songPlayer);
-	}
-	
-	@Override
-	void update(String key, Object value) {
-		super.update(key, value);
-		
-		switch (key){
-			case "noteBlock":
-				noteBlock = (Block) value;
-				break;
-		}
 	}
 
 	/**
@@ -73,7 +53,6 @@ public class NoteBlockSongPlayer extends RangeSongPlayer {
 	 */
 	public void setNoteBlock(Block noteBlock) {
 		this.noteBlock = noteBlock;
-		CallUpdate("noteBlock", noteBlock);
 	}
 
 	@Override

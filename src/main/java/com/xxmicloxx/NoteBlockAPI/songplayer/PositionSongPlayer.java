@@ -5,7 +5,6 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 import com.xxmicloxx.NoteBlockAPI.NoteBlockAPI;
-import com.xxmicloxx.NoteBlockAPI.SongPlayer;
 import com.xxmicloxx.NoteBlockAPI.event.PlayerRangeStateChangeEvent;
 import com.xxmicloxx.NoteBlockAPI.model.Layer;
 import com.xxmicloxx.NoteBlockAPI.model.Note;
@@ -23,37 +22,18 @@ public class PositionSongPlayer extends RangeSongPlayer {
 
 	public PositionSongPlayer(Song song) {
 		super(song);
-		makeNewClone(com.xxmicloxx.NoteBlockAPI.PositionSongPlayer.class);
 	}
 
 	public PositionSongPlayer(Song song, SoundCategory soundCategory) {
 		super(song, soundCategory);
-		makeNewClone(com.xxmicloxx.NoteBlockAPI.PositionSongPlayer.class);
-	}
-	
-	private PositionSongPlayer(SongPlayer songPlayer) {
-		super(songPlayer);
 	}
 	
 	public PositionSongPlayer(Playlist playlist, SoundCategory soundCategory) {
 		super(playlist, soundCategory);
-		makeNewClone(com.xxmicloxx.NoteBlockAPI.PositionSongPlayer.class);
 	}
 
 	public PositionSongPlayer(Playlist playlist) {
 		super(playlist);
-		makeNewClone(com.xxmicloxx.NoteBlockAPI.PositionSongPlayer.class);
-	}
-
-	@Override
-	void update(String key, Object value) {
-		super.update(key, value);
-		
-		switch (key){
-			case "targetLocation":
-				targetLocation = (Location) value;
-				break;
-		}
 	}
 
 	/**
@@ -69,7 +49,6 @@ public class PositionSongPlayer extends RangeSongPlayer {
 	 */
 	public void setTargetLocation(Location targetLocation) {
 		this.targetLocation = targetLocation;
-		CallUpdate("targetLocation", targetLocation);
 	}
 
 	@Override

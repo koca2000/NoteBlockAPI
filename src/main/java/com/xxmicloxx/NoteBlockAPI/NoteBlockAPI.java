@@ -144,50 +144,7 @@ public class NoteBlockAPI extends JavaPlugin {
 		
 		Metrics metrics = new Metrics(this, 1083);
 		
-		
-		new NoteBlockPlayerMain().onEnable();
-		
-		getServer().getScheduler().runTaskLater(this, new Runnable() {
-			
-			@Override
-			public void run() {
-				Plugin[] plugins = getServer().getPluginManager().getPlugins();
-		        Type[] types = new Type[]{PlayerRangeStateChangeEvent.class, SongDestroyingEvent.class, SongEndEvent.class, SongStoppedEvent.class };
-		        for (Plugin plugin : plugins) {
-		            ArrayList<RegisteredListener> rls = HandlerList.getRegisteredListeners(plugin);
-		            for (RegisteredListener rl : rls) {
-		                Method[] methods = rl.getListener().getClass().getDeclaredMethods();
-		                for (Method m : methods) {
-		                    Type[] params = m.getParameterTypes();
-		                    param:
-		                    for (Type paramType : params) {
-		                    	for (Type type : types){
-		                    		if (paramType.equals(type)) {
-		                    			dependentPlugins.put(plugin, true);
-		                    			break param;
-		                    		}
-		                    	}
-		                    }
-		                }
-
-		            }
-		        }
-		        
-		        metrics.addCustomChart(new Metrics.DrilldownPie("deprecated", () -> {
-			        Map<String, Map<String, Integer>> map = new HashMap<>();
-			        for (Plugin pl : dependentPlugins.keySet()){
-			        	String deprecated = dependentPlugins.get(pl) ? "yes" : "no";
-			        	Map<String, Integer> entry = new HashMap<>();
-				        entry.put(pl.getDescription().getFullName(), 1);
-				        map.put(deprecated, entry);
-			        }
-			        return map;
-			    }));
-			}
-		}, 1);
-		
 		getServer().getScheduler().runTaskTimerAsynchronously(this, new Runnable() {
-			
 			@Override
 			public void run() {
 				try {
@@ -207,7 +164,6 @@ public class NoteBlockAPI extends JavaPlugin {
 	public void onDisable() {    	
 		disabling = true;
 		Bukkit.getScheduler().cancelTasks(this);
-		NoteBlockPlayerMain.plugin.onDisable();
 	}
 
 	public void doSync(Runnable runnable) {
@@ -225,42 +181,4 @@ public class NoteBlockAPI extends JavaPlugin {
 	public static NoteBlockAPI getAPI(){
 		return plugin;
 	}
-	
-	protected void handleDeprecated(StackTraceElement[] ste){
-		int pom = 1;
-		String clazz = ste[pom].getClassName();
-		while (clazz.startsWith("com.xxmicloxx.NoteBlockAPI")){
-			pom++;
-			clazz = ste[pom].getClassName();
-		}
-		String[] packageParts = clazz.split("\\.");
-		ArrayList<Plugin> plugins = new ArrayList<Plugin>();
-		plugins.addAll(dependentPlugins.keySet());
-		
-		ArrayList<Plugin> notResult = new ArrayList<Plugin>();
-		parts:
-		for (int i = 0; i < packageParts.length - 1; i++){
-			
-			for (Plugin pl : plugins){
-				if (notResult.contains(pl)){ continue;}
-				if (plugins.size() - notResult.size() == 1){
-					break parts;
-				}
-				String[] plParts = pl.getDescription().getMain().split("\\.");
-				if (!packageParts[i].equalsIgnoreCase(plParts[i])){
-					notResult.add(pl);
-					continue;
-				}
-			}
-			plugins.removeAll(notResult);
-			notResult.clear();
-		}
-		
-		plugins.removeAll(notResult);
-		notResult.clear();
-		if (plugins.size() == 1){
-			dependentPlugins.put(plugins.get(0), true);
-		}
-	}
-	
 }
