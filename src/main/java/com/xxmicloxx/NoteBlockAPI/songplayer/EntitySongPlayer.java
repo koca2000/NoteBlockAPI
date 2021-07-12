@@ -56,11 +56,7 @@ public class EntitySongPlayer extends RangeSongPlayer {
     @Override
     public void playTick(Player player, int tick) {
         if (entity.isDead()){
-            if (autoDestroy){
-                destroy();
-            } else {
-                setPlaying(false);
-            }
+            setPlaying(false);
         }
         if (!player.getWorld().getName().equals(entity.getWorld().getName())) {
             return; // not in same world
