@@ -236,6 +236,10 @@ public abstract class SongPlayer {
 					}
 
 				} catch (Exception e) {
+					Bukkit.getLogger().severe("An error occurred during the playback of song "
+							+ (song != null ?
+									song.getPath() + " (" + song.getAuthor() + " - " + song.getTitle() + ")"
+									: "null"));
 					e.printStackTrace();
 				} finally {
 					lock.unlock();

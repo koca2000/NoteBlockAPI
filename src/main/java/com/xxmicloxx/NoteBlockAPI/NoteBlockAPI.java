@@ -4,6 +4,7 @@ import com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer;
 import com.xxmicloxx.NoteBlockAPI.utils.MathUtils;
 import com.xxmicloxx.NoteBlockAPI.utils.Updater;
 import org.bstats.bukkit.Metrics;
+import org.bstats.charts.DrilldownPie;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
@@ -156,8 +157,6 @@ public class NoteBlockAPI extends JavaPlugin {
 				}
 			}
 		}, 20*10, 20 * 60 * 60 * 24);
-		
-		new MathUtils();
 	}
 
 	@Override

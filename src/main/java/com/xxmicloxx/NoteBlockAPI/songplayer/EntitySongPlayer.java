@@ -74,12 +74,12 @@ public class EntitySongPlayer extends RangeSongPlayer {
             channelMode.play(player, entity.getLocation(), song, layer, note, soundCategory, volume, !enable10Octave);
 
             if (isInRange(player)) {
-                if (!this.playerList.get(player.getUniqueId())) {
+                if (!playerList.get(player.getUniqueId())) {
                     playerList.put(player.getUniqueId(), true);
                     Bukkit.getPluginManager().callEvent(new PlayerRangeStateChangeEvent(this, player, true));
                 }
             } else {
-                if (this.playerList.get(player.getUniqueId())) {
+                if (playerList.get(player.getUniqueId())) {
                     playerList.put(player.getUniqueId(), false);
                     Bukkit.getPluginManager().callEvent(new PlayerRangeStateChangeEvent(this, player, false));
                 }

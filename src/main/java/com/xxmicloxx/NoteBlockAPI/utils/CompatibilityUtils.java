@@ -7,6 +7,7 @@ import java.util.HashMap;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
@@ -208,6 +209,10 @@ public class CompatibilityUtils {
 		}
 		serverVersion = Float.parseFloat(versionString);
 		return serverVersion;
+	}
+
+	public static Material getNoteBlockMaterial(){
+		return Material.valueOf("NOTE_BLOCK");
 	}
 
 }

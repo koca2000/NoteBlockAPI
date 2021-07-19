@@ -4,33 +4,31 @@ import org.bukkit.Location;
 
 public class MathUtils {
 
-	private static MathUtils instance;
-	private double[] cos = new double[360];
-	private double[] sin = new double[360];
-	
-	public MathUtils(){
-		instance = this;
+	private static double[] cos = new double[360];
+	private static double[] sin = new double[360];
+
+	static {
 		for (int deg = 0; deg < 360; deg++) {
-		    cos[deg] = Math.cos(Math.toRadians(deg));
-		    sin[deg] = Math.sin(Math.toRadians(deg));
+			cos[deg] = Math.cos(Math.toRadians(deg));
+			sin[deg] = Math.sin(Math.toRadians(deg));
 		}
 	}
 	
 	private static double[] getCos(){
-		return MathUtils.instance.cos;
+		return cos;
 	}
 	
 	private static double[] getSin(){
-		return MathUtils.instance.sin;
+		return sin;
 	}
 	
 	public static Location stereoSourceLeft(Location location, float distance) {
-		float yaw = location.getYaw();
-	    return location.clone().add(-getCos()[(int) (yaw + 360) % 360] * distance, 0, -getSin()[(int) (yaw + 360) % 360] * distance);
+		int angle = getAngle(location.getYaw());
+	    return location.clone().add(-getCos()[angle] * distance, 0, -getSin()[angle] * distance);
 	}
 	public static Location stereoSourceRight(Location location, float distance) {
-	    float yaw = location.getYaw();
-	    return location.clone().add(getCos()[(int) (yaw + 360) % 360] * distance, 0, getSin()[(int) (yaw + 360) % 360] * distance);
+		int angle = getAngle(location.getYaw());
+	    return location.clone().add(getCos()[angle] * distance, 0, getSin()[angle] * distance);
 	}
 
 	/**
@@ -40,8 +38,14 @@ public class MathUtils {
 	 * @return
 	 */
 	public static Location stereoPan(Location location, float distance){
-		float yaw = location.getYaw();
-		return location.clone().add( getCos()[(int) (yaw + 360) % 360] * distance, 0, getSin()[(int) (yaw + 360) % 360] * distance);
+		int angle = getAngle(location.getYaw());
+		return location.clone().add( getCos()[angle] * distance, 0, getSin()[angle] * distance);
+	}
+
+	private static int getAngle(float yaw){
+		int angle = (int) yaw;
+		while (angle < 0) angle += 360;
+		return angle % 360;
 	}
 	
 }

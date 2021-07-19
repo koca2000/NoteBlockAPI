@@ -1,20 +1,14 @@
 package com.xxmicloxx.NoteBlockAPI.songplayer;
 
-import com.xxmicloxx.NoteBlockAPI.utils.NoteUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.entity.Player;
-
 import com.xxmicloxx.NoteBlockAPI.NoteBlockAPI;
 import com.xxmicloxx.NoteBlockAPI.event.PlayerRangeStateChangeEvent;
-import com.xxmicloxx.NoteBlockAPI.model.Layer;
-import com.xxmicloxx.NoteBlockAPI.model.Note;
-import com.xxmicloxx.NoteBlockAPI.model.Playlist;
-import com.xxmicloxx.NoteBlockAPI.model.Song;
-import com.xxmicloxx.NoteBlockAPI.model.SoundCategory;
+import com.xxmicloxx.NoteBlockAPI.model.*;
+import com.xxmicloxx.NoteBlockAPI.utils.CompatibilityUtils;
 import com.xxmicloxx.NoteBlockAPI.utils.InstrumentUtils;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
 
 /**
  * SongPlayer created at a specified NoteBlock
@@ -57,7 +51,7 @@ public class NoteBlockSongPlayer extends RangeSongPlayer {
 
 	@Override
 	public void playTick(Player player, int tick) {
-		if (noteBlock.getType() != Material.NOTE_BLOCK) {
+		if (noteBlock.getType() != CompatibilityUtils.getNoteBlockMaterial()) {
 			return;
 		}
 		if (!player.getWorld().getName().equals(noteBlock.getWorld().getName())) {
@@ -73,12 +67,16 @@ public class NoteBlockSongPlayer extends RangeSongPlayer {
 			if (note == null) {
 				continue;
 			}
+			int key = note.getKey() - 33;
+
+			while (key < 0) key += 12;
+			while (key > 24) key -= 12;
+
 			player.playNote(loc, InstrumentUtils.getBukkitInstrument(note.getInstrument()),
-					new org.bukkit.Note(note.getKey() - 33));
+					new org.bukkit.Note(key));
 
 			float volume = ((layer.getVolume() * (int) this.volume * (int) playerVolume * note.getVelocity()) / 100_00_00_00F)
 					* ((1F / 16F) * getDistance());
-			float pitch = NoteUtils.getPitch(note);
 
             channelMode.play(player, loc, song, layer, note, soundCategory, volume, !enable10Octave);
 
