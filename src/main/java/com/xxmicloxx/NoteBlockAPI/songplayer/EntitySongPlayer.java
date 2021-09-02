@@ -76,12 +76,12 @@ public class EntitySongPlayer extends RangeSongPlayer {
             if (isInRange(player)) {
                 if (!playerList.get(player.getUniqueId())) {
                     playerList.put(player.getUniqueId(), true);
-                    Bukkit.getPluginManager().callEvent(new PlayerRangeStateChangeEvent(this, player, true));
+                    plugin.doSync(() -> Bukkit.getPluginManager().callEvent(new PlayerRangeStateChangeEvent(this, player, true)));
                 }
             } else {
                 if (playerList.get(player.getUniqueId())) {
                     playerList.put(player.getUniqueId(), false);
-                    Bukkit.getPluginManager().callEvent(new PlayerRangeStateChangeEvent(this, player, false));
+                    plugin.doSync(() -> Bukkit.getPluginManager().callEvent(new PlayerRangeStateChangeEvent(this, player, false)));
                 }
             }
         }
