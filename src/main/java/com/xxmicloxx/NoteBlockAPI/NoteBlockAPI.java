@@ -11,6 +11,7 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredListener;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -165,12 +166,12 @@ public class NoteBlockAPI extends JavaPlugin {
 		Bukkit.getScheduler().cancelTasks(this);
 	}
 
-	public void doSync(Runnable runnable) {
-		getServer().getScheduler().runTask(this, runnable);
+	public BukkitTask doSync(Runnable runnable) {
+		 return getServer().getScheduler().runTask(this, runnable);
 	}
 
-	public void doAsync(Runnable runnable) {
-		getServer().getScheduler().runTaskAsynchronously(this, runnable);
+	public BukkitTask doAsync(Runnable runnable) {
+		return getServer().getScheduler().runTaskAsynchronously(this, runnable);
 	}
 
 	public boolean isDisabling() {

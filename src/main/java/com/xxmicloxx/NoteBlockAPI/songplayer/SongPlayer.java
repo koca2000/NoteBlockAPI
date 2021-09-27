@@ -7,6 +7,7 @@ import com.xxmicloxx.NoteBlockAPI.model.playmode.ChannelMode;
 import com.xxmicloxx.NoteBlockAPI.model.playmode.MonoMode;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -48,6 +49,7 @@ public abstract class SongPlayer {
 
 	private final Lock lock = new ReentrantLock();
 	private final Random rng = new Random();
+	private BukkitTask backgroundTask = null;
 
 	public SongPlayer(Song song) {
 		this(new Playlist(song), SoundCategory.MASTER);
@@ -114,7 +116,10 @@ public abstract class SongPlayer {
 	 * Starts playback of this SongPlayer
 	 */
 	private void run() {
-		plugin.doAsync(() -> {
+		if (backgroundTask != null && Bukkit.getScheduler().isCurrentlyRunning(backgroundTask.getTaskId()) && Bukkit.getScheduler().isQueued(backgroundTask.getTaskId()))
+			return;
+
+		backgroundTask = plugin.doAsync(() -> {
 			while (playing || fading) {
 				long startTime = System.currentTimeMillis();
 
