@@ -11,14 +11,13 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredListener;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.scheduler.BukkitWorker;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -206,6 +205,12 @@ public class NoteBlockAPI extends JavaPlugin {
 	public void onDisable() {    	
 		disabling = true;
 		Bukkit.getScheduler().cancelTasks(this);
+		List<BukkitWorker> workers = Bukkit.getScheduler().getActiveWorkers();
+		for (BukkitWorker worker : workers){
+			if (!worker.getOwner().equals(this))
+				continue;
+			worker.getThread().interrupt();
+		}
 		NoteBlockPlayerMain.plugin.onDisable();
 	}
 
