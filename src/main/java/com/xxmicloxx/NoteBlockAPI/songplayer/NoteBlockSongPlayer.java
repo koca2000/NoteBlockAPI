@@ -5,7 +5,6 @@ import com.xxmicloxx.NoteBlockAPI.SongPlayer;
 import com.xxmicloxx.NoteBlockAPI.event.PlayerRangeStateChangeEvent;
 import com.xxmicloxx.NoteBlockAPI.model.*;
 import com.xxmicloxx.NoteBlockAPI.utils.CompatibilityUtils;
-import com.xxmicloxx.NoteBlockAPI.utils.InstrumentUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -88,10 +87,6 @@ public class NoteBlockSongPlayer extends RangeSongPlayer {
 			if (note == null) {
 				continue;
 			}
-			int key = note.getKey() - 33;
-
-			while (key < 0) key += 12;
-			while (key > 24) key -= 12;
 
 			float volume = ((layer.getVolume() * (int) this.volume * (int) playerVolume * note.getVelocity()) / 100_00_00_00F)
 					* ((1F / 16F) * getDistance());
