@@ -93,9 +93,6 @@ public class NoteBlockSongPlayer extends RangeSongPlayer {
 			while (key < 0) key += 12;
 			while (key > 24) key -= 12;
 
-			player.playNote(loc, InstrumentUtils.getBukkitInstrument(note.getInstrument()),
-					new org.bukkit.Note(key));
-
 			float volume = ((layer.getVolume() * (int) this.volume * (int) playerVolume * note.getVelocity()) / 100_00_00_00F)
 					* ((1F / 16F) * getDistance());
 
