@@ -16,6 +16,11 @@ public class Layer {
 	private int panning = 100;
 	private String name = "";
 
+	@Deprecated
+	public Layer(){
+		notesAtTicks = new HashMap<>();
+	}
+
 	public Layer(Map<Integer, Note> notes){
 		notesAtTicks = notes;
 	}
@@ -86,9 +91,11 @@ public class Layer {
 
 	/**
 	 * Sets the volume for all notes in the Layer
-	 * @param volume
+	 * @param volume Value in range 0 - 100
 	 */
 	public void setVolume(byte volume) {
+		if (volume < 0) volume = 0;
+		if (volume > 100) volume = 100;
 		this.volume = volume;
 	}
 
