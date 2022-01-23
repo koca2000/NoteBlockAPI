@@ -58,7 +58,7 @@ public class NBSDecoder {
 	 * @return Song object representing the given .nbs file
 	 */
 	private static Song parse(InputStream inputStream, File songFile) {
-		HashMap<Integer, Layer> layerHashMap = new HashMap<Integer, Layer>();
+		HashMap<Integer, Layer> layerHashMap = new HashMap<>();
 		byte biggestInstrumentIndex = -1;
 		boolean isStereo = false;
 		try {
@@ -187,8 +187,6 @@ public class NBSDecoder {
 
 			return new Song(speed, layerHashMap, songHeight, length, title, 
 					author, originalAuthor, description, songFile, firstcustominstrument, customInstrumentsArray, isStereo);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
 		} catch (EOFException e) {
 			String file = "";
 			if (songFile != null) {

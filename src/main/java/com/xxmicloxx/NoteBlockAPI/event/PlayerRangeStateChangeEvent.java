@@ -13,9 +13,9 @@ import com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer;
 public class PlayerRangeStateChangeEvent extends Event {
 
 	private static final HandlerList handlers = new HandlerList();
-	private SongPlayer song;
-	private Player player;
-	private boolean state;
+	private final SongPlayer song;
+	private final Player player;
+	private final boolean state;
 
 	public PlayerRangeStateChangeEvent(SongPlayer song, Player player, boolean state) {
 		this.song = song;

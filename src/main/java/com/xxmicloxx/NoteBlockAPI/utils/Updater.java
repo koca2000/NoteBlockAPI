@@ -3,13 +3,12 @@ package com.xxmicloxx.NoteBlockAPI.utils;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 
 public class Updater {
 	
-	public static boolean checkUpdate(String resource, String actualVersion) throws MalformedURLException, IOException{
+	public static boolean checkUpdate(String resource, String actualVersion) throws IOException{
 		boolean snapshot = false;
 		if (actualVersion.contains("-SNAPSHOT")){
 			snapshot = true;

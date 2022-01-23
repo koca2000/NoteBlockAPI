@@ -96,10 +96,6 @@ public class NoteBlockSongPlayer extends RangeSongPlayer {
 	public boolean isInRange(Player player) {
 		Location loc = noteBlock.getLocation();
 		loc = new Location(loc.getWorld(), loc.getX() + 0.5f, loc.getY() - 0.5f, loc.getZ() + 0.5f);
-		if (player.getLocation().distance(loc) > getDistance()) {
-			return false;
-		} else {
-			return true;
-		}
+		return player.getLocation().distance(loc) <= getDistance();
 	}
 }

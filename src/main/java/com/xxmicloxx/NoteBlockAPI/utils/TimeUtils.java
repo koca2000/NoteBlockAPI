@@ -14,7 +14,7 @@ public class TimeUtils {
 	 * 			<li>m for one-digit minutes</li>
 	 *			<li>ss for two-digit seconds</li>
 	 * 			<li>s for one-digit seconds</li>
-	 * 			<li>m for miliseconds (do not use without seconds, would be more than 4 digits)</li>
+	 * 			<li>m for milliseconds (do not use without seconds, would be more than 4 digits)</li>
 	 * 		</ul>
 	 * @param songPlayer
 	 * @return formatted string
@@ -33,7 +33,7 @@ public class TimeUtils {
 	 * 			<li>m for one-digit minutes</li>
 	 *			<li>ss for two-digit seconds</li>
 	 * 			<li>s for one-digit seconds</li>
-	 * 			<li>m for miliseconds (do not use without seconds, would be more than 4 digits)</li>
+	 * 			<li>m for milliseconds (do not use without seconds, would be more than 4 digits)</li>
 	 * 		</ul>
 	 * @param songPlayer
 	 * @return formatted string
@@ -44,36 +44,36 @@ public class TimeUtils {
 	
 	private static String getTime(String format, short ticks, float speed){
 		String time = format;
-		long milisTotal = (long) ((ticks / speed) * 1000);
+		long millisTotal = (long) ((ticks / speed) * 1000);
 		
 		int hours = 0;
 		if (time.contains("h")){
-			hours = (int) Math.floor(milisTotal / 1000 / 60 / 60);
-			milisTotal -= hours * 1000 * 60 * 60;
+			hours = (int) Math.floor(millisTotal / 1000 / 60 / 60);
+			millisTotal -= hours * 1000 * 60 * 60;
 		}
 		
 		int minutes = 0;
 		if (time.contains("m")){
-			minutes = (int) Math.floor(milisTotal / 1000 / 60);
-			milisTotal -= minutes * 1000 * 60;
+			minutes = (int) Math.floor(millisTotal / 1000 / 60);
+			millisTotal -= minutes * 1000 * 60;
 		}
 		
 		int seconds = 0;
 		if (time.contains("s")){
-			seconds = (int) Math.floor(milisTotal / 1000);
-			milisTotal -= seconds * 1000;
+			seconds = (int) Math.floor(millisTotal / 1000);
+			millisTotal -= seconds * 1000;
 		}
 		
-		time = time.replace("hh", String.format("%02", hours));
+		time = time.replace("hh", String.format("%02d", hours));
 		time = time.replace("h", hours + "");
 		
-		time = time.replace("mm", String.format("%02", minutes));
+		time = time.replace("mm", String.format("%02d", minutes));
 		time = time.replace("m", minutes + "");
 		
-		time = time.replace("ss", String.format("%02", seconds));
+		time = time.replace("ss", String.format("%02d", seconds));
 		time = time.replace("s", seconds + "");
 		
-		time = time.replace("n", milisTotal + "");
+		time = time.replace("n", millisTotal + "");
 		
 		return time;
 	}

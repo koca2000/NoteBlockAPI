@@ -11,7 +11,7 @@ import java.util.HashMap;
  */
 public class Song implements Cloneable {
 
-	private HashMap<Integer, Layer> layerHashMap = new HashMap<Integer, Layer>();
+	private HashMap<Integer, Layer> layerHashMap;
 	private short songHeight;
 	private short length;
 	private String title;

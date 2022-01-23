@@ -10,7 +10,7 @@ import com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer;
 public class SongLoopEvent extends Event implements Cancellable {
 
 	private static final HandlerList handlers = new HandlerList();
-	private SongPlayer song;
+	private final SongPlayer song;
 	private boolean cancelled = false;
 
 	public SongLoopEvent(SongPlayer song) {

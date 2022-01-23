@@ -57,8 +57,7 @@ public class Playlist {
 	 * @throws IllegalArgumentException when you try to remove all {@link Song} from {@link Playlist}
 	 */
 	public void remove(Song ...songs){
-		ArrayList<Song> songsTemp = new ArrayList<>();
-		songsTemp.addAll(this.songs);
+		ArrayList<Song> songsTemp = new ArrayList<>(this.songs);
 		songsTemp.removeAll(Arrays.asList(songs));
 		if (songsTemp.size() > 0){
 			this.songs = songsTemp;

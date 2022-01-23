@@ -31,9 +31,9 @@ public enum Sound {
 	NOTE_BIT("BLOCK_NOTE_BLOCK_BIT"),
 	NOTE_BANJO("BLOCK_NOTE_BLOCK_BANJO");
 
-	private String[] versionDependentNames;
+	private final String[] versionDependentNames;
 	private org.bukkit.Sound cached = null;
-	private static Map<String, org.bukkit.Sound> cachedSoundMap = new HashMap<>();
+	private static final Map<String, org.bukkit.Sound> cachedSoundMap = new HashMap<>();
 
 	Sound(String... versionDependentNames) {
 		this.versionDependentNames = versionDependentNames;

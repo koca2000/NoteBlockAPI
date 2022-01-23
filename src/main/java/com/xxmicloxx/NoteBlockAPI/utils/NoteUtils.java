@@ -4,7 +4,7 @@ import com.xxmicloxx.NoteBlockAPI.model.Note;
 
 public class NoteUtils {
 
-    private static float[] pitches = null;
+    private static final float[] pitches;
 
     static {
         pitches = new float[2401];
@@ -104,9 +104,7 @@ public class NoteUtils {
     public static boolean isOutOfRange(byte key, short pitch){
         key = applyPitchToKey(key, pitch);
 
-        if(key < 33) return true;
-        else if(key < 57) return false;
-        else return true;
+        return key < 33 || key >= 57;
     }
 
 }

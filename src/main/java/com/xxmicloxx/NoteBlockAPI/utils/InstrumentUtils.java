@@ -48,9 +48,7 @@ public class InstrumentUtils {
 		// 105 base_3
 		if(key < 9) name += "_-2";
 		else if(key < 33) name += "_-1";
-		else //noinspection StatementWithEmptyBody
-			if(key < 57);
-		else if(key < 81) name += "_1";
+		else if(key >= 57 && key < 81) name += "_1";
 		else if(key < 105) name += "_2";
 		return name;
 	}

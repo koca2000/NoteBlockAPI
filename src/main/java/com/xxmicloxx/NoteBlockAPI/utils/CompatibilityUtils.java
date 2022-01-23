@@ -23,7 +23,7 @@ public class CompatibilityUtils {
 	public static final String NMS_DIR = OBC_DIR.replaceFirst("org.bukkit.craftbukkit", "net.minecraft.server");
 
 	private static Class<? extends Enum> soundCategoryClass;
-	private static HashMap<String, Method> playSoundMethod = new HashMap<>();
+	private static final HashMap<String, Method> playSoundMethod = new HashMap<>();
 
 	private static float serverVersion = -1;
 
@@ -62,16 +62,16 @@ public class CompatibilityUtils {
 		return soundCategoryClass;
 	}
 
-	private static Method getPlaySoundMethod(Class sound, boolean soundcategory) throws ClassNotFoundException, NoSuchMethodException {
-		Method method = playSoundMethod.get(sound.getName() + soundcategory);
+	private static Method getPlaySoundMethod(Class sound, boolean soundCategory) throws ClassNotFoundException, NoSuchMethodException {
+		Method method = playSoundMethod.get(sound.getName() + soundCategory);
 		if (method == null){
-			if (soundcategory) {
+			if (soundCategory) {
 				method = Player.class.getMethod("playSound", Location.class, sound,
 						getSoundCategoryClass(), float.class, float.class);
 			} else {
 				method = Player.class.getMethod("playSound", Location.class, sound, float.class, float.class);
 			}
-			playSoundMethod.put(sound.getName() + soundcategory, method);
+			playSoundMethod.put(sound.getName() + soundCategory, method);
 		}
 		return method;
 	}

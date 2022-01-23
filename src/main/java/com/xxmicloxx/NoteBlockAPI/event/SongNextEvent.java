@@ -8,7 +8,7 @@ import com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer;
 public class SongNextEvent extends Event {
 
 	private static final HandlerList handlers = new HandlerList();
-	private SongPlayer song;
+	private final SongPlayer song;
 
 	public SongNextEvent(SongPlayer song) {
 		this.song = song;

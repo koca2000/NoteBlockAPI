@@ -1,24 +1,17 @@
 package com.xxmicloxx.NoteBlockAPI;
 
 import com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer;
-import com.xxmicloxx.NoteBlockAPI.utils.MathUtils;
 import com.xxmicloxx.NoteBlockAPI.utils.Updater;
 import org.bstats.bukkit.Metrics;
-import org.bstats.charts.DrilldownPie;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.event.HandlerList;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.RegisteredListener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scheduler.BukkitWorker;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,12 +23,10 @@ public class NoteBlockAPI extends JavaPlugin {
 
 	private static NoteBlockAPI plugin;
 	
-	private Map<UUID, ArrayList<SongPlayer>> playingSongs = new ConcurrentHashMap<UUID, ArrayList<SongPlayer>>();
-	private Map<UUID, Byte> playerVolume = new ConcurrentHashMap<UUID, Byte>();
+	private final Map<UUID, ArrayList<SongPlayer>> playingSongs = new ConcurrentHashMap<>();
+	private final Map<UUID, Byte> playerVolume = new ConcurrentHashMap<>();
 
 	private boolean disabling = false;
-	
-	private HashMap<Plugin, Boolean> dependentPlugins = new HashMap<>();
 
 	/**
 	 * Returns true if a Player is currently receiving a song
@@ -111,12 +102,7 @@ public class NoteBlockAPI extends JavaPlugin {
 	 * @return volume (byte)
 	 */
 	public static byte getPlayerVolume(UUID uuid) {
-		Byte byteObj = plugin.playerVolume.get(uuid);
-		if (byteObj == null) {
-			byteObj = 100;
-			plugin.playerVolume.put(uuid, byteObj);
-		}
-		return byteObj;
+		return plugin.playerVolume.computeIfAbsent(uuid, k -> (byte) 100);
 	}
 	
 	public static ArrayList<SongPlayer> getSongPlayersByPlayer(Player player){
@@ -139,13 +125,7 @@ public class NoteBlockAPI extends JavaPlugin {
 	public void onEnable() {
 		plugin = this;
 		
-		for (Plugin pl : getServer().getPluginManager().getPlugins()){
-			if (pl.getDescription().getDepend().contains("NoteBlockAPI") || pl.getDescription().getSoftDepend().contains("NoteBlockAPI")){
-				dependentPlugins.put(pl, false);
-			}
-		}
-		
-		Metrics metrics = new Metrics(this, 1083);
+		new Metrics(this, 1083);
 
 		getServer().getScheduler().runTaskTimerAsynchronously(this, new Runnable() {
 			@Override

@@ -13,7 +13,7 @@ import com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer;
 public class SongStoppedEvent extends Event {
 
 	private static final HandlerList handlers = new HandlerList();
-	private SongPlayer songPlayer;
+	private final SongPlayer songPlayer;
 
 	public SongStoppedEvent(SongPlayer songPlayer) {
 		this.songPlayer = songPlayer;

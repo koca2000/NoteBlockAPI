@@ -9,7 +9,7 @@ import java.util.HashMap;
  */
 public class Layer {
 
-	private HashMap<Integer, Note> notesAtTicks = new HashMap<Integer, Note>();
+	private HashMap<Integer, Note> notesAtTicks = new HashMap<>();
 	private byte volume = 100;
 	private int panning = 100;
 	private String name = "";

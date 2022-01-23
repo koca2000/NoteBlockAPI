@@ -33,8 +33,8 @@ public abstract class SongPlayer {
 	protected boolean playing = false;
 	protected boolean fading = false;
 
-	protected Map<UUID, Boolean> playerList = new ConcurrentHashMap<UUID, Boolean>();
-	protected Map<Song, Boolean> songQueue = new ConcurrentHashMap<Song, Boolean>(); //True if already played
+	protected Map<UUID, Boolean> playerList = new ConcurrentHashMap<>();
+	protected Map<Song, Boolean> songQueue = new ConcurrentHashMap<>(); //True if already played
 
 	protected byte volume = 100;
 	protected Fade fadeIn;
@@ -43,7 +43,7 @@ public abstract class SongPlayer {
 	protected SoundCategory soundCategory;
 	protected RepeatMode repeat = RepeatMode.NO;
 	protected ChannelMode channelMode = new MonoMode();
-	protected boolean random = false;
+	protected boolean random;
 	protected boolean enable10Octave = false;
 	protected boolean autoStop = false;
 
@@ -183,9 +183,7 @@ public abstract class SongPlayer {
 
 								if (left.size() == 0) {
 									left.addAll(songQueue.keySet());
-									for (Song s : songQueue.keySet()) {
-										songQueue.put(s, false);
-									}
+									songQueue.replaceAll((song, played) -> false);
 									song = left.get(rng.nextInt(left.size()));
 									actualSong = playlist.getIndex(song);
 									if (repeat == RepeatMode.ALL) {
@@ -305,8 +303,7 @@ public abstract class SongPlayer {
 	 * @return list of Player UUIDs
 	 */
 	public Set<UUID> getPlayerUUIDs() {
-		Set<UUID> uuids = new HashSet<>();
-		uuids.addAll(playerList.keySet());
+		Set<UUID> uuids = new HashSet<>(playerList.keySet());
 		return Collections.unmodifiableSet(uuids);
 	}
 
@@ -329,7 +326,7 @@ public abstract class SongPlayer {
 				playerList.put(player, false);
 				ArrayList<SongPlayer> songs = NoteBlockAPI.getSongPlayersByPlayer(player);
 				if (songs == null) {
-					songs = new ArrayList<SongPlayer>();
+					songs = new ArrayList<>();
 				}
 				songs.add(this);
 				NoteBlockAPI.setSongPlayersByPlayer(player, songs);
