@@ -12,6 +12,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredListener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.scheduler.BukkitWorker;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -145,7 +146,7 @@ public class NoteBlockAPI extends JavaPlugin {
 		}
 		
 		Metrics metrics = new Metrics(this, 1083);
-		
+
 		getServer().getScheduler().runTaskTimerAsynchronously(this, new Runnable() {
 			@Override
 			public void run() {
@@ -164,6 +165,12 @@ public class NoteBlockAPI extends JavaPlugin {
 	public void onDisable() {    	
 		disabling = true;
 		Bukkit.getScheduler().cancelTasks(this);
+		List<BukkitWorker> workers = Bukkit.getScheduler().getActiveWorkers();
+		for (BukkitWorker worker : workers){
+			if (!worker.getOwner().equals(this))
+				continue;
+			worker.getThread().interrupt();
+		}
 	}
 
 	public BukkitTask doSync(Runnable runnable) {

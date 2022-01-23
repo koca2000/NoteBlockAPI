@@ -230,16 +230,23 @@ public abstract class SongPlayer {
 						plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
 						continue;
 					}
-
-					for (UUID uuid : playerList.keySet()) {
-						Player player = Bukkit.getPlayer(uuid);
-						if (player == null) {
-							// offline...
-							continue;
+					try {
+						for (UUID uuid : playerList.keySet()) {
+							Player player = Bukkit.getPlayer(uuid);
+							if (player == null) {
+								// offline...
+								continue;
+							}
+							playTick(player, tick);
 						}
-						playTick(player, tick);
 					}
-
+					catch (Exception e){
+						Bukkit.getLogger().severe("An error occurred during the playback of song "
+								+ (song != null ?
+								song.getPath() + " (" + song.getAuthor() + " - " + song.getTitle() + ")"
+								: "null"));
+						e.printStackTrace();
+					}
 				} catch (Exception e) {
 					Bukkit.getLogger().severe("An error occurred during the playback of song "
 							+ (song != null ?
