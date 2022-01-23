@@ -38,7 +38,7 @@ public class RadioSongPlayer extends SongPlayer {
 	public void playTick(Player player, int tick) {
 		byte playerVolume = NoteBlockAPI.getPlayerVolume(player);
 
-		for (Layer layer : song.getLayerHashMap().values()) {
+		for (Layer layer : song.getLayers()) {
 			Note note = layer.getNote(tick);
 			if (note == null) {
 				continue;

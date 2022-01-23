@@ -62,7 +62,7 @@ public class NoteBlockSongPlayer extends RangeSongPlayer {
 		Location loc = noteBlock.getLocation();
 		loc = new Location(loc.getWorld(), loc.getX() + 0.5f, loc.getY() - 0.5f, loc.getZ() + 0.5f);
 		
-		for (Layer layer : song.getLayerHashMap().values()) {
+		for (Layer layer : song.getLayers()) {
 			Note note = layer.getNote(tick);
 			if (note == null) {
 				continue;

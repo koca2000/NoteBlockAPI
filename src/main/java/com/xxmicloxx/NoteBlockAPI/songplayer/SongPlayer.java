@@ -241,14 +241,14 @@ public abstract class SongPlayer {
 					catch (Exception e){
 						Bukkit.getLogger().severe("An error occurred during the playback of song "
 								+ (song != null ?
-								song.getPath() + " (" + song.getAuthor() + " - " + song.getTitle() + ")"
+								song.getMetadata().getPath() + " (" + song.getMetadata().getAuthor() + " - " + song.getMetadata().getTitle() + ")"
 								: "null"));
 						e.printStackTrace();
 					}
 				} catch (Exception e) {
 					Bukkit.getLogger().severe("An error occurred during the playback of song "
 							+ (song != null ?
-									song.getPath() + " (" + song.getAuthor() + " - " + song.getTitle() + ")"
+									song.getMetadata().getPath() + " (" + song.getMetadata().getAuthor() + " - " + song.getMetadata().getTitle() + ")"
 									: "null"));
 					e.printStackTrace();
 				} finally {

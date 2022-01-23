@@ -59,7 +59,7 @@ public class PositionSongPlayer extends RangeSongPlayer {
 
 		byte playerVolume = NoteBlockAPI.getPlayerVolume(player);
 
-		for (Layer layer : song.getLayerHashMap().values()) {
+		for (Layer layer : song.getLayers()) {
 			Note note = layer.getNote(tick);
 			if (note == null) continue;
 

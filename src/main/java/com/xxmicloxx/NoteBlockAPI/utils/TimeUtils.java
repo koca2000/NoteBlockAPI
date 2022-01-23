@@ -16,7 +16,7 @@ public class TimeUtils {
 	 * 			<li>s for one-digit seconds</li>
 	 * 			<li>m for milliseconds (do not use without seconds, would be more than 4 digits)</li>
 	 * 		</ul>
-	 * @param songPlayer
+	 * @param songPlayer Instance of SongPlayer to use
 	 * @return formatted string
 	 */
 	public static String getActualTime(String format, SongPlayer songPlayer){
@@ -35,7 +35,7 @@ public class TimeUtils {
 	 * 			<li>s for one-digit seconds</li>
 	 * 			<li>m for milliseconds (do not use without seconds, would be more than 4 digits)</li>
 	 * 		</ul>
-	 * @param songPlayer
+	 * @param songPlayer Instance of SongPlayer to use
 	 * @return formatted string
 	 */
 	public static String getLength(String format, SongPlayer songPlayer){
@@ -46,21 +46,21 @@ public class TimeUtils {
 		String time = format;
 		long millisTotal = (long) ((ticks / speed) * 1000);
 		
-		int hours = 0;
+		long hours = 0;
 		if (time.contains("h")){
-			hours = (int) Math.floor(millisTotal / 1000 / 60 / 60);
+			hours = millisTotal / (1000 * 60 * 60);
 			millisTotal -= hours * 1000 * 60 * 60;
 		}
 		
-		int minutes = 0;
+		long minutes = 0;
 		if (time.contains("m")){
-			minutes = (int) Math.floor(millisTotal / 1000 / 60);
+			minutes = millisTotal / (1000 * 60);
 			millisTotal -= minutes * 1000 * 60;
 		}
 		
-		int seconds = 0;
+		long seconds = 0;
 		if (time.contains("s")){
-			seconds = (int) Math.floor(millisTotal / 1000);
+			seconds = millisTotal / 1000;
 			millisTotal -= seconds * 1000;
 		}
 		

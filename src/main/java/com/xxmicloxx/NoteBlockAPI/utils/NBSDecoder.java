@@ -11,13 +11,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import com.xxmicloxx.NoteBlockAPI.model.*;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-
-import com.xxmicloxx.NoteBlockAPI.model.CustomInstrument;
-import com.xxmicloxx.NoteBlockAPI.model.Layer;
-import com.xxmicloxx.NoteBlockAPI.model.Note;
-import com.xxmicloxx.NoteBlockAPI.model.Song;
 
 /**
  * Utils for reading Note Block Studio data
@@ -43,7 +39,7 @@ public class NBSDecoder {
 	/**
 	 * Parses a Song from an InputStream
 	 * @see Song
-	 * @param inputStream of a Note Block Studio project file (.nbs)
+	 * @param inputStream InputStream of a Note Block Studio project file (.nbs)
 	 * @return Song object from the InputStream
 	 */
 	public static Song parse(InputStream inputStream) {
@@ -58,135 +54,32 @@ public class NBSDecoder {
 	 * @return Song object representing the given .nbs file
 	 */
 	private static Song parse(InputStream inputStream, File songFile) {
-		HashMap<Integer, Layer> layerHashMap = new HashMap<>();
-		byte biggestInstrumentIndex = -1;
-		boolean isStereo = false;
+		SongBuilder builder = new SongBuilder();
 		try {
 			DataInputStream dataInputStream = new DataInputStream(inputStream);
-			short length = readShort(dataInputStream);
-			int firstcustominstrument = 10; //Backward compatibility - most of songs with old structure are from 1.12
-			int firstcustominstrumentdiff;
-			int nbsversion = 0;
-			if (length == 0) {
-				nbsversion = dataInputStream.readByte();
-				firstcustominstrument = dataInputStream.readByte();
-				if (nbsversion >= 3) {
-					length = readShort(dataInputStream);
+			builder.length = readShort(dataInputStream);
+			builder.firstCustomInstrumentIndex = 10; //Backward compatibility - most of songs with old structure are from 1.12
+
+			if (builder.length == 0) {
+				builder.nbsVersion = dataInputStream.readByte();
+				builder.firstCustomInstrumentIndex = dataInputStream.readByte();
+				if (builder.nbsVersion >= 3) {
+					builder.length = readShort(dataInputStream);
 				}
 			}
-			firstcustominstrumentdiff = InstrumentUtils.getCustomInstrumentFirstIndex() - firstcustominstrument;
-			short songHeight = readShort(dataInputStream);
-			String title = readString(dataInputStream);
-			String author = readString(dataInputStream);
-			String originalAuthor = readString(dataInputStream); // original author
-			String description = readString(dataInputStream);
-			float speed = readShort(dataInputStream) / 100f;
-			dataInputStream.readBoolean(); // auto-save
-			dataInputStream.readByte(); // auto-save duration
-			dataInputStream.readByte(); // x/4ths, time signature
-			readInt(dataInputStream); // minutes spent on project
-			readInt(dataInputStream); // left clicks (why?)
-			readInt(dataInputStream); // right clicks (why?)
-			readInt(dataInputStream); // blocks added
-			readInt(dataInputStream); // blocks removed
-			readString(dataInputStream); // .mid/.schematic file name
-			if (nbsversion >= 4) {
-				dataInputStream.readByte(); // loop on/off
-				dataInputStream.readByte(); // max loop count
-				readShort(dataInputStream); // loop start tick
-			}
-			short tick = -1;
-			while (true) {
-				short jumpTicks = readShort(dataInputStream); // jumps till next tick
-				//System.out.println("Jumps to next tick: " + jumpTicks);
-				if (jumpTicks == 0) {
-					break;
-				}
-				tick += jumpTicks;
-				//System.out.println("Tick: " + tick);
-				short layer = -1;
-				while (true) {
-					short jumpLayers = readShort(dataInputStream); // jumps till next layer
-					if (jumpLayers == 0) {
-						break;
-					}
-					layer += jumpLayers;
-					//System.out.println("Layer: " + layer);
-					byte instrument = dataInputStream.readByte();
+			builder.firstCustomInstrumentIndexDiff = InstrumentUtils.getCustomInstrumentFirstIndex() - builder.firstCustomInstrumentIndex;
+			builder.songHeight = readShort(dataInputStream);
+			builder.metadata = loadSongMetadata(dataInputStream);
+			builder.metadata.setPath(songFile);
+			builder.speed = readShort(dataInputStream) / 100f;
+			loadUnusedMetadata(dataInputStream, builder.nbsVersion);
 
-					if (firstcustominstrumentdiff > 0 && instrument >= firstcustominstrument){
-						instrument += firstcustominstrumentdiff;
-					}
+			loadNotes(dataInputStream, builder);
+			loadLayers(dataInputStream, builder);
 
-					byte key = dataInputStream.readByte();
-					byte velocity = 100;
-					int panning = 100;
-					short pitch = 0;
-					if (nbsversion >= 4) {
-						velocity = dataInputStream.readByte(); // note block velocity
-						panning = 200 - dataInputStream.readUnsignedByte(); // note panning, 0 is right in nbs format
-						pitch = readShort(dataInputStream); // note block pitch
-					}
+			loadCustomInstruments(dataInputStream,builder);
 
-					if (panning != 100){
-					    isStereo = true;
-                    }
-
-					setNote(layer, tick,
-							new Note(instrument /* instrument */, key/* note */, velocity, panning, pitch),
-							layerHashMap);
-				}
-			}
-
-			if (nbsversion > 0 && nbsversion < 3) {
-				length = tick;
-			}
-
-			for (int i = 0; i < songHeight; i++) {
-				Layer layer = layerHashMap.get(i);
-
-				String name = readString(dataInputStream);
-				if (nbsversion >= 4){
-					dataInputStream.readByte(); // layer lock
-				}
-
-				byte volume = dataInputStream.readByte();
-				int panning = 100;
-				if (nbsversion >= 2){
-					panning = 200 - dataInputStream.readUnsignedByte(); // layer stereo, 0 is right in nbs format
-				}
-
-                if (panning != 100){
-                    isStereo = true;
-                }
-
-				if (layer != null) {
-					layer.setName(name);
-					layer.setVolume(volume);
-					layer.setPanning(panning);
-				}
-			}
-			//count of custom instruments
-			byte customAmnt = dataInputStream.readByte();
-			CustomInstrument[] customInstrumentsArray = new CustomInstrument[customAmnt];
-
-			for (int index = 0; index < customAmnt; index++) {
-				customInstrumentsArray[index] = new CustomInstrument((byte) index, 
-						readString(dataInputStream), readString(dataInputStream));
-				dataInputStream.readByte();//pitch
-				dataInputStream.readByte();//key
-			}
-
-			if (firstcustominstrumentdiff < 0){
-				ArrayList<CustomInstrument> customInstruments = CompatibilityUtils.getVersionCustomInstrumentsForSong(firstcustominstrument);
-				customInstruments.addAll(Arrays.asList(customInstrumentsArray));
-				customInstrumentsArray = customInstruments.toArray(customInstrumentsArray);
-			} else {
-				firstcustominstrument += firstcustominstrumentdiff;
-			}
-
-			return new Song(speed, layerHashMap, songHeight, length, title, 
-					author, originalAuthor, description, songFile, firstcustominstrument, customInstrumentsArray, isStereo);
+			return builder.toSong();
 		} catch (EOFException e) {
 			String file = "";
 			if (songFile != null) {
@@ -199,20 +92,132 @@ public class NBSDecoder {
 		return null;
 	}
 
-	/**
-	 * Sets a note at a tick in a song
-	 * @param layerIndex
-	 * @param ticks
-	 * @param note
-	 * @param layerHashMap
-	 */
-	private static void setNote(int layerIndex, int ticks, Note note, HashMap<Integer, Layer> layerHashMap) {
-		Layer layer = layerHashMap.get(layerIndex);
-		if (layer == null) {
-			layer = new Layer();
-			layerHashMap.put(layerIndex, layer);
+	private static SongMetadata loadSongMetadata(DataInputStream dataInputStream) throws IOException {
+		SongMetadata metadata = new SongMetadata();
+		metadata.setTitle(readString(dataInputStream));
+		metadata.setAuthor(readString(dataInputStream));
+		metadata.setOriginalAuthor(readString(dataInputStream));
+		metadata.setDescription(readString(dataInputStream));
+		return metadata;
+	}
+
+	private static void loadUnusedMetadata(DataInputStream dataInputStream, int nbsVersion) throws IOException {
+		dataInputStream.readBoolean(); // auto-save
+		dataInputStream.readByte(); // auto-save duration
+		dataInputStream.readByte(); // x/4ths, time signature
+		readInt(dataInputStream); // minutes spent on project
+		readInt(dataInputStream); // left clicks (why?)
+		readInt(dataInputStream); // right clicks (why?)
+		readInt(dataInputStream); // blocks added
+		readInt(dataInputStream); // blocks removed
+		readString(dataInputStream); // .mid/.schematic file name
+		if (nbsVersion >= 4) {
+			dataInputStream.readByte(); // loop on/off
+			dataInputStream.readByte(); // max loop count
+			readShort(dataInputStream); // loop start tick
 		}
-		layer.setNote(ticks, note);
+	}
+
+	private static void loadNotes(DataInputStream dataInputStream, SongBuilder builder) throws IOException {
+		HashMap<Integer, HashMap<Integer, Note>> layers = new HashMap<>();
+		short tick = -1;
+		while (true) {
+			short jumpTicks = readShort(dataInputStream); // jumps till next tick
+			if (jumpTicks == 0) {
+				break;
+			}
+			tick += jumpTicks;
+			int layer = -1;
+			while (true) {
+				short jumpLayers = readShort(dataInputStream); // jumps till next layer
+				if (jumpLayers == 0) {
+					break;
+				}
+				layer += jumpLayers;
+
+				Note note = loadNote(dataInputStream, builder);
+				layers.computeIfAbsent(layer, l -> new HashMap<>()).put((int) tick, note);
+			}
+		}
+
+		if (builder.nbsVersion > 0 && builder.nbsVersion < 3) {
+			builder.length = tick;
+		}
+
+		HashMap<Integer, Layer> finishedLayers = new HashMap<>();
+		layers.forEach((i, notes) -> finishedLayers.put(i, new Layer(notes)));
+		builder.layers = finishedLayers;
+	}
+
+	private static Note loadNote(DataInputStream dataInputStream, SongBuilder builder) throws IOException {
+		byte instrument = dataInputStream.readByte();
+
+		if (builder.firstCustomInstrumentIndexDiff > 0 && instrument >= builder.firstCustomInstrumentIndex){
+			instrument += builder.firstCustomInstrumentIndexDiff;
+		}
+
+		byte key = dataInputStream.readByte();
+		byte velocity = 100;
+		int panning = 100;
+		short pitch = 0;
+		if (builder.nbsVersion >= 4) {
+			velocity = dataInputStream.readByte(); // note block velocity
+			panning = 200 - dataInputStream.readUnsignedByte(); // note panning, 0 is right in nbs format
+			pitch = readShort(dataInputStream); // note block pitch
+		}
+
+		if (panning != 100){
+			builder.isStereo = true;
+		}
+		return new Note(instrument , key, velocity, panning, pitch);
+	}
+
+	private static void loadLayers(DataInputStream dataInputStream, SongBuilder builder) throws IOException {
+		for (int i = 0; i < builder.songHeight; i++) {
+			Layer layer = builder.layers.get(i);
+
+			String name = readString(dataInputStream);
+			if (builder.nbsVersion >= 4){
+				dataInputStream.readByte(); // layer lock
+			}
+
+			byte volume = dataInputStream.readByte();
+			int panning = 100;
+			if (builder.nbsVersion >= 2){
+				panning = 200 - dataInputStream.readUnsignedByte(); // layer stereo, 0 is right in nbs format
+			}
+
+			if (panning != 100){
+				builder.isStereo = true;
+			}
+
+			if (layer != null) {
+				layer.setName(name);
+				layer.setVolume(volume);
+				layer.setPanning(panning);
+			}
+		}
+	}
+
+	private static void loadCustomInstruments(DataInputStream dataInputStream, SongBuilder builder) throws IOException {
+		//count of custom instruments
+		byte customInstrumentsCount = dataInputStream.readByte();
+		builder.customInstruments = new CustomInstrument[customInstrumentsCount];
+
+		for (int index = 0; index < customInstrumentsCount; index++) {
+			builder.customInstruments[index] = new CustomInstrument((byte) index,
+					readString(dataInputStream), readString(dataInputStream));
+			dataInputStream.readByte();//pitch
+			dataInputStream.readByte();//key
+		}
+
+		if (builder.firstCustomInstrumentIndexDiff < 0){
+			ArrayList<CustomInstrument> customInstruments = CompatibilityUtils.getVersionCustomInstrumentsForSong(builder.firstCustomInstrumentIndex);
+			customInstruments.addAll(Arrays.asList(builder.customInstruments));
+			builder.customInstruments = customInstruments.toArray(builder.customInstruments);
+		} else {
+			builder.firstCustomInstrumentIndex += builder.firstCustomInstrumentIndexDiff;
+		}
 	}
 
 	private static short readShort(DataInputStream dataInputStream) throws IOException {
@@ -241,5 +246,23 @@ public class NBSDecoder {
 		}
 		return builder.toString();
 	}
-	
+
+	private static class SongBuilder {
+		private HashMap<Integer, Layer> layers = new HashMap<>();
+		private short songHeight = 0;
+		private short length = 0;
+		private float speed = 20;
+		private CustomInstrument[] customInstruments = new CustomInstrument[0];
+		private int firstCustomInstrumentIndex = 0;
+		private int firstCustomInstrumentIndexDiff = 0;
+		private boolean isStereo = false;
+
+		private int nbsVersion = 0;
+
+		private SongMetadata metadata = new SongMetadata();
+
+		public Song toSong(){
+			return new Song(speed, layers, songHeight, length, metadata, firstCustomInstrumentIndex, customInstruments, isStereo);
+		}
+	}
 }

@@ -7,38 +7,43 @@ import java.net.URL;
 import java.net.URLConnection;
 
 public class Updater {
-	
-	public static boolean checkUpdate(String resource, String actualVersion) throws IOException{
+
+	/**
+	 * Checks Spigot forums for plugin update
+	 * @param resource Resource ID
+	 * @param actualVersion Textual representation of currently installed version
+	 * @return string|null Returns textual representation of the new version if available. Otherwise returns null
+	 * @throws IOException if the connection fails
+	 */
+	public static String checkUpdate(String resource, String actualVersion) throws IOException{
 		boolean snapshot = false;
 		if (actualVersion.contains("-SNAPSHOT")){
 			snapshot = true;
 			actualVersion = actualVersion.replace("-SNAPSHOT","");
 		}
 
-		Float version = getVersionNumber(actualVersion);
+		int version = getVersionNumber(actualVersion);
 		
 		URLConnection con = new URL("https://api.spigotmc.org/legacy/update.php?resource=" + resource).openConnection();
 		String newVersionString = new BufferedReader(new InputStreamReader(con.getInputStream())).readLine();
 		int first = newVersionString.indexOf("(");
 		String newVersion = first == -1 ? newVersionString : newVersionString.substring(0, first);
 
-		Float newVer = getVersionNumber(newVersion);
+		int newVer = getVersionNumber(newVersion);
 
-		return snapshot ? newVer >= version : newVer > version;
+		return (snapshot && newVer >= version) || newVer > version ? newVersion : null;
 	}
 	
-	private static Float getVersionNumber(String version){
+	private static int getVersionNumber(String version){
 		String[] versionParts = version.split("\\.");
-		String versionString = "0.";
-		
-		for (String vpart : versionParts){
-			if (vpart.length() < 2){
-				versionString += "0";
-			}
-			versionString += vpart;
+
+		int versionNumber = 0;
+		for (int i = 0; i < 4; i++){
+			versionNumber *= 100;
+			if (i < versionParts.length)
+				versionNumber += Integer.parseInt(versionParts[i]);
 		}
-		
-		return Float.parseFloat(versionString);
+		return versionNumber;
 	}
 	
 }

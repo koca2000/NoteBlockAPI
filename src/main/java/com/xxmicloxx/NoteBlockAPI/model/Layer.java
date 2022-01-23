@@ -1,30 +1,40 @@
 package com.xxmicloxx.NoteBlockAPI.model;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Represents a series of notes in Note Block Studio. 
- * A Layer can have a maximum of one note per tick (20 ticks a second)
- *
+ * A Layer can have a maximum of one note per tick
  */
 public class Layer {
 
-	private HashMap<Integer, Note> notesAtTicks = new HashMap<>();
+	private Map<Integer, Note> notesAtTicks;
 	private byte volume = 100;
 	private int panning = 100;
 	private String name = "";
 
+	public Layer(Map<Integer, Note> notes){
+		notesAtTicks = notes;
+	}
+
 	/**
 	 * Gets the notes in the Layer with the tick they are created as a hash map
+	 * @deprecated
 	 * @return HashMap of notes with the tick they are played at
 	 */
+	@Deprecated
 	public HashMap<Integer, Note> getNotesAtTicks() {
-		return notesAtTicks;
+		return new HashMap<>(notesAtTicks);
 	}
 
 	/**
 	 * Sets the notes in the Layer with the tick they are created as a hash map
+	 * @deprecated Notes in layer can not be changed anymore
 	 */
+	@Deprecated
 	public void setNotesAtTicks(HashMap<Integer, Note> notesAtTicks) {
 		this.notesAtTicks = notesAtTicks;
 	}
@@ -52,9 +62,18 @@ public class Layer {
 
 	/**
 	 * Sets the given note at the given tick in the Layer
+	 * @deprecated Notes in layer can not be changed anymore
 	 */
+	@Deprecated
 	public void setNote(int tick, Note note) {
 		notesAtTicks.put(tick, note);
+	}
+
+	/**
+	 * Returns collection of all notes in this layer
+	 */
+	public Collection<Note> getNotes(){
+		return Collections.unmodifiableCollection(notesAtTicks.values());
 	}
 
 	/**

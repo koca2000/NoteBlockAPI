@@ -30,7 +30,7 @@ public class NoteBlockAPI extends JavaPlugin {
 
 	/**
 	 * Returns true if a Player is currently receiving a song
-	 * @param player
+	 * @param player The player you want to know the information about
 	 * @return is receiving a song
 	 */
 	public static boolean isReceivingSong(Player player) {
@@ -39,7 +39,7 @@ public class NoteBlockAPI extends JavaPlugin {
 
 	/**
 	 * Returns true if a Player with specified UUID is currently receiving a song
-	 * @param uuid
+	 * @param uuid UUID of the player
 	 * @return is receiving a song
 	 */
 	public static boolean isReceivingSong(UUID uuid) {
@@ -49,7 +49,7 @@ public class NoteBlockAPI extends JavaPlugin {
 
 	/**
 	 * Stops the song for a Player
-	 * @param player
+	 * @param player The player for whose the playback will be stopped
 	 */
 	public static void stopPlaying(Player player) {
 		stopPlaying(player.getUniqueId());
@@ -57,7 +57,7 @@ public class NoteBlockAPI extends JavaPlugin {
 
 	/**
 	 * Stops the song for a Player
-	 * @param uuid
+	 * @param uuid UUID of the player
 	 */
 	public static void stopPlaying(UUID uuid) {
 		ArrayList<SongPlayer> songs = plugin.playingSongs.get(uuid);
@@ -71,8 +71,8 @@ public class NoteBlockAPI extends JavaPlugin {
 
 	/**
 	 * Sets the volume for a given Player
-	 * @param player
-	 * @param volume
+	 * @param player Player whose volume will be set
+	 * @param volume Volume in range 0 - 100
 	 */
 	public static void setPlayerVolume(Player player, byte volume) {
 		setPlayerVolume(player.getUniqueId(), volume);
@@ -80,16 +80,19 @@ public class NoteBlockAPI extends JavaPlugin {
 
 	/**
 	 * Sets the volume for a given Player
-	 * @param uuid
-	 * @param volume
+	 * @param uuid UUID of the player
+	 * @param volume Volume in range 0 - 100
 	 */
 	public static void setPlayerVolume(UUID uuid, byte volume) {
+		if (volume > 100) volume = 100;
+		if (volume < 0) volume = 0;
+
 		plugin.playerVolume.put(uuid, volume);
 	}
 
 	/**
 	 * Gets the volume for a given Player
-	 * @param player
+	 * @param player Player whose volume would be returned
 	 * @return volume (byte)
 	 */
 	public static byte getPlayerVolume(Player player) {
@@ -98,7 +101,7 @@ public class NoteBlockAPI extends JavaPlugin {
 
 	/**
 	 * Gets the volume for a given Player
-	 * @param uuid
+	 * @param uuid UUID of the player
 	 * @return volume (byte)
 	 */
 	public static byte getPlayerVolume(UUID uuid) {
@@ -127,16 +130,14 @@ public class NoteBlockAPI extends JavaPlugin {
 		
 		new Metrics(this, 1083);
 
-		getServer().getScheduler().runTaskTimerAsynchronously(this, new Runnable() {
-			@Override
-			public void run() {
-				try {
-					if (Updater.checkUpdate("19287", getDescription().getVersion())){
-						Bukkit.getLogger().info(String.format("[%s] New update available!", plugin.getDescription().getName()));
-					}
-				} catch (IOException e) {
-					Bukkit.getLogger().info(String.format("[%s] Cannot receive update from Spigot resource page!", plugin.getDescription().getName()));
+		getServer().getScheduler().runTaskTimerAsynchronously(this, () -> {
+			try {
+				String newVersion = Updater.checkUpdate("19287", getDescription().getVersion());
+				if (newVersion != null){
+					Bukkit.getLogger().info(String.format("[%s] New update available! Available version: %s. Your version: %s", plugin.getDescription().getName(), newVersion, getDescription().getVersion()));
 				}
+			} catch (IOException e) {
+				Bukkit.getLogger().info(String.format("[%s] Cannot receive version information from Spigot resource page!", plugin.getDescription().getName()));
 			}
 		}, 20*10, 20 * 60 * 60 * 24);
 	}
@@ -167,5 +168,16 @@ public class NoteBlockAPI extends JavaPlugin {
 	
 	public static NoteBlockAPI getAPI(){
 		return plugin;
+	}
+
+	/**
+	 * Calls Plugin Manager to enable NoteBlockAPI as a plugin.
+	 * Only necessary if the plugin is shaded.
+	 */
+	public static void initialize(){
+		if (getAPI() != null)
+			return;
+
+		Bukkit.getPluginManager().enablePlugin(new NoteBlockAPI());
 	}
 }

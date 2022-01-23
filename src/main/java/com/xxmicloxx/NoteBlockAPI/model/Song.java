@@ -1,59 +1,57 @@
 package com.xxmicloxx.NoteBlockAPI.model;
 
-import com.xxmicloxx.NoteBlockAPI.utils.InstrumentUtils;
-
 import java.io.File;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 
 /**
  * Represents a Note Block Studio project
- *
  */
 public class Song implements Cloneable {
 
-	private HashMap<Integer, Layer> layerHashMap;
-	private short songHeight;
-	private short length;
-	private String title;
-	private File path;
-	private String author;
-	private String originalAuthor;
-	private String description;
-	private float speed;
-	private float delay;
-	private CustomInstrument[] customInstruments;
-	private int firstCustomInstrumentIndex;
-	private boolean isStereo = false;
+	private final HashMap<Integer, Layer> layers;
+	private final short songHeight;
+	private final short length;
+	private final float speed;
+	private final float delay;
+	private final CustomInstrument[] customInstruments;
+	private final int firstCustomInstrumentIndex;
+	private final boolean isStereo;
+
+	private SongMetadata metadata;
 
 	/**
 	 * Create Song instance by copying other Song parameters
 	 * @param other song
 	 */
 	public Song(Song other) {
-		this(other.getSpeed(), other.getLayerHashMap(), other.getSongHeight(), 
-				other.getLength(), other.getTitle(), other.getAuthor(), other.getOriginalAuthor(),
-				other.getDescription(), other.getPath(), other.getFirstCustomInstrumentIndex(), other.getCustomInstruments(), other.isStereo);
+		this(other.getSpeed(), other.layers, other.getSongHeight(),
+				other.getLength(), other.getMetadata(), other.getFirstCustomInstrumentIndex(), other.getCustomInstruments(), other.isStereo);
 	}
 
-	public Song(float speed, HashMap<Integer, Layer> layerHashMap,
+	@Deprecated
+	public Song(float speed, HashMap<Integer, Layer> layers,
 				short songHeight, final short length, String title, String author, String originalAuthor,
 				String description, File path, int firstCustomInstrumentIndex, boolean isStereo) {
-		this(speed, layerHashMap, songHeight, length, title, author, originalAuthor, description, path, firstCustomInstrumentIndex, new CustomInstrument[0], isStereo);
+		this(speed, layers, songHeight, length, title, author, originalAuthor, description, path, firstCustomInstrumentIndex, new CustomInstrument[0], isStereo);
 	}
 
-	public Song(float speed, HashMap<Integer, Layer> layerHashMap,
+	@Deprecated
+	public Song(float speed, HashMap<Integer, Layer> layers,
 		short songHeight, final short length, String title, String author, String originalAuthor,
 				String description, File path, int firstCustomInstrumentIndex, CustomInstrument[] customInstruments, boolean isStereo) {
+		this(speed, layers, songHeight, length, new SongMetadata(title, author, originalAuthor, description, path), firstCustomInstrumentIndex, customInstruments, isStereo);
+	}
+
+	public Song(float speed, HashMap<Integer, Layer> layers, short songHeight, final short length,
+				SongMetadata metadata, int firstCustomInstrumentIndex, CustomInstrument[] customInstruments, boolean isStereo) {
 		this.speed = speed;
 		delay = 20 / speed;
-		this.layerHashMap = layerHashMap;
+		this.layers = layers;
 		this.songHeight = songHeight;
 		this.length = length;
-		this.title = title;
-		this.author = author;
-		this.originalAuthor = originalAuthor;
-		this.description = description;
-		this.path = path;
+		this.metadata = metadata;
 		this.firstCustomInstrumentIndex = firstCustomInstrumentIndex;
 		this.customInstruments = customInstruments;
 		this.isStereo = isStereo;
@@ -61,10 +59,29 @@ public class Song implements Cloneable {
 
 	/**
 	 * Gets all Layers in this Song and their index
+	 * @deprecated Use {@link #getLayer(int)} or {@link #getLayers()} instead
 	 * @return HashMap of Layers and their index
 	 */
+	@Deprecated
 	public HashMap<Integer, Layer> getLayerHashMap() {
-		return layerHashMap;
+		return layers;
+	}
+
+	/**
+	 * Returns unmodifiable collection of layers. Order of layers is not guaranteed in any way.
+	 * @return Unmodifiable collection
+	 */
+	public Collection<Layer> getLayers(){
+		return Collections.unmodifiableCollection(layers.values());
+	}
+
+	/**
+	 * Returns {@link Layer} with the specified index or null if the layer doesn't have any notes
+	 * @param index Index of the layer in the Song
+	 * @return {@link Layer} or null if the layer with specified index doesn't have any notes
+	 */
+	public Layer getLayer(int index) {
+		return layers.get(index);
 	}
 
 	/**
@@ -85,47 +102,57 @@ public class Song implements Cloneable {
 
 	/**
 	 * Gets the title / name of this Song
+	 * @deprecated Use {@link #getMetadata()}
 	 * @return title of the Song
 	 */
+	@Deprecated
 	public String getTitle() {
-		return title;
+		return metadata.getTitle();
 	}
 
 	/**
 	 * Gets the author of the Song
+	 * @deprecated Use {@link #getMetadata()}
 	 * @return author
 	 */
+	@Deprecated
 	public String getAuthor() {
-		return author;
+		return metadata.getAuthor();
 	}
 
 	/**
 	 * Gets the original author of the Song
+	 * @deprecated Use {@link #getMetadata()}
 	 * @return author
 	 */
+	@Deprecated
 	public String getOriginalAuthor() {
-		return originalAuthor;
+		return metadata.getOriginalAuthor();
 	}
 
 	/**
 	 * Returns the File from which this Song is sourced
+	 * @deprecated Use {@link #getMetadata()}
 	 * @return file of this Song
 	 */
+	@Deprecated
 	public File getPath() {
-		return path;
+		return metadata.getPath();
 	}
 
 	/**
 	 * Gets the description of this Song
+	 * @deprecated Use {@link #getMetadata()}
 	 * @return description
 	 */
+	@Deprecated
 	public String getDescription() {
-		return description;
+		return metadata.getDescription();
 	}
 
 	/**
 	 * Gets the speed (ticks per second) of this Song
-	 * @return
+	 * @return ticks per second
 	 */
 	public float getSpeed() {
 		return speed;
@@ -148,6 +175,14 @@ public class Song implements Cloneable {
 		return customInstruments;
 	}
 
+	public SongMetadata getMetadata() {
+		return metadata;
+	}
+
+	public void setMetadata(SongMetadata metadata) {
+		this.metadata = metadata;
+	}
+
 	@Override
 	public Song clone() {
 		return new Song(this);
@@ -159,7 +194,6 @@ public class Song implements Cloneable {
 
 	/**
 	 * Returns true if song has at least one stereo {@link Note} or {@link Layer} in nbs file
-	 * @return
 	 */
 	public boolean isStereo() {
 		return isStereo;

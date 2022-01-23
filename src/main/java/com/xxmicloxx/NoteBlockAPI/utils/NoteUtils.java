@@ -97,9 +97,9 @@ public class NoteUtils {
 
     /**
      * Returns true if combination of specified key and pitch is outside Minecraft octave range
-     * @param key
-     * @param pitch
-     * @return
+     * @param key sound key
+     * @param pitch extra pitch
+     * @return true if the note is outside of Minecraft's octave range
      */
     public static boolean isOutOfRange(byte key, short pitch){
         key = applyPitchToKey(key, pitch);
