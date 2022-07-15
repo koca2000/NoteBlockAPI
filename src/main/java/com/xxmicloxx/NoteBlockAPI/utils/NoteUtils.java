@@ -30,8 +30,19 @@ public class NoteUtils {
      * @param note note
      * @return pitch
      */
+    @Deprecated
     public static float getPitchInOctave(Note note) {
         return getPitchInOctave(note.getKey(), note.getPitch());
+    }
+
+    /**
+     * Get pitch in specific octave range
+     *
+     * @param note note
+     * @return pitch
+     */
+    public static float getPitchInOctave(cz.koca2000.nbs4j.Note note) {
+        return getPitchInOctave((byte) note.getKey(), (short) note.getPitch());
     }
 
     /**
@@ -72,8 +83,19 @@ public class NoteUtils {
      * @param note note
      * @return pitch
      */
+    @Deprecated
     public static float getPitchTransposed(Note note) {
         return getPitchTransposed(note.getKey(), note.getPitch());
+    }
+
+    /**
+     * Get pitch after transposed
+     *
+     * @param note note
+     * @return pitch
+     */
+    public static float getPitchTransposed(cz.koca2000.nbs4j.Note note) {
+        return getPitchTransposed((byte) note.getKey(), (short) note.getPitch());
     }
 
     /**

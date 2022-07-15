@@ -61,17 +61,18 @@ public class NoteBlockSongPlayer extends RangeSongPlayer {
 		byte playerVolume = NoteBlockAPI.getPlayerVolume(player);
 		Location loc = noteBlock.getLocation();
 		loc = new Location(loc.getWorld(), loc.getX() + 0.5f, loc.getY() - 0.5f, loc.getZ() + 0.5f);
-		
-		for (Layer layer : song.getLayers()) {
-			Note note = layer.getNote(tick);
+
+		for (int i = 0; i < playingSong.getLayersCount(); i++) {
+			cz.koca2000.nbs4j.Layer layer = playingSong.getLayer(i);
+			cz.koca2000.nbs4j.Note note = layer.getNote(tick);
 			if (note == null) {
 				continue;
 			}
 
-			float volume = ((layer.getVolume() * (int) this.volume * (int) playerVolume * note.getVelocity()) / 100_00_00_00F)
+			float volume = ((layer.getVolume() * (int) this.volume * (int) playerVolume * note.getVolume()) / 100_00_00_00F)
 					* ((1F / 16F) * getDistance());
 
-            channelMode.play(player, loc, song, layer, note, soundCategory, volume, !enable10Octave);
+            channelMode.play(player, loc, playingSong, layer, note, soundCategory, volume, !enable10Octave);
 
 			if (isInRange(player)) {
 				if (!this.playerList.get(player.getUniqueId())) {

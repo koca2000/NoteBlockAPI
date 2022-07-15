@@ -64,14 +64,15 @@ public class EntitySongPlayer extends RangeSongPlayer {
 
         byte playerVolume = NoteBlockAPI.getPlayerVolume(player);
 
-        for (Layer layer : song.getLayers()) {
-            Note note = layer.getNote(tick);
+        for (int i = 0; i < playingSong.getLayersCount(); i++) {
+            cz.koca2000.nbs4j.Layer layer = playingSong.getLayer(i);
+            cz.koca2000.nbs4j.Note note = layer.getNote(tick);
             if (note == null) continue;
 
-            float volume = ((layer.getVolume() * (int) this.volume * (int) playerVolume * note.getVelocity()) / 100_00_00_00F)
+            float volume = ((layer.getVolume() * (int) this.volume * (int) playerVolume * note.getVolume()) / 100_00_00_00F)
                     * ((1F / 16F) * getDistance());
 
-            channelMode.play(player, entity.getLocation(), song, layer, note, soundCategory, volume, !enable10Octave);
+            channelMode.play(player, entity.getLocation(), playingSong, layer, note, soundCategory, volume, !enable10Octave);
 
             if (isInRange(player)) {
                 if (!playerList.get(player.getUniqueId())) {

@@ -4,6 +4,7 @@ import com.xxmicloxx.NoteBlockAPI.model.Layer;
 import com.xxmicloxx.NoteBlockAPI.model.Note;
 import com.xxmicloxx.NoteBlockAPI.model.Song;
 import com.xxmicloxx.NoteBlockAPI.model.SoundCategory;
+import com.xxmicloxx.NoteBlockAPI.utils.NoteUtils;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
@@ -18,4 +19,11 @@ public abstract class ChannelMode {
 
     public abstract void play(Player player, Location location, Song song, Layer layer, Note note,
                               SoundCategory soundCategory, float volume, boolean doTranspose);
+
+    public abstract void play(Player player, Location location, cz.koca2000.nbs4j.Song song, cz.koca2000.nbs4j.Layer layer,
+                              cz.koca2000.nbs4j.Note note, SoundCategory soundCategory, float volume, boolean doTranspose);
+
+    protected float getPitch(cz.koca2000.nbs4j.Note note, boolean doTranspose){
+        return doTranspose ? NoteUtils.getPitchTransposed(note) : NoteUtils.getPitchInOctave(note);
+    }
 }

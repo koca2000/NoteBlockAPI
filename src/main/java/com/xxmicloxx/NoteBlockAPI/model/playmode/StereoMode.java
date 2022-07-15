@@ -8,7 +8,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 /**
- * Uses panning for individual {@link Note} and {@link Layer} based on data from nbs file.
+ * Uses panning for individual {@link cz.koca2000.nbs4j.Note} and {@link cz.koca2000.nbs4j.Layer} based on data from nbs file.
  */
 public class StereoMode extends ChannelMode {
 
@@ -28,61 +28,53 @@ public class StereoMode extends ChannelMode {
         } else {
             distance = ((layer.getPanning() - 100 + note.getPanning() - 100) / 200f) * maxDistance;
         }
-        if (InstrumentUtils.isCustomInstrument(note.getInstrument())) {
-            CustomInstrument instrument = song.getCustomInstruments()[note.getInstrument() - InstrumentUtils.getCustomInstrumentFirstIndex()];
-
-            if (instrument.getSound() != null) {
-                CompatibilityUtils.playSound(player, location, instrument.getSound(), soundCategory, volume, pitch, distance);
-            } else {
-                CompatibilityUtils.playSound(player, location, instrument.getSoundFileName(), soundCategory, volume, pitch, distance);
-            }
+        cz.koca2000.nbs4j.CustomInstrument customInstrument = InstrumentUtils.getCustomInstrumentForNote(note.getNote());
+        if (customInstrument != null) {
+            CompatibilityUtils.playSound(player, location, customInstrument.getFileName(), soundCategory, volume, pitch, distance);
         } else {
-            CompatibilityUtils.playSound(player, location, InstrumentUtils.getInstrument(note.getInstrument()), soundCategory, volume, pitch, distance);
+            CompatibilityUtils.playSound(player, location, InstrumentUtils.getInstrument((byte) note.getNote().getInstrument()), soundCategory, volume, pitch, distance);
         }
     }
 
     @Override
     public void play(Player player, Location location, Song song, Layer layer, Note note, SoundCategory soundCategory, float volume, boolean doTranspose) {
+        play(player, location, song.getSong(), layer.getLayer(), note.getNote(), soundCategory, volume, doTranspose);
+    }
+
+    @Override
+    public void play(Player player, Location location, cz.koca2000.nbs4j.Song song, cz.koca2000.nbs4j.Layer layer, cz.koca2000.nbs4j.Note note, SoundCategory soundCategory, float volume, boolean doTranspose) {
         if (!song.isStereo() && fallbackChannelMode != null){
             fallbackChannelMode.play(player, location, song, layer, note, soundCategory, volume, doTranspose);
             return;
         }
 
-        float pitch;
-        if(doTranspose)
-            pitch = NoteUtils.getPitchTransposed(note);
-        else
-            pitch = NoteUtils.getPitchInOctave(note);
+        float pitch = getPitch(note, doTranspose);
 
-        float distance = 0;
-        if (layer.getPanning() == 100){
-            distance = (note.getPanning() - 100) * maxDistance;
+        float distance;
+        if (layer.getPanning() == cz.koca2000.nbs4j.Layer.NEUTRAL_PANNING){
+            distance = note.getPanning() * maxDistance;
         } else {
-            distance = ((layer.getPanning() - 100 + note.getPanning() - 100) / 200f) * maxDistance;
+            distance = ((layer.getPanning() + note.getPanning()) / 200f) * maxDistance;
         }
-        if (InstrumentUtils.isCustomInstrument(note.getInstrument())) {
-            CustomInstrument instrument = song.getCustomInstruments()[note.getInstrument() - InstrumentUtils.getCustomInstrumentFirstIndex()];
 
+        cz.koca2000.nbs4j.CustomInstrument customInstrument = InstrumentUtils.getCustomInstrumentForNote(note);
+        if (customInstrument != null) {
             if (!doTranspose){
-                CompatibilityUtils.playSound(player, location, InstrumentUtils.warpNameOutOfRange(instrument.getSoundFileName(), note.getKey(), note.getPitch()), soundCategory, volume, pitch, distance);
+                CompatibilityUtils.playSound(player, location, InstrumentUtils.warpNameOutOfRange(customInstrument.getFileName(), (byte) note.getKey(), (short) note.getPitch()), soundCategory, volume, pitch, distance);
             } else {
-                if (instrument.getSound() != null) {
-                    CompatibilityUtils.playSound(player, location, instrument.getSound(), soundCategory, volume, pitch, distance);
-                } else {
-                    CompatibilityUtils.playSound(player, location, instrument.getSoundFileName(), soundCategory, volume, pitch, distance);
-                }
+                CompatibilityUtils.playSound(player, location, customInstrument.getFileName(), soundCategory, volume, pitch, distance);
             }
         } else {
-            if (NoteUtils.isOutOfRange(note.getKey(), note.getPitch()) && !doTranspose) {
-                CompatibilityUtils.playSound(player, location, InstrumentUtils.warpNameOutOfRange(note.getInstrument(), note.getKey(), note.getPitch()), soundCategory, volume, pitch, distance);
+            if (NoteUtils.isOutOfRange((byte) note.getKey(), (short) note.getPitch()) && !doTranspose) {
+                CompatibilityUtils.playSound(player, location, InstrumentUtils.warpNameOutOfRange((byte) note.getInstrument(), (byte) note.getKey(), (short) note.getPitch()), soundCategory, volume, pitch, distance);
             } else {
-                CompatibilityUtils.playSound(player, location, InstrumentUtils.getInstrument(note.getInstrument()), soundCategory, volume, pitch, distance);
+                CompatibilityUtils.playSound(player, location, InstrumentUtils.getInstrument((byte) note.getInstrument()), soundCategory, volume, pitch, distance);
             }
         }
     }
 
     /**
-     * Returns scale of panning in blocks. {@link Note} with maximum left panning will be played this distance from {@link Player}'s head on left side.
+     * Returns scale of panning in blocks. {@link cz.koca2000.nbs4j.Note} with maximum left panning will be played this distance from {@link Player}'s head on left side.
      * @return
      */
     public float getMaxDistance() {
@@ -90,7 +82,7 @@ public class StereoMode extends ChannelMode {
     }
 
     /**
-     * Sets scale of panning in blocks. {@link Note} with maximum left panning will be played this distance from {@link Player}'s head on left side.
+     * Sets scale of panning in blocks. {@link cz.koca2000.nbs4j.Note} with maximum left panning will be played this distance from {@link Player}'s head on left side.
      * @param maxDistance
      */
     public void setMaxDistance(float maxDistance) {

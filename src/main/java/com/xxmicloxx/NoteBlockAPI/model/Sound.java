@@ -14,53 +14,88 @@ import java.util.Map;
  */
 public enum Sound {
 
-	NOTE_PIANO("NOTE_PIANO", "BLOCK_NOTE_HARP", "BLOCK_NOTE_BLOCK_HARP"),
-	NOTE_BASS("NOTE_BASS", "BLOCK_NOTE_BASS", "BLOCK_NOTE_BLOCK_BASS"),
-	NOTE_BASS_DRUM("NOTE_BASS_DRUM", "BLOCK_NOTE_BASEDRUM", "BLOCK_NOTE_BLOCK_BASEDRUM"),
-	NOTE_SNARE_DRUM("NOTE_SNARE_DRUM", "BLOCK_NOTE_SNARE", "BLOCK_NOTE_BLOCK_SNARE"),
-	NOTE_STICKS("NOTE_STICKS", "BLOCK_NOTE_HAT", "BLOCK_NOTE_BLOCK_HAT"),
-	NOTE_BASS_GUITAR("NOTE_BASS_GUITAR", "BLOCK_NOTE_GUITAR", "BLOCK_NOTE_BLOCK_GUITAR"),
-	NOTE_FLUTE("NOTE_FLUTE", "BLOCK_NOTE_FLUTE", "BLOCK_NOTE_BLOCK_FLUTE"),
-	NOTE_BELL("NOTE_BELL", "BLOCK_NOTE_BELL", "BLOCK_NOTE_BLOCK_BELL"),
-	NOTE_CHIME("NOTE_CHIME", "BLOCK_NOTE_CHIME", "BLOCK_NOTE_BLOCK_CHIME"),
-	NOTE_XYLOPHONE("NOTE_XYLOPHONE", "BLOCK_NOTE_XYLOPHONE", "BLOCK_NOTE_BLOCK_XYLOPHONE"),
-	NOTE_PLING("NOTE_PLING", "BLOCK_NOTE_PLING", "BLOCK_NOTE_BLOCK_PLING"),
-	NOTE_IRON_XYLOPHONE("BLOCK_NOTE_BLOCK_IRON_XYLOPHONE"),
-	NOTE_COW_BELL("BLOCK_NOTE_BLOCK_COW_BELL"),
-	NOTE_DIDGERIDOO("BLOCK_NOTE_BLOCK_DIDGERIDOO"),
-	NOTE_BIT("BLOCK_NOTE_BLOCK_BIT"),
-	NOTE_BANJO("BLOCK_NOTE_BLOCK_BANJO");
+	NOTE_PIANO(0, "minecraft:block.note_block.harp", "NOTE_PIANO", "BLOCK_NOTE_HARP", "BLOCK_NOTE_BLOCK_HARP"),
+	NOTE_BASS(1, "minecraft:block.note_block.bass", "NOTE_BASS", "BLOCK_NOTE_BASS", "BLOCK_NOTE_BLOCK_BASS"),
+	NOTE_BASS_DRUM(2, "minecraft:block.note_block.basedrum", "NOTE_BASS_DRUM", "BLOCK_NOTE_BASEDRUM", "BLOCK_NOTE_BLOCK_BASEDRUM"),
+	NOTE_SNARE_DRUM(3, "minecraft:block.note_block.snare", "NOTE_SNARE_DRUM", "BLOCK_NOTE_SNARE", "BLOCK_NOTE_BLOCK_SNARE"),
+	NOTE_STICKS(4, "minecraft:block.note_block.hat","NOTE_STICKS", "BLOCK_NOTE_HAT", "BLOCK_NOTE_BLOCK_HAT"),
+	NOTE_BASS_GUITAR(5, "minecraft:block.note_block.guitar", "NOTE_BASS_GUITAR", "BLOCK_NOTE_GUITAR", "BLOCK_NOTE_BLOCK_GUITAR"),
+	NOTE_FLUTE(6, "minecraft:block.note_block.flute", "NOTE_FLUTE", "BLOCK_NOTE_FLUTE", "BLOCK_NOTE_BLOCK_FLUTE"),
+	NOTE_BELL(7, "minecraft:block.note_block.bell", "NOTE_BELL", "BLOCK_NOTE_BELL", "BLOCK_NOTE_BLOCK_BELL"),
+	NOTE_CHIME(8, "minecraft:block.note_block.chime", "NOTE_CHIME", "BLOCK_NOTE_CHIME", "BLOCK_NOTE_BLOCK_CHIME"),
+	NOTE_XYLOPHONE(9, "minecraft:block.note_block.xylophone", "NOTE_XYLOPHONE", "BLOCK_NOTE_XYLOPHONE", "BLOCK_NOTE_BLOCK_XYLOPHONE"),
+	NOTE_PLING(15, "minecraft:block.note_block.pling", "NOTE_PLING", "BLOCK_NOTE_PLING", "BLOCK_NOTE_BLOCK_PLING"),
+	NOTE_IRON_XYLOPHONE(10, "minecraft:block.note_block.iron_xylophone", "BLOCK_NOTE_BLOCK_IRON_XYLOPHONE"),
+	NOTE_COW_BELL(11, "minecraft:block.note_block.cow_bell", "BLOCK_NOTE_BLOCK_COW_BELL"),
+	NOTE_DIDGERIDOO(12, "minecraft:block.note_block.didgeridoo", "BLOCK_NOTE_BLOCK_DIDGERIDOO"),
+	NOTE_BIT(13, "minecraft:block.note_block.bit", "BLOCK_NOTE_BLOCK_BIT"),
+	NOTE_BANJO(14, "minecraft:block.note_block.banjo", "BLOCK_NOTE_BLOCK_BANJO");
 
+	private static final Map<String, Sound> soundsByName = new HashMap<>();
+	private static final Sound[] soundsByIndex = new Sound[values().length];
+
+	private final int instrumentIndex;
+	private final String resourcePackName;
 	private final String[] versionDependentNames;
-	private org.bukkit.Sound cached = null;
-	private static final Map<String, org.bukkit.Sound> cachedSoundMap = new HashMap<>();
 
-	Sound(String... versionDependentNames) {
+	private org.bukkit.Sound cached = null;
+	private boolean isAvailable = true;
+
+	Sound(int instrumentIndex, String resourcePackName, String... versionDependentNames) {
+		this.instrumentIndex = instrumentIndex;
+		this.resourcePackName = resourcePackName;
 		this.versionDependentNames = versionDependentNames;
 	}
 
 	/**
 	 * Attempts to retrieve the org.bukkit.Sound equivalent of a version dependent enum name
 	 * @param bukkitSoundName
+	 * @deprecated Use {@link #getByBukkitName(String)} and {@link #getSound()} to get org.bukkit.Sound
 	 * @return org.bukkit.Sound enum
 	 */
+	@Deprecated
 	public static org.bukkit.Sound getFromBukkitName(String bukkitSoundName) {
-		org.bukkit.Sound sound = cachedSoundMap.get(bukkitSoundName.toUpperCase());
+		Sound sound = soundsByName.get(bukkitSoundName.toUpperCase());
 		if (sound != null)
-			return sound;
+			return sound.getSound();
 
 		return org.bukkit.Sound.valueOf(bukkitSoundName);
 	}
 
-	private org.bukkit.Sound getSound() {
-		if (cached != null) return cached;
-		for (String name : versionDependentNames) {
-			try {
-				return cached = org.bukkit.Sound.valueOf(name);
-			} catch (IllegalArgumentException ignore2) {
-				// try next
-			}
+	public static Sound getByBukkitName(String bukkitSoundName){
+		return soundsByName.get(bukkitSoundName.toUpperCase());
+	}
+
+	public static Sound getByIndex(int index){
+		if (index < 0 || index >= soundsByIndex.length)
+			return null;
+		return soundsByIndex[index];
+	}
+
+	public int getInstrumentIndex(){
+		return instrumentIndex;
+	}
+
+	public String getResourcePackName(){
+		return resourcePackName;
+	}
+
+	public org.bukkit.Sound getSound() {
+		if (cached != null)
+			return cached;
+
+		if (!isAvailable)
+			return null;
+
+		org.bukkit.Sound[] bukkitSounds = org.bukkit.Sound.values();
+		for (org.bukkit.Sound sound : bukkitSounds) {
+			for (String name : versionDependentNames)
+				if (sound.name().equals(name)){
+					cached = sound;
+					return sound;
+				}
 		}
+		isAvailable = false;
 		return null;
 	}
 
@@ -79,8 +114,11 @@ public enum Sound {
 
 	static {
 		// Cache sound access.
-		for (Sound sound : values())
-			for (String soundName : sound.versionDependentNames)
-				cachedSoundMap.put(soundName.toUpperCase(), sound.getSound());
+		for (Sound sound : values()) {
+			sound.getSound();
+			soundsByIndex[sound.getInstrumentIndex()] = sound;
+			for (String name : sound.versionDependentNames)
+				soundsByName.put(name, sound);
+		}
 	}
 }

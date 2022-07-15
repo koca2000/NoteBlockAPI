@@ -8,7 +8,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 /**
- * Ignores panning of {@link Note} and {@link Layer} from nbs format and plays mono {@link Note} as fake stereo at fixed offset from {@link Player} head.
+ * Ignores panning of {@link cz.koca2000.nbs4j.Note} and {@link cz.koca2000.nbs4j.Layer} from nbs format and plays mono {@link cz.koca2000.nbs4j.Note} as fake stereo at fixed offset from {@link Player} head.
  */
 public class MonoStereoMode extends ChannelMode{
 
@@ -16,67 +16,60 @@ public class MonoStereoMode extends ChannelMode{
 
     @Override
     public void play(Player player, Location location, Song song, Layer layer, Note note, SoundCategory soundCategory, float volume, float pitch) {
-        if (InstrumentUtils.isCustomInstrument(note.getInstrument())) {
-            CustomInstrument instrument = song.getCustomInstruments()[note.getInstrument() - InstrumentUtils.getCustomInstrumentFirstIndex()];
-
-            if (instrument.getSound() != null) {
-                CompatibilityUtils.playSound(player, location, instrument.getSound(), soundCategory, volume, pitch, distance);
-                CompatibilityUtils.playSound(player, location, instrument.getSound(), soundCategory, volume, pitch, -distance);
-            } else {
-                CompatibilityUtils.playSound(player, location, instrument.getSoundFileName(), soundCategory, volume, pitch, distance);
-                CompatibilityUtils.playSound(player, location, instrument.getSoundFileName(), soundCategory, volume, pitch, -distance);
-            }
+        cz.koca2000.nbs4j.CustomInstrument customInstrument = InstrumentUtils.getCustomInstrumentForNote(note.getNote());
+        if (customInstrument != null) {
+            CompatibilityUtils.playSound(player, location, customInstrument.getFileName(), soundCategory, volume, pitch, distance);
+            CompatibilityUtils.playSound(player, location, customInstrument.getFileName(), soundCategory, volume, pitch, -distance);
         } else {
-            CompatibilityUtils.playSound(player, location, InstrumentUtils.getInstrument(note.getInstrument()), soundCategory, volume, pitch, distance);
-            CompatibilityUtils.playSound(player, location, InstrumentUtils.getInstrument(note.getInstrument()), soundCategory, volume, pitch, -distance);
+            org.bukkit.Sound sound = InstrumentUtils.getInstrument((byte) note.getNote().getInstrument());
+            CompatibilityUtils.playSound(player, location, sound, soundCategory, volume, pitch, distance);
+            CompatibilityUtils.playSound(player, location, sound, soundCategory, volume, pitch, -distance);
         }
     }
 
     @Override
     public void play(Player player, Location location, Song song, Layer layer, Note note, SoundCategory soundCategory, float volume, boolean doTranspose) {
-        float pitch;
-        if(doTranspose)
-            pitch = NoteUtils.getPitchTransposed(note);
-        else
-            pitch = NoteUtils.getPitchInOctave(note);
+        play(player, location, song.getSong(), layer.getLayer(), note.getNote(), soundCategory, volume, doTranspose);
+    }
 
-        if (InstrumentUtils.isCustomInstrument(note.getInstrument())) {
-            CustomInstrument instrument = song.getCustomInstruments()[note.getInstrument() - InstrumentUtils.getCustomInstrumentFirstIndex()];
+    @Override
+    public void play(Player player, Location location, cz.koca2000.nbs4j.Song song, cz.koca2000.nbs4j.Layer layer, cz.koca2000.nbs4j.Note note, SoundCategory soundCategory, float volume, boolean doTranspose) {
+        float pitch = getPitch(note, doTranspose);
 
+        cz.koca2000.nbs4j.CustomInstrument customInstrument = InstrumentUtils.getCustomInstrumentForNote(note);
+        if (customInstrument != null) {
             if (!doTranspose){
-                CompatibilityUtils.playSound(player, location, InstrumentUtils.warpNameOutOfRange(instrument.getSoundFileName(), note.getKey(), note.getPitch()), soundCategory, volume, pitch, distance);
-                CompatibilityUtils.playSound(player, location, InstrumentUtils.warpNameOutOfRange(instrument.getSoundFileName(), note.getKey(), note.getPitch()), soundCategory, volume, pitch, -distance);
+                String instrumentName = InstrumentUtils.warpNameOutOfRange(customInstrument.getFileName(), (byte) note.getKey(), (short) note.getPitch());
+                CompatibilityUtils.playSound(player, location, instrumentName, soundCategory, volume, pitch, distance);
+                CompatibilityUtils.playSound(player, location, instrumentName, soundCategory, volume, pitch, -distance);
             } else {
-                if (instrument.getSound() != null) {
-                    CompatibilityUtils.playSound(player, location, instrument.getSound(), soundCategory, volume, pitch, distance);
-                    CompatibilityUtils.playSound(player, location, instrument.getSound(), soundCategory, volume, pitch, -distance);
-                } else {
-                    CompatibilityUtils.playSound(player, location, instrument.getSoundFileName(), soundCategory, volume, pitch, distance);
-                    CompatibilityUtils.playSound(player, location, instrument.getSoundFileName(), soundCategory, volume, pitch, -distance);
-                }
+                CompatibilityUtils.playSound(player, location, customInstrument.getFileName(), soundCategory, volume, pitch, distance);
+                CompatibilityUtils.playSound(player, location, customInstrument.getFileName(), soundCategory, volume, pitch, -distance);
             }
         } else {
-            if (NoteUtils.isOutOfRange(note.getKey(), note.getPitch()) && !doTranspose) {
-                CompatibilityUtils.playSound(player, location, InstrumentUtils.warpNameOutOfRange(note.getInstrument(), note.getKey(), note.getPitch()), soundCategory, volume, pitch, distance);
-                CompatibilityUtils.playSound(player, location, InstrumentUtils.warpNameOutOfRange(note.getInstrument(), note.getKey(), note.getPitch()), soundCategory, volume, pitch, -distance);
+            if (NoteUtils.isOutOfRange((byte) note.getKey(), (short) note.getPitch()) && !doTranspose) {
+                String instrumentName = InstrumentUtils.warpNameOutOfRange((byte) note.getInstrument(), (byte) note.getKey(), (short) note.getPitch());
+                CompatibilityUtils.playSound(player, location, instrumentName, soundCategory, volume, pitch, distance);
+                CompatibilityUtils.playSound(player, location, instrumentName, soundCategory, volume, pitch, -distance);
             } else {
-                CompatibilityUtils.playSound(player, location, InstrumentUtils.getInstrument(note.getInstrument()), soundCategory, volume, pitch, distance);
-                CompatibilityUtils.playSound(player, location, InstrumentUtils.getInstrument(note.getInstrument()), soundCategory, volume, pitch, -distance);
+                org.bukkit.Sound sound = InstrumentUtils.getInstrument((byte) note.getInstrument());
+                CompatibilityUtils.playSound(player, location, sound, soundCategory, volume, pitch, distance);
+                CompatibilityUtils.playSound(player, location, sound, soundCategory, volume, pitch, -distance);
             }
         }
     }
 
     /**
-     * Returns distance of {@link Note} from {@link Player}'s head.
-     * @return
+     * Returns distance of {@link cz.koca2000.nbs4j.Note} from {@link Player}'s head.
+     * @return distance in blocks
      */
     public float getDistance() {
         return distance;
     }
 
     /**
-     * Sets distance of {@link Note} from {@link Player}'s head.
-     * @param distance
+     * Sets distance of {@link cz.koca2000.nbs4j.Note} from {@link Player}'s head.
+     * @param distance distance in blocks
      */
     public void setDistance(float distance) {
         this.distance = distance;

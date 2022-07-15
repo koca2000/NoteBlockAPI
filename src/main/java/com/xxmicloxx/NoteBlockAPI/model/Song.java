@@ -1,87 +1,183 @@
 package com.xxmicloxx.NoteBlockAPI.model;
 
+import com.xxmicloxx.NoteBlockAPI.utils.InstrumentUtils;
+
 import java.io.File;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Represents a Note Block Studio project
+ *
  */
+@Deprecated
 public class Song implements Cloneable {
 
-	private final HashMap<Integer, Layer> layers;
-	private final short songHeight;
-	private final short length;
-	private final float speed;
-	private final float delay;
-	private final CustomInstrument[] customInstruments;
-	private final int firstCustomInstrumentIndex;
-	private final boolean isStereo;
+	private File path;
 
-	private SongMetadata metadata;
+	private cz.koca2000.nbs4j.Song song;
 
 	/**
 	 * Create Song instance by copying other Song parameters
 	 * @param other song
 	 */
 	public Song(Song other) {
-		this(other.getSpeed(), other.layers, other.getSongHeight(),
-				other.getLength(), other.getMetadata(), other.getFirstCustomInstrumentIndex(), other.getCustomInstruments(), other.isStereo);
+		this(other.getSpeed(), other.getLayerHashMap(), other.getSongHeight(),
+				other.getLength(), other.getTitle(), other.getAuthor(), other.getOriginalAuthor(),
+				other.getDescription(), other.getPath(), other.getFirstCustomInstrumentIndex(), other.getCustomInstruments(), other.isStereo());
+	}
+
+	/**
+	 * @deprecated Use {@link #Song(float, HashMap, short, short, String, String, String, File, int, boolean)}
+	 * @param speed
+	 * @param layerHashMap
+	 * @param songHeight
+	 * @param length
+	 * @param title
+	 * @param author
+	 * @param description
+	 * @param path
+	 */
+	@Deprecated
+	public Song(float speed, HashMap<Integer, Layer> layerHashMap,
+				short songHeight, final short length, String title, String author,
+				String description, File path) {
+		this(speed, layerHashMap, songHeight, length, title, author, description, path, InstrumentUtils.getCustomInstrumentFirstIndex(), new CustomInstrument[0], false);
+	}
+
+	/**
+	 * @deprecated Use {@link #Song(float, HashMap, short, short, String, String, String, File, int, CustomInstrument[], boolean)}
+	 * @param speed
+	 * @param layerHashMap
+	 * @param songHeight
+	 * @param length
+	 * @param title
+	 * @param author
+	 * @param description
+	 * @param path
+	 * @param customInstruments
+	 */
+	@Deprecated
+	public Song(float speed, HashMap<Integer, Layer> layerHashMap,
+				short songHeight, final short length, String title, String author,
+				String description, File path, CustomInstrument[] customInstruments) {
+		this(speed, layerHashMap, songHeight, length, title, author, description, path, InstrumentUtils.getCustomInstrumentFirstIndex(), customInstruments, false);
+	}
+
+	/**
+	 * @deprecated Use {@link #Song(float, HashMap, short, short, String, String, String, File, int, boolean)}
+	 * @param speed
+	 * @param layerHashMap
+	 * @param songHeight
+	 * @param length
+	 * @param title
+	 * @param author
+	 * @param description
+	 * @param path
+	 * @param firstCustomInstrumentIndex
+	 */
+	@Deprecated
+	public Song(float speed, HashMap<Integer, Layer> layerHashMap,
+				short songHeight, final short length, String title, String author,
+				String description, File path, int firstCustomInstrumentIndex) {
+		this(speed, layerHashMap, songHeight, length, title, author, description, path, firstCustomInstrumentIndex, new CustomInstrument[0], false);
+	}
+
+	/**
+	 * @deprecated Use {@link #Song(float, HashMap, short, short, String, String, String, File, int, CustomInstrument[], boolean)}
+	 * @param speed
+	 * @param layerHashMap
+	 * @param songHeight
+	 * @param length
+	 * @param title
+	 * @param author
+	 * @param description
+	 * @param path
+	 * @param firstCustomInstrumentIndex
+	 * @param customInstruments
+	 */
+	@Deprecated
+	public Song(float speed, HashMap<Integer, Layer> layerHashMap,
+				short songHeight, final short length, String title, String author,
+				String description, File path, int firstCustomInstrumentIndex, CustomInstrument[] customInstruments) {
+		this(speed, layerHashMap, songHeight, length, title, author, description, path, firstCustomInstrumentIndex, customInstruments, false);
 	}
 
 	@Deprecated
-	public Song(float speed, HashMap<Integer, Layer> layers,
+	public Song(float speed, HashMap<Integer, Layer> layerHashMap,
+				short songHeight, final short length, String title, String author,
+				String description, File path, int firstCustomInstrumentIndex, boolean isStereo) {
+		this(speed, layerHashMap, songHeight, length, title, author, "", description, path, firstCustomInstrumentIndex, new CustomInstrument[0], isStereo);
+	}
+
+	@Deprecated
+	public Song(float speed, HashMap<Integer, Layer> layerHashMap,
+				short songHeight, final short length, String title, String author,
+				String description, File path, int firstCustomInstrumentIndex, CustomInstrument[] customInstruments, boolean isStereo) {
+		this(speed, layerHashMap, songHeight, length, title, author, "", description, path, firstCustomInstrumentIndex, customInstruments, isStereo);
+	}
+
+	public Song(float speed, HashMap<Integer, Layer> layerHashMap,
 				short songHeight, final short length, String title, String author, String originalAuthor,
 				String description, File path, int firstCustomInstrumentIndex, boolean isStereo) {
-		this(speed, layers, songHeight, length, title, author, originalAuthor, description, path, firstCustomInstrumentIndex, new CustomInstrument[0], isStereo);
+		this(speed, layerHashMap, songHeight, length, title, author, originalAuthor, description, path, firstCustomInstrumentIndex, new CustomInstrument[0], isStereo);
 	}
 
-	@Deprecated
-	public Song(float speed, HashMap<Integer, Layer> layers,
-		short songHeight, final short length, String title, String author, String originalAuthor,
+	public Song(float speed, HashMap<Integer, Layer> layerHashMap,
+				short songHeight, final short length, String title, String author, String originalAuthor,
 				String description, File path, int firstCustomInstrumentIndex, CustomInstrument[] customInstruments, boolean isStereo) {
-		this(speed, layers, songHeight, length, new SongMetadata(title, author, originalAuthor, description, path), firstCustomInstrumentIndex, customInstruments, isStereo);
+
+		this.path = path;
+		song = new cz.koca2000.nbs4j.Song()
+				.setLength(length)
+				.setTempoChange(-1, speed)
+				.setLayersCount(songHeight);
+
+		song.getMetadata()
+				.setTitle(title)
+				.setAuthor(author)
+				.setOriginalAuthor(originalAuthor)
+				.setDescription(description);
+
+		for (Map.Entry<Integer, Layer> entry : layerHashMap.entrySet()){
+			int index = entry.getKey();
+			Layer layer = entry.getValue();
+			song.getLayer(index)
+					.setName(layer.getName())
+					.setVolume(layer.getVolume())
+					.setPanning(layer.getPanning() - 100);
+
+			for (Map.Entry<Integer, Note> noteEntry : layer.getNotesAtTicks().entrySet()){
+				cz.koca2000.nbs4j.Note note = new cz.koca2000.nbs4j.Note(noteEntry.getValue().getNote());
+				if (note.getInstrument() > firstCustomInstrumentIndex){
+					note.setInstrument(note.getInstrument() - firstCustomInstrumentIndex, true);
+				}
+				song.setNote(noteEntry.getKey(), index, note);
+			}
+		}
+
+		for (CustomInstrument instrument : customInstruments){
+			song.addCustomInstrument(new cz.koca2000.nbs4j.CustomInstrument()
+					.setName(instrument.getName())
+					.setFileName(instrument.getSoundFileName()));
+		}
 	}
 
-	public Song(float speed, HashMap<Integer, Layer> layers, short songHeight, final short length,
-				SongMetadata metadata, int firstCustomInstrumentIndex, CustomInstrument[] customInstruments, boolean isStereo) {
-		this.speed = speed;
-		delay = 20 / speed;
-		this.layers = layers;
-		this.songHeight = songHeight;
-		this.length = length;
-		this.metadata = metadata;
-		this.firstCustomInstrumentIndex = firstCustomInstrumentIndex;
-		this.customInstruments = customInstruments;
-		this.isStereo = isStereo;
+	public Song(cz.koca2000.nbs4j.Song song){
+		this.song = song;
 	}
 
 	/**
 	 * Gets all Layers in this Song and their index
-	 * @deprecated Use {@link #getLayer(int)} or {@link #getLayers()} instead
 	 * @return HashMap of Layers and their index
 	 */
-	@Deprecated
 	public HashMap<Integer, Layer> getLayerHashMap() {
+		HashMap<Integer, Layer> layers = new HashMap<>();
+		for (int i = 0; i < song.getLayersCount(); i++){
+			layers.put(i, new Layer(song.getLayer(i)));
+		}
 		return layers;
-	}
-
-	/**
-	 * Returns unmodifiable collection of layers. Order of layers is not guaranteed in any way.
-	 * @return Unmodifiable collection
-	 */
-	public Collection<Layer> getLayers(){
-		return Collections.unmodifiableCollection(layers.values());
-	}
-
-	/**
-	 * Returns {@link Layer} with the specified index or null if the layer doesn't have any notes
-	 * @param index Index of the layer in the Song
-	 * @return {@link Layer} or null if the layer with specified index doesn't have any notes
-	 */
-	public Layer getLayer(int index) {
-		return layers.get(index);
 	}
 
 	/**
@@ -89,7 +185,7 @@ public class Song implements Cloneable {
 	 * @return Song height
 	 */
 	public short getSongHeight() {
-		return songHeight;
+		return (short) song.getLayersCount();
 	}
 
 	/**
@@ -97,65 +193,55 @@ public class Song implements Cloneable {
 	 * @return length of this Song
 	 */
 	public short getLength() {
-		return length;
+		return (short) song.getSongLength();
 	}
 
 	/**
 	 * Gets the title / name of this Song
-	 * @deprecated Use {@link #getMetadata()}
 	 * @return title of the Song
 	 */
-	@Deprecated
 	public String getTitle() {
-		return metadata.getTitle();
+		return song.getMetadata().getTitle();
 	}
 
 	/**
 	 * Gets the author of the Song
-	 * @deprecated Use {@link #getMetadata()}
 	 * @return author
 	 */
-	@Deprecated
 	public String getAuthor() {
-		return metadata.getAuthor();
+		return song.getMetadata().getAuthor();
 	}
 
 	/**
 	 * Gets the original author of the Song
-	 * @deprecated Use {@link #getMetadata()}
 	 * @return author
 	 */
-	@Deprecated
 	public String getOriginalAuthor() {
-		return metadata.getOriginalAuthor();
+		return song.getMetadata().getOriginalAuthor();
 	}
 
 	/**
 	 * Returns the File from which this Song is sourced
-	 * @deprecated Use {@link #getMetadata()}
 	 * @return file of this Song
 	 */
-	@Deprecated
 	public File getPath() {
-		return metadata.getPath();
+		return path;
 	}
 
 	/**
 	 * Gets the description of this Song
-	 * @deprecated Use {@link #getMetadata()}
 	 * @return description
 	 */
-	@Deprecated
 	public String getDescription() {
-		return metadata.getDescription();
+		return song.getMetadata().getDescription();
 	}
 
 	/**
 	 * Gets the speed (ticks per second) of this Song
-	 * @return ticks per second
+	 * @return
 	 */
 	public float getSpeed() {
-		return speed;
+		return song.getTempo(0);
 	}
 
 	/**
@@ -163,7 +249,7 @@ public class Song implements Cloneable {
 	 * @return delay
 	 */
 	public float getDelay() {
-		return delay;
+		return 20 / song.getTempo(0);
 	}
 
 	/**
@@ -172,15 +258,11 @@ public class Song implements Cloneable {
 	 * @return array of CustomInstruments
 	 */
 	public CustomInstrument[] getCustomInstruments() {
-		return customInstruments;
-	}
-
-	public SongMetadata getMetadata() {
-		return metadata;
-	}
-
-	public void setMetadata(SongMetadata metadata) {
-		this.metadata = metadata;
+		CustomInstrument[] instruments = new CustomInstrument[song.getCustomInstrumentsCount()];
+		for (int i = 0; i < instruments.length; i++){
+			instruments[i] = new CustomInstrument(song.getCustomInstrument(i));
+		}
+		return instruments;
 	}
 
 	@Override
@@ -189,13 +271,31 @@ public class Song implements Cloneable {
 	}
 
 	public int getFirstCustomInstrumentIndex() {
-		return firstCustomInstrumentIndex;
+		return song.getNonCustomInstrumentsCount();
 	}
 
 	/**
 	 * Returns true if song has at least one stereo {@link Note} or {@link Layer} in nbs file
+	 * @return
 	 */
 	public boolean isStereo() {
-		return isStereo;
+		return song.isStereo();
+	}
+
+	public cz.koca2000.nbs4j.Song getSong(){
+		return song;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof Song){
+			return song.equals(((Song)o).getSong());
+		}
+		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		return song.hashCode();
 	}
 }

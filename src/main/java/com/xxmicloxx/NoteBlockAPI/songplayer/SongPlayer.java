@@ -9,9 +9,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
@@ -24,7 +21,10 @@ import java.util.concurrent.locks.ReentrantLock;
 public abstract class SongPlayer {
 	protected NoteBlockAPI plugin;
 
+	@Deprecated
 	protected Song song;
+
+	protected cz.koca2000.nbs4j.Song playingSong;
 	protected Playlist playlist;
 	protected int actualSong = 0;
 
@@ -34,7 +34,7 @@ public abstract class SongPlayer {
 	protected boolean fading = false;
 
 	protected Map<UUID, Boolean> playerList = new ConcurrentHashMap<>();
-	protected Map<Song, Boolean> songQueue = new ConcurrentHashMap<>(); //True if already played
+	protected Map<cz.koca2000.nbs4j.Song, Boolean> songQueue = new ConcurrentHashMap<>(); //True if already played
 
 	protected byte volume = 100;
 	protected Fade fadeIn;
@@ -89,7 +89,9 @@ public abstract class SongPlayer {
 			checkPlaylistQueue();
 			actualSong = rng.nextInt(playlist.getCount());
 		}
-		this.song = playlist.get(actualSong);
+
+		this.playingSong = playlist.getSong(actualSong);
+		this.song = new Song(playingSong);
 	}
 
 	/**
@@ -150,7 +152,7 @@ public abstract class SongPlayer {
 						if (fade != -1){
 							volume = (byte) fade;
 						}
-					} else if (tick >= song.getLength() - fadeOut.getFadeDuration()){
+					} else if (tick >= playingSong.getSongLength() - fadeOut.getFadeDuration()){
 						int fade = fadeOut.calculateFade();
 						if (fade != -1){
 							volume = (byte) fade;
@@ -158,7 +160,7 @@ public abstract class SongPlayer {
 					}
 
 					tick++;
-					if (tick > song.getLength()) {
+					if (tick > playingSong.getSongLength()) {
 						tick = -1;
 						fadeIn.setFadeDone(0);
 						fadeOut.setFadeDone(0);
@@ -172,10 +174,10 @@ public abstract class SongPlayer {
 							}
 						} else {
 							if (random) {
-								songQueue.put(song, true);
+								songQueue.put(playingSong, true);
 								checkPlaylistQueue();
-								ArrayList<Song> left = new ArrayList<>();
-								for (Song s : songQueue.keySet()) {
+								ArrayList<cz.koca2000.nbs4j.Song> left = new ArrayList<>();
+								for (cz.koca2000.nbs4j.Song s : songQueue.keySet()) {
 									if (!songQueue.get(s)) {
 										left.add(s);
 									}
@@ -184,7 +186,8 @@ public abstract class SongPlayer {
 								if (left.size() == 0) {
 									left.addAll(songQueue.keySet());
 									songQueue.replaceAll((song, played) -> false);
-									song = left.get(rng.nextInt(left.size()));
+									playingSong = left.get(rng.nextInt(left.size()));
+									song = new Song(playingSong);
 									actualSong = playlist.getIndex(song);
 									if (repeat == RepeatMode.ALL) {
 										SongLoopEvent event = new SongLoopEvent(this);
@@ -195,7 +198,8 @@ public abstract class SongPlayer {
 										}
 									}
 								} else {
-									song = left.get(rng.nextInt(left.size()));
+									playingSong = left.get(rng.nextInt(left.size()));
+									song = new Song(playingSong);
 									actualSong = playlist.getIndex(song);
 
 									SongNextEvent event = new SongNextEvent(this);
@@ -205,13 +209,15 @@ public abstract class SongPlayer {
 							} else {
 								if (playlist.hasNext(actualSong)) {
 									actualSong++;
-									song = playlist.get(actualSong);
+									playingSong = playlist.getSong(actualSong);
+									song = new Song(playingSong);
 									SongNextEvent event = new SongNextEvent(this);
 									plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
 									continue;
 								} else {
 									actualSong = 0;
-									song = playlist.get(actualSong);
+									playingSong = playlist.getSong(actualSong);
+									song = new Song(playingSong);
 									if (repeat == RepeatMode.ALL) {
 										SongLoopEvent event = new SongLoopEvent(this);
 										plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
@@ -241,14 +247,14 @@ public abstract class SongPlayer {
 					catch (Exception e){
 						Bukkit.getLogger().severe("An error occurred during the playback of song "
 								+ (song != null ?
-								song.getMetadata().getPath() + " (" + song.getMetadata().getAuthor() + " - " + song.getMetadata().getTitle() + ")"
+								"(author: " + playingSong.getMetadata().getAuthor() + ", title: " + playingSong.getMetadata().getTitle() + ")"
 								: "null"));
 						e.printStackTrace();
 					}
 				} catch (Exception e) {
 					Bukkit.getLogger().severe("An error occurred during the playback of song "
 							+ (song != null ?
-									song.getMetadata().getPath() + " (" + song.getMetadata().getAuthor() + " - " + song.getMetadata().getTitle() + ")"
+									"(author: " + playingSong.getMetadata().getAuthor() + ", title: " + playingSong.getMetadata().getTitle() + ")"
 									: "null"));
 					e.printStackTrace();
 				} finally {
@@ -256,7 +262,7 @@ public abstract class SongPlayer {
 				}
 
 				long duration = System.currentTimeMillis() - startTime;
-				float delayMillis = song.getDelay() * 50;
+				float delayMillis = (20 / playingSong.getTempo(tick)) * 50;
 				if (duration < delayMillis) {
 					try {
 						Thread.sleep((long) (delayMillis - duration));
@@ -269,13 +275,13 @@ public abstract class SongPlayer {
 	}
 
 	private void checkPlaylistQueue(){
-		for (Song s : songQueue.keySet()){
+		for (cz.koca2000.nbs4j.Song s : songQueue.keySet()){
 			if (!playlist.contains(s)){
 				songQueue.remove(s);
 			}
 		}
 
-		for (Song s : playlist.getSongList()){
+		for (cz.koca2000.nbs4j.Song s : playlist.getSongs()){
 			if (!songQueue.containsKey(s)){
 				songQueue.put(s, false);
 			}
@@ -524,8 +530,13 @@ public abstract class SongPlayer {
 	 * Gets the Song being played by this SongPlayer
 	 * @return
 	 */
+	@Deprecated
 	public Song getSong() {
-		return song;
+		return new Song(song);
+	}
+
+	public cz.koca2000.nbs4j.Song getPlayingSong(){
+		return playingSong;
 	}
 	
 	/**
@@ -544,7 +555,7 @@ public abstract class SongPlayer {
 	}
 	
 	/**
-	 * Get index of actually played {@link Song} in {@link Playlist}
+	 * Get index of actually played {@link cz.koca2000.nbs4j.Song} in {@link Playlist}
 	 * @return
 	 */
 	public int getPlayedSongIndex(){
@@ -552,15 +563,16 @@ public abstract class SongPlayer {
 	}
 	
 	/**
-	 * Start playing {@link Song} at specified index in {@link Playlist}
-	 * If there is no {@link Song} at this index, {@link SongPlayer} will continue playing current song
+	 * Start playing {@link cz.koca2000.nbs4j.Song} at specified index in {@link Playlist}
+	 * If there is no {@link cz.koca2000.nbs4j.Song} at this index, {@link SongPlayer} will continue playing current song
 	 * @param index
 	 */
 	public void playSong(int index){
 		lock.lock();
 		try {
 			if (playlist.exist(index)){
-				song = playlist.get(index);
+				playingSong = playlist.getSong(index);
+				song = new Song(playingSong);
 				actualSong = index;
 				tick = -1;
 				fadeIn.setFadeDone(0);
@@ -577,7 +589,7 @@ public abstract class SongPlayer {
 	public void playNextSong(){
 		lock.lock();
 		try {
-			tick = song.getLength();
+			tick = (short) playingSong.getSongLength();
 		} finally {
 			lock.unlock();
 		}
