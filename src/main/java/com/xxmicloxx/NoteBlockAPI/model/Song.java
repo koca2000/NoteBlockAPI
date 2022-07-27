@@ -5,7 +5,6 @@ import com.xxmicloxx.NoteBlockAPI.utils.InstrumentUtils;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * Represents a Note Block Studio project

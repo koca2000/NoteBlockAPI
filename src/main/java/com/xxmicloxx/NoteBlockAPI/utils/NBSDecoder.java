@@ -1,12 +1,8 @@
 package com.xxmicloxx.NoteBlockAPI.utils;
 
 import com.xxmicloxx.NoteBlockAPI.model.Song;
-import cz.koca2000.nbs4j.SongCorruptedException;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 
 /**

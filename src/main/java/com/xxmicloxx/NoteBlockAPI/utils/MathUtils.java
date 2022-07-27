@@ -13,22 +13,12 @@ public class MathUtils {
 			sin[deg] = Math.sin(Math.toRadians(deg));
 		}
 	}
-	
-	private static double[] getCos(){
-		return cos;
-	}
-	
-	private static double[] getSin(){
-		return sin;
-	}
-	
+
 	public static Location stereoSourceLeft(Location location, float distance) {
-		int angle = getAngle(location.getYaw());
-	    return location.clone().add(-getCos()[angle] * distance, 0, -getSin()[angle] * distance);
+		return stereoPan(location, -distance);
 	}
 	public static Location stereoSourceRight(Location location, float distance) {
-		int angle = getAngle(location.getYaw());
-	    return location.clone().add(getCos()[angle] * distance, 0, getSin()[angle] * distance);
+		return stereoPan(location, distance);
 	}
 
 	/**
@@ -39,7 +29,7 @@ public class MathUtils {
 	 */
 	public static Location stereoPan(Location location, float distance){
 		int angle = getAngle(location.getYaw());
-		return location.clone().add( getCos()[angle] * distance, 0, getSin()[angle] * distance);
+		return location.clone().add( cos[angle] * distance, 0, sin[angle] * distance);
 	}
 
 	private static int getAngle(float yaw){
