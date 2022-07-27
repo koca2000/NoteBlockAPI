@@ -1,5 +1,8 @@
 package com.xxmicloxx.NoteBlockAPI.model;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,7 +21,7 @@ public class Layer {
 		layer = new cz.koca2000.nbs4j.Layer();
 	}
 
-	public Layer(cz.koca2000.nbs4j.Layer layer){
+	public Layer(@NotNull cz.koca2000.nbs4j.Layer layer){
 		this.layer = layer;
 	}
 
@@ -27,6 +30,7 @@ public class Layer {
 	 * @deprecated
 	 * @return HashMap of notes with the tick they are played at
 	 */
+	@NotNull
 	@Deprecated
 	public HashMap<Integer, Note> getNotesAtTicks() {
 		HashMap<Integer, Note> notes = new HashMap<>();
@@ -42,20 +46,16 @@ public class Layer {
 	 * @deprecated Notes in layer can not be changed anymore
 	 */
 	@Deprecated
-	public void setNotesAtTicks(HashMap<Integer, Note> notesAtTicks) {
-		if (layer.getSong() != null){
-			cz.koca2000.nbs4j.Song song = layer.getSong();
-			int index = getLayerIndex();
-
-			for (Map.Entry<Integer, Note> noteEntry : notesAtTicks.entrySet()){
-				song.setNote(noteEntry.getKey(), index, noteEntry.getValue().getNote());
-			}
+	public void setNotesAtTicks(@NotNull HashMap<Integer, Note> notesAtTicks) {
+		for (Map.Entry<Integer, Note> noteEntry : notesAtTicks.entrySet()){
+			layer.setNote(noteEntry.getKey(), noteEntry.getValue().getNote());
 		}
 	}
 
 	/**
 	 * Gets the name of the Layer
 	 */
+	@NotNull
 	@Deprecated
 	public String getName() {
 		return layer.getName();
@@ -65,13 +65,14 @@ public class Layer {
 	 * Sets the name of the Layer
 	 */
 	@Deprecated
-	public void setName(String name) {
+	public void setName(@NotNull String name) {
 		layer.setName(name);
 	}
 
 	/**
 	 * Gets the note played at a given tick
 	 */
+	@Nullable
 	@Deprecated
 	public Note getNote(int tick) {
 		cz.koca2000.nbs4j.Note note = layer.getNote(tick);
@@ -85,11 +86,8 @@ public class Layer {
 	 * @deprecated Notes in layer can not be changed anymore
 	 */
 	@Deprecated
-	public void setNote(int tick, Note note) {
-		if (layer.getSong() != null){
-			int index = getLayerIndex();
-			layer.getSong().setNote(tick, index, note.getNote());
-		}
+	public void setNote(int tick, @NotNull Note note) {
+		layer.setNote(tick, note.getNote());
 	}
 
 	/**
@@ -130,18 +128,8 @@ public class Layer {
 		layer.setPanning(panning - 100);
 	}
 
+	@NotNull
 	public cz.koca2000.nbs4j.Layer getLayer(){
 		return layer;
-	}
-
-	private int getLayerIndex(){
-		cz.koca2000.nbs4j.Song song = layer.getSong();
-		if (song == null)
-			return -1;
-		for (int index = 0; index < song.getLayersCount(); index++){
-			if (song.getLayer(index) == layer)
-				return index;
-		}
-		return -1;
 	}
 }

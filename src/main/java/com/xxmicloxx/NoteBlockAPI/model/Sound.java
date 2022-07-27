@@ -1,5 +1,8 @@
 package com.xxmicloxx.NoteBlockAPI.model;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,9 +42,8 @@ public enum Sound {
 	private final String[] versionDependentNames;
 
 	private org.bukkit.Sound cached = null;
-	private boolean isAvailable = true;
 
-	Sound(int instrumentIndex, String resourcePackName, String... versionDependentNames) {
+	Sound(int instrumentIndex, @NotNull String resourcePackName, @NotNull String... versionDependentNames) {
 		this.instrumentIndex = instrumentIndex;
 		this.resourcePackName = resourcePackName;
 		this.versionDependentNames = versionDependentNames;
@@ -50,22 +52,24 @@ public enum Sound {
 	/**
 	 * Attempts to retrieve the org.bukkit.Sound equivalent of a version dependent enum name
 	 * @param bukkitSoundName
-	 * @deprecated Use {@link #getByBukkitName(String)} and {@link #getSound()} to get org.bukkit.Sound
+	 * @deprecated Use {@link #getByBukkitName(String)} and {@link #getBukkitSound()} to get org.bukkit.Sound
 	 * @return org.bukkit.Sound enum
 	 */
 	@Deprecated
-	public static org.bukkit.Sound getFromBukkitName(String bukkitSoundName) {
+	public static org.bukkit.Sound getFromBukkitName(@NotNull String bukkitSoundName) {
 		Sound sound = soundsByName.get(bukkitSoundName.toUpperCase());
 		if (sound != null)
-			return sound.getSound();
+			return sound.getBukkitSound();
 
 		return org.bukkit.Sound.valueOf(bukkitSoundName);
 	}
 
-	public static Sound getByBukkitName(String bukkitSoundName){
+	@Nullable
+	public static Sound getByBukkitName(@NotNull String bukkitSoundName){
 		return soundsByName.get(bukkitSoundName.toUpperCase());
 	}
 
+	@Nullable
 	public static Sound getByIndex(int index){
 		if (index < 0 || index >= soundsByIndex.length)
 			return null;
@@ -76,27 +80,26 @@ public enum Sound {
 		return instrumentIndex;
 	}
 
+	@NotNull
 	public String getResourcePackName(){
 		return resourcePackName;
 	}
 
-	public org.bukkit.Sound getSound() {
-		if (cached != null)
-			return cached;
+	@Nullable
+	public org.bukkit.Sound getBukkitSound() {
+		return cached;
+	}
 
-		if (!isAvailable)
-			return null;
-
+	private void cacheBukkitSound(){
 		org.bukkit.Sound[] bukkitSounds = org.bukkit.Sound.values();
 		for (org.bukkit.Sound sound : bukkitSounds) {
-			for (String name : versionDependentNames)
-				if (sound.name().equals(name)){
+			for (String name : versionDependentNames) {
+				if (sound.name().equals(name)) {
 					cached = sound;
-					return sound;
+					return;
 				}
+			}
 		}
-		isAvailable = false;
-		return null;
 	}
 
 	/**
@@ -104,10 +107,12 @@ public enum Sound {
 	 *
 	 * Caches sound on first call
 	 * @return corresponding {@link org.bukkit.Sound}
+	 * @deprecated Use {@link #getBukkitSound()}
 	 */
+	@NotNull
 	public org.bukkit.Sound bukkitSound() {
-		if (getSound() != null) {
-			return getSound();
+		if (getBukkitSound() != null) {
+			return getBukkitSound();
 		}
 		throw new IllegalArgumentException("Found no valid sound name for " + this.name());
 	}
@@ -115,7 +120,7 @@ public enum Sound {
 	static {
 		// Cache sound access.
 		for (Sound sound : values()) {
-			sound.getSound();
+			sound.cacheBukkitSound();
 			soundsByIndex[sound.getInstrumentIndex()] = sound;
 			for (String name : sound.versionDependentNames)
 				soundsByName.put(name, sound);

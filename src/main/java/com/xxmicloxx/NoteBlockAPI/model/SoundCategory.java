@@ -5,7 +5,6 @@ package com.xxmicloxx.NoteBlockAPI.model;
  *
  */
 public enum SoundCategory {
-
 	MASTER,
 	MUSIC,
 	RECORDS,
@@ -15,6 +14,5 @@ public enum SoundCategory {
 	NEUTRAL,
 	PLAYERS,
 	AMBIENT,
-	VOICE;
-
+	VOICE
 }

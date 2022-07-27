@@ -1,11 +1,10 @@
 package com.xxmicloxx.NoteBlockAPI.event;
 
+import com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
-
-import com.xxmicloxx.NoteBlockAPI.model.Song;
-import com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer;
+import org.jetbrains.annotations.NotNull;
 
 public class SongLoopEvent extends Event implements Cancellable {
 
@@ -13,24 +12,17 @@ public class SongLoopEvent extends Event implements Cancellable {
 	private final SongPlayer song;
 	private boolean cancelled = false;
 
-	public SongLoopEvent(SongPlayer song) {
+	public SongLoopEvent(@NotNull SongPlayer song) {
 		this.song = song;
 	}
 
-	public static HandlerList getHandlerList() {
-		return handlers;
-	}
-
 	/**
-	 * Returns SongPlayer which {@link Song} ends and is going to start again
+	 * Returns SongPlayer which {@link cz.koca2000.nbs4j.Song} ends and is going to start again
 	 * @return SongPlayer
 	 */
+	@NotNull
 	public SongPlayer getSongPlayer() {
 		return song;
-	}
-
-	public HandlerList getHandlers() {
-		return handlers;
 	}
 
 	@Override
@@ -39,8 +31,18 @@ public class SongLoopEvent extends Event implements Cancellable {
 	}
 
 	@Override
-	public void setCancelled(boolean cancel) {
-		this.cancelled = cancel;
+	public void setCancelled(boolean cancelled) {
+		this.cancelled = cancelled;
 	}
 
+	@NotNull
+	@Override
+	public HandlerList getHandlers() {
+		return handlers;
+	}
+
+	@NotNull
+	public static HandlerList getHandlerList() {
+		return handlers;
+	}
 }

@@ -1,5 +1,7 @@
 package com.xxmicloxx.NoteBlockAPI.model;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -11,7 +13,7 @@ public class Playlist {
 
 
 	@Deprecated
-	public Playlist(Song ...songs){
+	public Playlist(@NotNull Song ...songs){
 		if (songs.length == 0){
 			throw new IllegalArgumentException("Cannot create empty playlist");
 		}
@@ -19,7 +21,7 @@ public class Playlist {
 		add(songs);
 	}
 
-	public Playlist(cz.koca2000.nbs4j.Song ...songs){
+	public Playlist(@NotNull cz.koca2000.nbs4j.Song ...songs){
 		if (songs.length == 0){
 			throw new IllegalArgumentException("Cannot create empty playlist");
 		}
@@ -32,7 +34,7 @@ public class Playlist {
 	 * @param songs
 	 */
 	@Deprecated
-	public void add(Song ...songs){
+	public void add(@NotNull Song ...songs){
 		if (songs.length == 0){
 			return;
 		}
@@ -44,7 +46,7 @@ public class Playlist {
 	 * Add array of {@link cz.koca2000.nbs4j.Song} to playlist
 	 * @param songs
 	 */
-	public void add(cz.koca2000.nbs4j.Song ...songs){
+	public void add(@NotNull cz.koca2000.nbs4j.Song ...songs){
 		if (songs.length == 0){
 			return;
 		}
@@ -58,7 +60,7 @@ public class Playlist {
 	 * @param songs
 	 */
 	@Deprecated
-	public void insert(int index, Song ...songs){
+	public void insert(int index, @NotNull Song ...songs){
 		if (songs.length == 0){
 			return;
 		}
@@ -74,7 +76,7 @@ public class Playlist {
 	 * @param index
 	 * @param songs
 	 */
-	public void insert(int index, cz.koca2000.nbs4j.Song...songs){
+	public void insert(int index, @NotNull cz.koca2000.nbs4j.Song...songs){
 		if (songs.length == 0){
 			return;
 		}
@@ -84,15 +86,16 @@ public class Playlist {
 		checkNull(songs);
 		this.songs.addAll(index, Arrays.asList(songs));
 	}
-	
-	private void checkNull(Song ...songs){
+
+	@Deprecated
+	private void checkNull(@NotNull Song ...songs){
 		List<Song> songList = Arrays.asList(songs);
 		if (songList.contains(null)){
 			throw new IllegalArgumentException("Cannot add null to playlist");
 		}
 	}
 
-	private void checkNull(cz.koca2000.nbs4j.Song ...songs){
+	private void checkNull(@NotNull cz.koca2000.nbs4j.Song ...songs){
 		List<cz.koca2000.nbs4j.Song> songList = Arrays.asList(songs);
 		if (songList.contains(null)){
 			throw new IllegalArgumentException("Cannot add null to playlist");
@@ -105,7 +108,7 @@ public class Playlist {
 	 * @throws IllegalArgumentException when you try to remove all {@link Song} from {@link Playlist}
 	 */
 	@Deprecated
-	public void remove(Song ...songs){
+	public void remove(@NotNull Song ...songs){
 		List<cz.koca2000.nbs4j.Song> oldSongs = SongsToNBS4j(songs);
 		ArrayList<cz.koca2000.nbs4j.Song> songsTemp = new ArrayList<>(this.songs);
 		songsTemp.removeAll(oldSongs);
@@ -121,7 +124,7 @@ public class Playlist {
 	 * @param songs
 	 * @throws IllegalArgumentException when you try to remove all {@link cz.koca2000.nbs4j.Song} from {@link Playlist}
 	 */
-	public void remove(cz.koca2000.nbs4j.Song...songs){
+	public void remove(@NotNull cz.koca2000.nbs4j.Song...songs){
 		ArrayList<cz.koca2000.nbs4j.Song> songsTemp = new ArrayList<>(this.songs);
 		songsTemp.removeAll(Arrays.asList(songs));
 		if (songsTemp.size() > 0){
@@ -136,6 +139,8 @@ public class Playlist {
 	 * @param songNumber - song index
 	 * @return
 	 */
+	@Deprecated
+	@NotNull
 	public Song get(int songNumber){
 		return new Song(songs.get(songNumber));
 	}
@@ -145,12 +150,13 @@ public class Playlist {
 	 * @param songNumber - song index
 	 * @return
 	 */
+	@NotNull
 	public cz.koca2000.nbs4j.Song getSong(int songNumber){
 		return songs.get(songNumber);
 	}
 	
 	/**
-	 * Get number of {@link Song} in playlist
+	 * Get number of {@link cz.koca2000.nbs4j.Song} in playlist
 	 * @return
 	 */
 	public int getCount(){
@@ -181,46 +187,54 @@ public class Playlist {
 	 * @return Index of song. -1 if song is not in playelist
 	 */
 	@Deprecated
-	public int getIndex(Song song){	return songs.indexOf(song.getSong());	}
+	public int getIndex(@NotNull Song song){	return songs.indexOf(song.getSong());	}
 
 	/**
 	 * Returns index of song.
 	 * @param song
 	 * @return Index of song. -1 if song is not in playelist
 	 */
-	public int getIndex(cz.koca2000.nbs4j.Song song){	return songs.indexOf(song);	}
+	public int getIndex(@NotNull cz.koca2000.nbs4j.Song song){	return songs.indexOf(song);	}
 
 	/**
 	 * Check whether playlist contains song.
 	 * @param song
 	 * @return
 	 */
-	public boolean contains(Song song) { return songs.contains(song.getSong()); }
+	@Deprecated
+	public boolean contains(@NotNull Song song) { return songs.contains(song.getSong()); }
 
 	/**
 	 * Check whether playlist contains song.
 	 * @param song
 	 * @return
 	 */
-	public boolean contains(cz.koca2000.nbs4j.Song song) { return songs.contains(song); }
+	public boolean contains(@NotNull cz.koca2000.nbs4j.Song song) { return songs.contains(song); }
 
 	/**
 	 * Returns list of Songs in Playlist
 	 * @return
-	 */	
+	 */
+	@Deprecated
+	@NotNull
 	public ArrayList<Song> getSongList(){
 		return new ArrayList<>(NBS4jToSong(songs));
 	}
 
+	@NotNull
 	public List<cz.koca2000.nbs4j.Song> getSongs(){
 		return new ArrayList<>(songs);
 	}
 
-	private List<cz.koca2000.nbs4j.Song> SongsToNBS4j(Song[] songs){
+	@Deprecated
+	@NotNull
+	private List<cz.koca2000.nbs4j.Song> SongsToNBS4j(@NotNull Song[] songs){
 		return Arrays.stream(songs).map(Song::getSong).collect(Collectors.toList());
 	}
 
-	private List<Song> NBS4jToSong(List<cz.koca2000.nbs4j.Song> songs){
+	@Deprecated
+	@NotNull
+	private List<Song> NBS4jToSong(@NotNull List<cz.koca2000.nbs4j.Song> songs){
 		return songs.stream().map(Song::new).collect(Collectors.toList());
 	}
 }

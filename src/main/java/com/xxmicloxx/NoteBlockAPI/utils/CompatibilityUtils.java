@@ -1,18 +1,19 @@
 package com.xxmicloxx.NoteBlockAPI.utils;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-
+import com.xxmicloxx.NoteBlockAPI.model.CustomInstrument;
+import com.xxmicloxx.NoteBlockAPI.model.SoundCategory;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import com.xxmicloxx.NoteBlockAPI.model.CustomInstrument;
-import com.xxmicloxx.NoteBlockAPI.model.SoundCategory;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Fields/methods for reflection &amp; version checking
@@ -31,8 +32,11 @@ public class CompatibilityUtils {
 	 * Gets NMS class from given name
 	 * @param name of class (w/ package)
 	 * @return Class of given name
+	 * @deprecated NMS is not used
 	 */
-	public static Class<?> getMinecraftClass(String name) {
+	@Nullable
+	@Deprecated
+	public static Class<?> getMinecraftClass(@NotNull String name) {
 		try {
 			return Class.forName(NMS_DIR + "." + name);
 		} catch (ClassNotFoundException e) {
@@ -46,7 +50,8 @@ public class CompatibilityUtils {
 	 * @param name of class (w/ package)
 	 * @return Class of given name
 	 */
-	public static Class<?> getCraftBukkitClass(String name) {
+	@Nullable
+	public static Class<?> getCraftBukkitClass(@NotNull String name) {
 		try {
 			return Class.forName(OBC_DIR + "." + name);
 		} catch (ClassNotFoundException e) {
@@ -55,6 +60,7 @@ public class CompatibilityUtils {
 		}
 	}
 
+	@NotNull
 	private static Class<? extends Enum> getSoundCategoryClass() throws ClassNotFoundException {
 		if (isSoundCategoryCompatible() && soundCategoryClass == null){
 			soundCategoryClass = (Class<? extends Enum>) Class.forName("org.bukkit.SoundCategory");
@@ -62,7 +68,8 @@ public class CompatibilityUtils {
 		return soundCategoryClass;
 	}
 
-	private static Method getPlaySoundMethod(Class sound, boolean soundCategory) throws ClassNotFoundException, NoSuchMethodException {
+	@NotNull
+	private static Method getPlaySoundMethod(@NotNull Class sound, boolean soundCategory) throws ClassNotFoundException, NoSuchMethodException {
 		Method method = playSoundMethod.get(sound.getName() + soundCategory);
 		if (method == null){
 			if (soundCategory) {
@@ -96,8 +103,8 @@ public class CompatibilityUtils {
 	 * @param pitch
 	 * @param distance
 	 */
-	public static void playSound(Player player, Location location, String sound,
-								 SoundCategory category, float volume, float pitch, float distance) {
+	public static void playSound(@NotNull Player player, @NotNull Location location, @NotNull String sound,
+								 @NotNull SoundCategory category, float volume, float pitch, float distance) {
 		playSoundUniversal(player, location, sound, category, volume, pitch, distance);
 	}
 
@@ -111,13 +118,13 @@ public class CompatibilityUtils {
 	 * @param pitch
 	 * @param distance
 	 */
-	public static void playSound(Player player, Location location, Sound sound,
-								 SoundCategory category, float volume, float pitch, float distance) {
+	public static void playSound(@NotNull Player player, @NotNull Location location, @NotNull Sound sound,
+								 @NotNull SoundCategory category, float volume, float pitch, float distance) {
 		playSoundUniversal(player, location, sound, category, volume, pitch, distance);
 	}
 
-	private static void playSoundUniversal(Player player, Location location, Object sound,
-								 SoundCategory category, float volume, float pitch, float distance) {
+	private static void playSoundUniversal(@NotNull Player player, @NotNull Location location, @NotNull Object sound,
+										   @NotNull SoundCategory category, float volume, float pitch, float distance) {
 		try {
 			if (isSoundCategoryCompatible()) {
 				Method method = getPlaySoundMethod(sound.getClass(), true);
@@ -137,6 +144,8 @@ public class CompatibilityUtils {
 	 * @param serverVersion 1.12 = 0.0112f, 1.14 = 0.0114f,...
 	 * @return list of custom instruments, if no instuments were added in specified version returns empty list
 	 */
+	@Deprecated
+	@NotNull
 	public static ArrayList<CustomInstrument> getVersionCustomInstruments(float serverVersion){
 		ArrayList<CustomInstrument> instruments = new ArrayList<>();
 		if (serverVersion == 0.0112f){
@@ -165,6 +174,8 @@ public class CompatibilityUtils {
 	 * @param firstCustomInstrumentIndex
 	 * @return
 	 */
+	@Deprecated
+	@NotNull
 	public static ArrayList<CustomInstrument> getVersionCustomInstrumentsForSong(int firstCustomInstrumentIndex){
 		ArrayList<CustomInstrument> instruments = new ArrayList<>();
 
@@ -211,6 +222,7 @@ public class CompatibilityUtils {
 		return serverVersion;
 	}
 
+	@NotNull
 	public static Material getNoteBlockMaterial(){
 		return Material.valueOf("NOTE_BLOCK");
 	}

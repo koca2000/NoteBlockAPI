@@ -5,6 +5,7 @@ import org.bukkit.entity.Player;
 import com.xxmicloxx.NoteBlockAPI.model.Playlist;
 import com.xxmicloxx.NoteBlockAPI.model.Song;
 import com.xxmicloxx.NoteBlockAPI.model.SoundCategory;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * SongPlayer playing only in specified distance
@@ -13,20 +14,27 @@ import com.xxmicloxx.NoteBlockAPI.model.SoundCategory;
 public abstract class RangeSongPlayer extends SongPlayer{
 
 	private int distance = 16;
-	
-	public RangeSongPlayer(Song song, SoundCategory soundCategory) {
+
+	@Deprecated
+	public RangeSongPlayer(@NotNull Song song, @NotNull SoundCategory soundCategory) {
 		super(song, soundCategory);
 	}
 
-	public RangeSongPlayer(Song song) {
+	@Deprecated
+	public RangeSongPlayer(@NotNull Song song) {
 		super(song);
 	}
 
-	public RangeSongPlayer(Playlist playlist, SoundCategory soundCategory) {
+	public RangeSongPlayer(@NotNull cz.koca2000.nbs4j.Song song) {
+		super(song);
+	}
+
+	@Deprecated
+	public RangeSongPlayer(@NotNull Playlist playlist, @NotNull SoundCategory soundCategory) {
 		super(playlist, soundCategory);
 	}
 
-	public RangeSongPlayer(Playlist playlist) {
+	public RangeSongPlayer(@NotNull Playlist playlist) {
 		super(playlist);
 	}
 

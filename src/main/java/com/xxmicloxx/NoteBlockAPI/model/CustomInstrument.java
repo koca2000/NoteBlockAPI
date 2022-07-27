@@ -1,5 +1,8 @@
 package com.xxmicloxx.NoteBlockAPI.model;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 /**
  * Create custom instruments from a sound file
  * @deprecated Use {@link cz.koca2000.nbs4j.CustomInstrument}
@@ -25,7 +28,7 @@ public class CustomInstrument {
 				.setFileName(soundFileName);
 	}
 
-	public CustomInstrument(cz.koca2000.nbs4j.CustomInstrument customInstrument){
+	public CustomInstrument(@NotNull cz.koca2000.nbs4j.CustomInstrument customInstrument){
 		this.customInstrument = customInstrument;
 	}
 
@@ -42,6 +45,7 @@ public class CustomInstrument {
 	 * Gets name of CustomInstrument
 	 * @return name
 	 */
+	@NotNull
 	@Deprecated
 	public String getName() {
 		return customInstrument.getName();
@@ -51,6 +55,7 @@ public class CustomInstrument {
 	 * Gets file name of the sound
 	 * @return file name
 	 */
+	@NotNull
 	@Deprecated
 	public String getSoundFileName() {
 		return customInstrument.getFileName();
@@ -60,6 +65,7 @@ public class CustomInstrument {
 	 * Gets the org.bukkit.Sound enum for this CustomInstrument
 	 * @return org.bukkit.Sound enum
 	 */
+	@Nullable
 	@Deprecated
 	public org.bukkit.Sound getSound() {
 		return null;

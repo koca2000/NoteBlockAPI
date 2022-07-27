@@ -1,5 +1,8 @@
 package com.xxmicloxx.NoteBlockAPI.utils;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -12,10 +15,11 @@ public class Updater {
 	 * Checks Spigot forums for plugin update
 	 * @param resource Resource ID
 	 * @param actualVersion Textual representation of currently installed version
-	 * @return string|null Returns textual representation of the new version if available. Otherwise returns null
+	 * @return string|null Returns textual representation of the new version if available. Otherwise, returns null
 	 * @throws IOException if the connection fails
 	 */
-	public static String checkUpdate(String resource, String actualVersion) throws IOException{
+	@Nullable
+	public static String checkUpdate(@NotNull String resource, @NotNull String actualVersion) throws IOException{
 		boolean snapshot = false;
 		if (actualVersion.contains("-SNAPSHOT")){
 			snapshot = true;
@@ -34,7 +38,7 @@ public class Updater {
 		return (snapshot && newVer >= version) || newVer > version ? newVersion : null;
 	}
 	
-	private static int getVersionNumber(String version){
+	private static int getVersionNumber(@NotNull String version){
 		String[] versionParts = version.split("\\.");
 
 		int versionNumber = 0;

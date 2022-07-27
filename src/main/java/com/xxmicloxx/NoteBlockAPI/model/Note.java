@@ -1,5 +1,7 @@
 package com.xxmicloxx.NoteBlockAPI.model;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * Represents a note played; contains the instrument and the key
  *
@@ -24,7 +26,7 @@ public class Note {
 				.setPitch(pitch);
 	}
 
-	public Note(cz.koca2000.nbs4j.Note note){
+	public Note(@NotNull cz.koca2000.nbs4j.Note note){
 		this.note = note;
 	}
 
@@ -123,6 +125,7 @@ public class Note {
 		note.setPanning(panning);
 	}
 
+	@NotNull
 	public cz.koca2000.nbs4j.Note getNote(){
 		return note;
 	}

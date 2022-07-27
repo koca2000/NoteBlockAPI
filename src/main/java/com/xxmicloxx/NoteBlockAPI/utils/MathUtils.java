@@ -1,6 +1,7 @@
 package com.xxmicloxx.NoteBlockAPI.utils;
 
 import org.bukkit.Location;
+import org.jetbrains.annotations.NotNull;
 
 public class MathUtils {
 
@@ -14,10 +15,13 @@ public class MathUtils {
 		}
 	}
 
-	public static Location stereoSourceLeft(Location location, float distance) {
+	@NotNull
+	public static Location stereoSourceLeft(@NotNull Location location, float distance) {
 		return stereoPan(location, -distance);
 	}
-	public static Location stereoSourceRight(Location location, float distance) {
+
+	@NotNull
+	public static Location stereoSourceRight(@NotNull Location location, float distance) {
 		return stereoPan(location, distance);
 	}
 
@@ -27,7 +31,7 @@ public class MathUtils {
 	 * @param distance negative for left side, positive for right side
 	 * @return
 	 */
-	public static Location stereoPan(Location location, float distance){
+	public static Location stereoPan(@NotNull Location location, float distance){
 		int angle = getAngle(location.getYaw());
 		return location.clone().add( cos[angle] * distance, 0, sin[angle] * distance);
 	}

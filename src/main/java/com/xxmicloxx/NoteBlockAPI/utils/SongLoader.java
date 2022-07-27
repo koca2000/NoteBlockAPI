@@ -4,6 +4,8 @@ import cz.koca2000.nbs4j.Song;
 import cz.koca2000.nbs4j.SongCorruptedException;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,9 +26,8 @@ public class SongLoader {
      * @param file file to be loaded
      * @return loaded {@link Song} or null if song could not be opened or loaded.
      */
-    public static Song loadSong(File file){
-        if (file == null)
-            throw new IllegalArgumentException("Given file can not be null");
+    @Nullable
+    public static Song loadSong(@NotNull File file){
         return loadSong(file.toPath());
     }
 
@@ -36,9 +37,8 @@ public class SongLoader {
      * @param path file to be loaded
      * @return loaded {@link Song} or null if song could not be opened or loaded.
      */
-    public static Song loadSong(Path path){
-        if (path == null)
-            throw new IllegalArgumentException("Given path can not be null");
+    @Nullable
+    public static Song loadSong(@NotNull Path path){
         try {
             return loadSongInternal(Files.newInputStream(path));
         }
@@ -59,9 +59,8 @@ public class SongLoader {
      * @param stream stream to be read
      * @return loaded {@link Song} or null if song could not be loaded.
      */
-    public static Song loadSong(InputStream stream){
-        if (stream == null)
-            throw new IllegalArgumentException("Given stream can not be null");
+    @Nullable
+    public static Song loadSong(@NotNull InputStream stream){
         try{
             return loadSongInternal(stream);
         }
@@ -72,7 +71,7 @@ public class SongLoader {
         return null;
     }
 
-    private static Song loadSongInternal(InputStream stream){
+    private static Song loadSongInternal(@NotNull InputStream stream){
         //TODO: try to load midi file
 
         return Song.fromStream(stream);

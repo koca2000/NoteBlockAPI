@@ -1,6 +1,7 @@
 package com.xxmicloxx.NoteBlockAPI.utils;
 
 import com.xxmicloxx.NoteBlockAPI.model.Note;
+import org.jetbrains.annotations.NotNull;
 
 public class NoteUtils {
 
@@ -41,7 +42,7 @@ public class NoteUtils {
      * @param note note
      * @return pitch
      */
-    public static float getPitchInOctave(cz.koca2000.nbs4j.Note note) {
+    public static float getPitchInOctave(@NotNull cz.koca2000.nbs4j.Note note) {
         return getPitchInOctave((byte) note.getKey(), (short) note.getPitch());
     }
 
@@ -84,7 +85,7 @@ public class NoteUtils {
      * @return pitch
      */
     @Deprecated
-    public static float getPitchTransposed(Note note) {
+    public static float getPitchTransposed(@NotNull Note note) {
         return getPitchTransposed(note.getKey(), note.getPitch());
     }
 
@@ -94,7 +95,7 @@ public class NoteUtils {
      * @param note note
      * @return pitch
      */
-    public static float getPitchTransposed(cz.koca2000.nbs4j.Note note) {
+    public static float getPitchTransposed(@NotNull cz.koca2000.nbs4j.Note note) {
         return getPitchTransposed((byte) note.getKey(), (short) note.getPitch());
     }
 

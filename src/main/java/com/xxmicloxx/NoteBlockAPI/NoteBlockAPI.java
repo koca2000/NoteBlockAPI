@@ -8,6 +8,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scheduler.BukkitWorker;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,7 +35,7 @@ public class NoteBlockAPI extends JavaPlugin {
 	 * @param player The player you want to know the information about
 	 * @return is receiving a song
 	 */
-	public static boolean isReceivingSong(Player player) {
+	public static boolean isReceivingSong(@NotNull Player player) {
 		return isReceivingSong(player.getUniqueId());
 	}
 
@@ -42,7 +44,7 @@ public class NoteBlockAPI extends JavaPlugin {
 	 * @param uuid UUID of the player
 	 * @return is receiving a song
 	 */
-	public static boolean isReceivingSong(UUID uuid) {
+	public static boolean isReceivingSong(@NotNull UUID uuid) {
 		ArrayList<SongPlayer> songs = plugin.playingSongs.get(uuid);
 		return (songs != null && !songs.isEmpty());
 	}
@@ -51,7 +53,7 @@ public class NoteBlockAPI extends JavaPlugin {
 	 * Stops the song for a Player
 	 * @param player The player for whose the playback will be stopped
 	 */
-	public static void stopPlaying(Player player) {
+	public static void stopPlaying(@NotNull Player player) {
 		stopPlaying(player.getUniqueId());
 	}
 
@@ -59,7 +61,7 @@ public class NoteBlockAPI extends JavaPlugin {
 	 * Stops the song for a Player
 	 * @param uuid UUID of the player
 	 */
-	public static void stopPlaying(UUID uuid) {
+	public static void stopPlaying(@NotNull UUID uuid) {
 		ArrayList<SongPlayer> songs = plugin.playingSongs.get(uuid);
 		if (songs == null) {
 			return;
@@ -74,7 +76,7 @@ public class NoteBlockAPI extends JavaPlugin {
 	 * @param player Player whose volume will be set
 	 * @param volume Volume in range 0 - 100
 	 */
-	public static void setPlayerVolume(Player player, byte volume) {
+	public static void setPlayerVolume(@NotNull Player player, byte volume) {
 		setPlayerVolume(player.getUniqueId(), volume);
 	}
 
@@ -83,7 +85,7 @@ public class NoteBlockAPI extends JavaPlugin {
 	 * @param uuid UUID of the player
 	 * @param volume Volume in range 0 - 100
 	 */
-	public static void setPlayerVolume(UUID uuid, byte volume) {
+	public static void setPlayerVolume(@NotNull UUID uuid, byte volume) {
 		if (volume > 100) volume = 100;
 		if (volume < 0) volume = 0;
 
@@ -95,7 +97,7 @@ public class NoteBlockAPI extends JavaPlugin {
 	 * @param player Player whose volume would be returned
 	 * @return volume (byte)
 	 */
-	public static byte getPlayerVolume(Player player) {
+	public static byte getPlayerVolume(@NotNull Player player) {
 		return getPlayerVolume(player.getUniqueId());
 	}
 
@@ -104,23 +106,25 @@ public class NoteBlockAPI extends JavaPlugin {
 	 * @param uuid UUID of the player
 	 * @return volume (byte)
 	 */
-	public static byte getPlayerVolume(UUID uuid) {
+	public static byte getPlayerVolume(@NotNull UUID uuid) {
 		return plugin.playerVolume.computeIfAbsent(uuid, k -> (byte) 100);
 	}
-	
-	public static ArrayList<SongPlayer> getSongPlayersByPlayer(Player player){
+
+	@Nullable
+	public static ArrayList<SongPlayer> getSongPlayersByPlayer(@NotNull Player player){
 		return getSongPlayersByPlayer(player.getUniqueId());
 	}
-	
+
+	@Nullable
 	public static ArrayList<SongPlayer> getSongPlayersByPlayer(UUID player){
 		return plugin.playingSongs.get(player);
 	}
-	
-	public static void setSongPlayersByPlayer(Player player, ArrayList<SongPlayer> songs){
+
+	public static void setSongPlayersByPlayer(@NotNull Player player, @NotNull ArrayList<SongPlayer> songs){
 		setSongPlayersByPlayer(player.getUniqueId(), songs);
 	}
-	
-	public static void setSongPlayersByPlayer(UUID player, ArrayList<SongPlayer> songs){
+
+	public static void setSongPlayersByPlayer(@NotNull UUID player, @NotNull ArrayList<SongPlayer> songs){
 		plugin.playingSongs.put(player, songs);
 	}
 
@@ -154,11 +158,13 @@ public class NoteBlockAPI extends JavaPlugin {
 		}
 	}
 
-	public BukkitTask doSync(Runnable runnable) {
+	@NotNull
+	public BukkitTask doSync(@NotNull Runnable runnable) {
 		 return getServer().getScheduler().runTask(this, runnable);
 	}
 
-	public BukkitTask doAsync(Runnable runnable) {
+	@NotNull
+	public BukkitTask doAsync(@NotNull Runnable runnable) {
 		return getServer().getScheduler().runTaskAsynchronously(this, runnable);
 	}
 

@@ -6,25 +6,40 @@ import com.xxmicloxx.NoteBlockAPI.model.*;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 public class EntitySongPlayer extends RangeSongPlayer {
 
     private Entity entity;
 
-    public EntitySongPlayer(Song song) {
+    @Deprecated
+    public EntitySongPlayer(@NotNull Song song) {
         super(song);
     }
 
-    public EntitySongPlayer(Song song, SoundCategory soundCategory) {
+    @Deprecated
+    public EntitySongPlayer(@NotNull Song song, SoundCategory soundCategory) {
         super(song, soundCategory);
     }
 
-    public EntitySongPlayer(Playlist playlist, SoundCategory soundCategory) {
+    @Deprecated
+    public EntitySongPlayer(@NotNull Playlist playlist, SoundCategory soundCategory) {
         super(playlist, soundCategory);
     }
 
-    public EntitySongPlayer(Playlist playlist) {
+    @Deprecated
+    public EntitySongPlayer(@NotNull Playlist playlist) {
         super(playlist);
+    }
+
+    public EntitySongPlayer(@NotNull cz.koca2000.nbs4j.Song song, @NotNull Entity entity) {
+        super(song);
+        this.entity = entity;
+    }
+
+    public EntitySongPlayer(@NotNull Playlist playlist, @NotNull Entity entity) {
+        super(playlist);
+        this.entity = entity;
     }
 
     /**
@@ -33,7 +48,7 @@ public class EntitySongPlayer extends RangeSongPlayer {
      * @return ability to hear the current {@link EntitySongPlayer}
      */
     @Override
-    public boolean isInRange(Player player) {
+    public boolean isInRange(@NotNull Player player) {
         return player.getLocation().distance(entity.getLocation()) <= getDistance();
     }
 
@@ -41,7 +56,7 @@ public class EntitySongPlayer extends RangeSongPlayer {
      * Set entity associated with this {@link EntitySongPlayer}
      * @param entity
      */
-    public void setEntity(Entity entity){
+    public void setEntity(@NotNull Entity entity){
         this.entity = entity;
     }
 
@@ -49,12 +64,13 @@ public class EntitySongPlayer extends RangeSongPlayer {
      * Get {@link Entity} associated with this {@link EntitySongPlayer}
      * @return
      */
+    @NotNull
     public Entity getEntity() {
         return entity;
     }
 
     @Override
-    public void playTick(Player player, int tick) {
+    public void playTick(@NotNull Player player, int tick) {
         if (entity.isDead()){
             setPlaying(false);
         }

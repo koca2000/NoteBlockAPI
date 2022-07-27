@@ -1,16 +1,15 @@
 package com.xxmicloxx.NoteBlockAPI.songplayer;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.entity.Player;
-
 import com.xxmicloxx.NoteBlockAPI.NoteBlockAPI;
 import com.xxmicloxx.NoteBlockAPI.event.PlayerRangeStateChangeEvent;
-import com.xxmicloxx.NoteBlockAPI.model.Layer;
-import com.xxmicloxx.NoteBlockAPI.model.Note;
 import com.xxmicloxx.NoteBlockAPI.model.Playlist;
 import com.xxmicloxx.NoteBlockAPI.model.Song;
 import com.xxmicloxx.NoteBlockAPI.model.SoundCategory;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * SongPlayer created at a specified Location
@@ -20,26 +19,41 @@ public class PositionSongPlayer extends RangeSongPlayer {
 
 	private Location targetLocation;
 
-	public PositionSongPlayer(Song song) {
+	@Deprecated
+	public PositionSongPlayer(@NotNull Song song) {
 		super(song);
 	}
 
-	public PositionSongPlayer(Song song, SoundCategory soundCategory) {
+	@Deprecated
+	public PositionSongPlayer(@NotNull Song song, @NotNull SoundCategory soundCategory) {
 		super(song, soundCategory);
 	}
-	
-	public PositionSongPlayer(Playlist playlist, SoundCategory soundCategory) {
+
+	@Deprecated
+	public PositionSongPlayer(@NotNull Playlist playlist, @NotNull SoundCategory soundCategory) {
 		super(playlist, soundCategory);
 	}
 
-	public PositionSongPlayer(Playlist playlist) {
+	@Deprecated
+	public PositionSongPlayer(@NotNull Playlist playlist) {
 		super(playlist);
+	}
+
+	public PositionSongPlayer(@NotNull cz.koca2000.nbs4j.Song song, @NotNull Location location) {
+		super(song);
+		setTargetLocation(location);
+	}
+
+	public PositionSongPlayer(@NotNull Playlist playlist, @NotNull Location location) {
+		super(playlist);
+		setTargetLocation(location);
 	}
 
 	/**
 	 * Gets location on which is the PositionSongPlayer playing
 	 * @return {@link Location}
 	 */
+	@Nullable
 	public Location getTargetLocation() {
 		return targetLocation;
 	}
@@ -47,14 +61,17 @@ public class PositionSongPlayer extends RangeSongPlayer {
 	/**
 	 * Sets location on which is the PositionSongPlayer playing
 	 */
-	public void setTargetLocation(Location targetLocation) {
+	public void setTargetLocation(@NotNull Location targetLocation) {
+		if (targetLocation.getWorld() == null)
+			throw new IllegalArgumentException("Location does not have the world set.");
+
 		this.targetLocation = targetLocation;
 	}
 
 	@Override
-	public void playTick(Player player, int tick) {
-		if (!player.getWorld().getName().equals(targetLocation.getWorld().getName())) {
-			return; // not in same world
+	public void playTick(@NotNull Player player, int tick) {
+		if (targetLocation.getWorld() != null && !player.getWorld().getName().equals(targetLocation.getWorld().getName())) {
+			return; // not in same world or invalid location
 		}
 
 		byte playerVolume = NoteBlockAPI.getPlayerVolume(player);
@@ -89,7 +106,7 @@ public class PositionSongPlayer extends RangeSongPlayer {
 	 * @return ability to hear the current PositionSongPlayer
 	 */
 	@Override
-	public boolean isInRange(Player player) {
+	public boolean isInRange(@NotNull Player player) {
 		return player.getLocation().distance(targetLocation) <= getDistance();
 	}
 }

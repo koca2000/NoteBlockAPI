@@ -7,23 +7,25 @@ import com.xxmicloxx.NoteBlockAPI.model.SoundCategory;
 import com.xxmicloxx.NoteBlockAPI.utils.NoteUtils;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 /**
- * Decides how is {@link Note} played to {@link Player}
+ * Decides how is {@link cz.koca2000.nbs4j.Note} played to {@link Player}
  */
 public abstract class ChannelMode {
 
     @Deprecated
-    public abstract void play(Player player, Location location, Song song, Layer layer, Note note,
-                              SoundCategory soundCategory, float volume, float pitch);
+    public abstract void play(@NotNull Player player, @NotNull Location location, @NotNull Song song, @NotNull Layer layer, @NotNull Note note,
+                              @NotNull SoundCategory soundCategory, float volume, float pitch);
 
-    public abstract void play(Player player, Location location, Song song, Layer layer, Note note,
-                              SoundCategory soundCategory, float volume, boolean doTranspose);
+    @Deprecated
+    public abstract void play(@NotNull Player player, @NotNull Location location, @NotNull Song song, @NotNull Layer layer, @NotNull Note note,
+                              @NotNull SoundCategory soundCategory, float volume, boolean doTranspose);
 
-    public abstract void play(Player player, Location location, cz.koca2000.nbs4j.Song song, cz.koca2000.nbs4j.Layer layer,
-                              cz.koca2000.nbs4j.Note note, SoundCategory soundCategory, float volume, boolean doTranspose);
+    public abstract void play(@NotNull Player player, @NotNull Location location, @NotNull cz.koca2000.nbs4j.Song song, @NotNull cz.koca2000.nbs4j.Layer layer,
+                              @NotNull cz.koca2000.nbs4j.Note note, @NotNull SoundCategory soundCategory, float volume, boolean doTranspose);
 
-    protected float getPitch(cz.koca2000.nbs4j.Note note, boolean doTranspose){
+    protected float getPitch(@NotNull cz.koca2000.nbs4j.Note note, boolean doTranspose){
         return doTranspose ? NoteUtils.getPitchTransposed(note) : NoteUtils.getPitchInOctave(note);
     }
 }

@@ -8,6 +8,8 @@ import com.xxmicloxx.NoteBlockAPI.model.playmode.MonoMode;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -40,7 +42,7 @@ public abstract class SongPlayer {
 	protected Fade fadeIn;
 	protected Fade fadeOut;
 	protected Fade fadeTemp = null;
-	protected SoundCategory soundCategory;
+	protected SoundCategory soundCategory = SoundCategory.MASTER;
 	protected RepeatMode repeat = RepeatMode.NO;
 	protected ChannelMode channelMode = new MonoMode();
 	protected boolean random;
@@ -51,47 +53,58 @@ public abstract class SongPlayer {
 	private final Random rng = new Random();
 	private BukkitTask backgroundTask = null;
 
-	public SongPlayer(Song song) {
-		this(new Playlist(song), SoundCategory.MASTER);
+	private boolean wasStarted = false;
+
+	@Deprecated
+	public SongPlayer(@NotNull Song song) {
+		this(new Playlist(song));
 	}
 
-	public SongPlayer(Song song, SoundCategory soundCategory) {
+	@Deprecated
+	public SongPlayer(@NotNull Song song, @NotNull SoundCategory soundCategory) {
 		this(new Playlist(song), soundCategory);
 	}
 
-	public SongPlayer(Song song, SoundCategory soundCategory, boolean random) {
+	@Deprecated
+	public SongPlayer(@NotNull Song song, @NotNull SoundCategory soundCategory, boolean random) {
 		this(new Playlist(song), soundCategory, random);
 	}
-	
-	public SongPlayer(Playlist playlist){
-		this(playlist, SoundCategory.MASTER);
+
+	public SongPlayer(@NotNull cz.koca2000.nbs4j.Song song) {
+		this(new Playlist(song));
 	}
 
-	public SongPlayer(Playlist playlist, SoundCategory soundCategory){
-		this(playlist, soundCategory, false);
+	@Deprecated
+	public SongPlayer(@NotNull cz.koca2000.nbs4j.Song song, @NotNull SoundCategory soundCategory) {
+		this(new Playlist(song), soundCategory);
 	}
 
-	public SongPlayer(Playlist playlist, SoundCategory soundCategory, boolean random){
+	public SongPlayer(@NotNull Playlist playlist){
 		this.playlist = playlist;
-		this.random = random;
-		this.soundCategory = soundCategory;
 		plugin = NoteBlockAPI.getAPI();
-		
+
 		fadeIn = new Fade(FadeType.NONE, 60);
 		fadeIn.setFadeStart((byte) 0);
 		fadeIn.setFadeTarget(volume);
-		
+
 		fadeOut = new Fade(FadeType.NONE, 60);
 		fadeOut.setFadeStart(volume);
 		fadeOut.setFadeTarget((byte) 0);
 
-		if (random){
-			checkPlaylistQueue();
-			actualSong = rng.nextInt(playlist.getCount());
-		}
-
 		this.playingSong = playlist.getSong(actualSong);
 		this.song = new Song(playingSong);
+	}
+
+	@Deprecated
+	public SongPlayer(@NotNull Playlist playlist, @NotNull SoundCategory soundCategory){
+		this(playlist, soundCategory, false);
+	}
+
+	@Deprecated
+	public SongPlayer(@NotNull Playlist playlist, @NotNull SoundCategory soundCategory, boolean random){
+		this(playlist);
+		setSoundCategory(soundCategory);
+		setRandom(random);
 	}
 
 	/**
@@ -188,7 +201,7 @@ public abstract class SongPlayer {
 									songQueue.replaceAll((song, played) -> false);
 									playingSong = left.get(rng.nextInt(left.size()));
 									song = new Song(playingSong);
-									actualSong = playlist.getIndex(song);
+									actualSong = playlist.getIndex(playingSong);
 									if (repeat == RepeatMode.ALL) {
 										SongLoopEvent event = new SongLoopEvent(this);
 										plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
@@ -200,7 +213,7 @@ public abstract class SongPlayer {
 								} else {
 									playingSong = left.get(rng.nextInt(left.size()));
 									song = new Song(playingSong);
-									actualSong = playlist.getIndex(song);
+									actualSong = playlist.getIndex(playingSong);
 
 									SongNextEvent event = new SongNextEvent(this);
 									plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
@@ -292,14 +305,16 @@ public abstract class SongPlayer {
 	 * Returns {@link Fade} for Fade in effect
 	 * @return Fade
 	 */
+	@NotNull
 	public Fade getFadeIn(){
 		return fadeIn;
 	}
-	
+
 	/**
 	 * Returns {@link Fade} for Fade out effect
 	 * @return Fade
 	 */
+	@NotNull
 	public Fade getFadeOut(){
 		return fadeOut;
 	}
@@ -308,6 +323,7 @@ public abstract class SongPlayer {
 	 * Gets list of current Player UUIDs listening to this SongPlayer
 	 * @return list of Player UUIDs
 	 */
+	@NotNull
 	public Set<UUID> getPlayerUUIDs() {
 		Set<UUID> uuids = new HashSet<>(playerList.keySet());
 		return Collections.unmodifiableSet(uuids);
@@ -317,7 +333,7 @@ public abstract class SongPlayer {
 	 * Adds a Player to the list of Players listening to this SongPlayer
 	 * @param player
 	 */
-	public void addPlayer(Player player) {
+	public void addPlayer(@NotNull Player player) {
 		addPlayer(player.getUniqueId());
 	}
 	
@@ -325,7 +341,7 @@ public abstract class SongPlayer {
 	 * Adds a Player to the list of Players listening to this SongPlayer
 	 * @param player's uuid
 	 */
-	public void addPlayer(UUID player) {
+	public void addPlayer(@NotNull UUID player) {
 		lock.lock();
 		try {
 			if (!playerList.containsKey(player)) {
@@ -384,7 +400,7 @@ public abstract class SongPlayer {
 	 * @param player to play this SongPlayer for
 	 * @param tick to play at
 	 */
-	public abstract void playTick(Player player, int tick);
+	public abstract void playTick(@NotNull Player player, int tick);
 
 	/**
 	 * SongPlayer will destroy itself
@@ -419,13 +435,16 @@ public abstract class SongPlayer {
 	/**
 	 * Sets whether the SongPlayer is playing and whether it should fade if previous value was different
 	 * @param playing
-	 * @param fade
+	 * @param doFade
 	 */
-	public void setPlaying(boolean playing, boolean fade) {
-		setPlaying(playing, fade ? (playing ? fadeIn : fadeOut) : null);
+	public void setPlaying(boolean playing, boolean doFade) {
+		Fade fade = null;
+		if (doFade)
+			fade = (playing ? fadeIn : fadeOut);
+		setPlaying(playing, fade);
 	}
 
-	public void setPlaying(boolean playing, Fade fade) {
+	public void setPlaying(boolean playing, @Nullable Fade fade) {
 		if (this.playing == playing) return;
 
 		this.playing = playing;
@@ -445,8 +464,15 @@ public abstract class SongPlayer {
 			}
 		}
 
-		if (playing)
+		if (playing) {
+			if (wasStarted && random) {
+				checkPlaylistQueue();
+				actualSong = rng.nextInt(playlist.getCount());
+			}
+			wasStarted = true;
+
 			run();
+		}
 	}
 
 	/**
@@ -469,7 +495,7 @@ public abstract class SongPlayer {
 	 * Removes a player from this SongPlayer
 	 * @param player to remove
 	 */
-	public void removePlayer(Player player) {
+	public void removePlayer(@NotNull Player player) {
 		removePlayer(player.getUniqueId());
 	}
 	
@@ -477,17 +503,16 @@ public abstract class SongPlayer {
 	 * Removes a player from this SongPlayer
 	 * @param uuid of player to remove
 	 */
-	public void removePlayer(UUID uuid) {
+	public void removePlayer(@NotNull UUID uuid) {
 		lock.lock();
 		try {
 			playerList.remove(uuid);
-			if (NoteBlockAPI.getSongPlayersByPlayer(uuid) == null) {
-				return;
+			ArrayList<SongPlayer> playerSongPlayers = NoteBlockAPI.getSongPlayersByPlayer(uuid);
+			if (playerSongPlayers != null) {
+				playerSongPlayers = new ArrayList<>(playerSongPlayers);
+				playerSongPlayers.remove(this);
+				NoteBlockAPI.setSongPlayersByPlayer(uuid, playerSongPlayers);
 			}
-			ArrayList<SongPlayer> songs = new ArrayList<>(
-					NoteBlockAPI.getSongPlayersByPlayer(uuid));
-			songs.remove(this);
-			NoteBlockAPI.setSongPlayersByPlayer(uuid, songs);
 			if (playerList.isEmpty() && autoStop) {
 				SongEndEvent event = new SongEndEvent(this);
 				plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
@@ -530,11 +555,13 @@ public abstract class SongPlayer {
 	 * Gets the Song being played by this SongPlayer
 	 * @return
 	 */
+	@NotNull
 	@Deprecated
 	public Song getSong() {
 		return new Song(song);
 	}
 
+	@NotNull
 	public cz.koca2000.nbs4j.Song getPlayingSong(){
 		return playingSong;
 	}
@@ -543,6 +570,7 @@ public abstract class SongPlayer {
 	 * Gets the Playlist being played by this SongPlayer
 	 * @return
 	 */
+	@NotNull
 	public Playlist getPlaylist() {
 		return playlist;
 	}
@@ -550,7 +578,7 @@ public abstract class SongPlayer {
 	/**
 	 * Sets the Playlist being played by this SongPlayer. Will affect next Song
 	 */
-	public void setPlaylist(Playlist playlist) {
+	public void setPlaylist(@NotNull Playlist playlist) {
 		this.playlist = playlist;
 	}
 	
@@ -584,7 +612,7 @@ public abstract class SongPlayer {
 	}
 
 	/**
-	 * Start playing {@link Song} that is next in {@link Playlist} or random {@link Song} from {@link Playlist}
+	 * Start playing {@link cz.koca2000.nbs4j.Song} that is next in {@link Playlist} or random {@link cz.koca2000.nbs4j.Song} from {@link Playlist}
 	 */
 	public void playNextSong(){
 		lock.lock();
@@ -600,6 +628,7 @@ public abstract class SongPlayer {
 	 * @see SoundCategory
 	 * @return SoundCategory of this SongPlayer
 	 */
+	@NotNull
 	public SoundCategory getCategory() {
 		return soundCategory;
 	}
@@ -607,8 +636,18 @@ public abstract class SongPlayer {
 	/**
 	 * Sets the SoundCategory for this SongPlayer
 	 * @param soundCategory
+	 * @deprecated Use {@link #setSoundCategory(SoundCategory)}
 	 */
-	public void setCategory(SoundCategory soundCategory) {
+	@Deprecated
+	public void setCategory(@NotNull SoundCategory soundCategory) {
+		this.soundCategory = soundCategory;
+	}
+
+	/**
+	 * Sets the SoundCategory for this SongPlayer. This decides under which volume settings the sound will be in client.
+	 * @param soundCategory {@link SoundCategory}
+	 */
+	public void setSoundCategory(@NotNull SoundCategory soundCategory) {
 		this.soundCategory = soundCategory;
 	}
 
@@ -616,7 +655,7 @@ public abstract class SongPlayer {
 	 * Sets SongPlayer's {@link RepeatMode}
 	 * @param repeatMode
 	 */
-	public void setRepeatMode(RepeatMode repeatMode){
+	public void setRepeatMode(@NotNull RepeatMode repeatMode){
 		this.repeat = repeatMode;
 	}
 
@@ -624,6 +663,7 @@ public abstract class SongPlayer {
 	 * Gets SongPlayer's {@link RepeatMode}
 	 * @return
 	 */
+	@NotNull
 	public RepeatMode getRepeatMode(){
 		return repeat;
 	}
@@ -644,6 +684,7 @@ public abstract class SongPlayer {
 		return random;
 	}
 
+	@NotNull
 	public ChannelMode getChannelMode(){
 		return channelMode;
 	}

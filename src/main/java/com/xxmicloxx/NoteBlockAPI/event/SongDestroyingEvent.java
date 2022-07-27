@@ -5,6 +5,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
 import com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Called whenever a SongPlayer is destroyed
@@ -17,24 +18,17 @@ public class SongDestroyingEvent extends Event implements Cancellable {
 	private final SongPlayer song;
 	private boolean cancelled = false;
 
-	public SongDestroyingEvent(SongPlayer song) {
+	public SongDestroyingEvent(@NotNull SongPlayer song) {
 		this.song = song;
-	}
-
-	public static HandlerList getHandlerList() {
-		return handlers;
 	}
 
 	/**
 	 * Returns SongPlayer which is being destroyed
 	 * @return SongPlayer
 	 */
+	@NotNull
 	public SongPlayer getSongPlayer() {
 		return song;
-	}
-
-	public HandlerList getHandlers() {
-		return handlers;
 	}
 
 	@Override
@@ -43,10 +37,18 @@ public class SongDestroyingEvent extends Event implements Cancellable {
 	}
 
 	@Override
-	public void setCancelled(boolean arg0) {
-		cancelled = arg0;
+	public void setCancelled(boolean cancelled) {
+		this.cancelled = cancelled;
 	}
 
-	
+	@NotNull
+	@Override
+	public HandlerList getHandlers() {
+		return handlers;
+	}
 
+	@NotNull
+	public static HandlerList getHandlerList() {
+		return handlers;
+	}
 }

@@ -6,14 +6,16 @@ import com.xxmicloxx.NoteBlockAPI.utils.InstrumentUtils;
 import com.xxmicloxx.NoteBlockAPI.utils.NoteUtils;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 /**
- * {@link Note} is played inside of {@link Player}'s head.
+ * {@link cz.koca2000.nbs4j.Note} is played inside of {@link Player}'s head.
  */
 public class MonoMode extends ChannelMode {
 
+    @Deprecated
     @Override
-    public void play(Player player, Location location, Song song, Layer layer, Note note, SoundCategory soundCategory, float volume, float pitch) {
+    public void play(@NotNull Player player, @NotNull Location location, @NotNull Song song, @NotNull Layer layer, @NotNull Note note, @NotNull SoundCategory soundCategory, float volume, float pitch) {
         cz.koca2000.nbs4j.CustomInstrument customInstrument = InstrumentUtils.getCustomInstrumentForNote(note.getNote());
         if (customInstrument != null) {
             CompatibilityUtils.playSound(player, location, customInstrument.getFileName(), soundCategory, volume, pitch, 0);
@@ -22,13 +24,14 @@ public class MonoMode extends ChannelMode {
         }
     }
 
+    @Deprecated
     @Override
-    public void play(Player player, Location location, Song song, Layer layer, Note note, SoundCategory soundCategory, float volume, boolean doTranspose) {
+    public void play(@NotNull Player player, @NotNull Location location, @NotNull Song song, @NotNull Layer layer, @NotNull Note note, @NotNull SoundCategory soundCategory, float volume, boolean doTranspose) {
         play(player, location, song.getSong(), layer.getLayer(), note.getNote(), soundCategory, volume, doTranspose);
     }
 
     @Override
-    public void play(Player player, Location location, cz.koca2000.nbs4j.Song song, cz.koca2000.nbs4j.Layer layer, cz.koca2000.nbs4j.Note note, SoundCategory soundCategory, float volume, boolean doTranspose) {
+    public void play(@NotNull Player player, @NotNull Location location, @NotNull cz.koca2000.nbs4j.Song song, @NotNull cz.koca2000.nbs4j.Layer layer, @NotNull cz.koca2000.nbs4j.Note note, @NotNull SoundCategory soundCategory, float volume, boolean doTranspose) {
         float pitch = getPitch(note, doTranspose);
 
         cz.koca2000.nbs4j.CustomInstrument customInstrument = InstrumentUtils.getCustomInstrumentForNote(note);

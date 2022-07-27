@@ -1,6 +1,7 @@
 package com.xxmicloxx.NoteBlockAPI.utils;
 
 import com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer;
+import org.jetbrains.annotations.NotNull;
 
 public class TimeUtils {
 
@@ -19,7 +20,8 @@ public class TimeUtils {
 	 * @param songPlayer Instance of SongPlayer to use
 	 * @return formatted string
 	 */
-	public static String getActualTime(String format, SongPlayer songPlayer){
+	@NotNull
+	public static String getActualTime(@NotNull String format, @NotNull SongPlayer songPlayer){
 		return getTime(format, songPlayer.getTick(), songPlayer.getSong().getSpeed());
 	}
 	
@@ -38,11 +40,13 @@ public class TimeUtils {
 	 * @param songPlayer Instance of SongPlayer to use
 	 * @return formatted string
 	 */
-	public static String getLength(String format, SongPlayer songPlayer){
+	@NotNull
+	public static String getLength(@NotNull String format, @NotNull SongPlayer songPlayer){
 		return getTime(format, songPlayer.getSong().getLength(), songPlayer.getSong().getSpeed());
 	}
-	
-	private static String getTime(String format, short ticks, float speed){
+
+	@NotNull
+	private static String getTime(@NotNull String format, short ticks, float speed){
 		String time = format;
 		long millisTotal = (long) ((ticks / speed) * 1000);
 		

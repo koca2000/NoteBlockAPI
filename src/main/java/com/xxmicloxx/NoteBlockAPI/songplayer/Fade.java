@@ -2,6 +2,7 @@ package com.xxmicloxx.NoteBlockAPI.songplayer;
 
 import com.xxmicloxx.NoteBlockAPI.model.FadeType;
 import com.xxmicloxx.NoteBlockAPI.utils.Interpolator;
+import org.jetbrains.annotations.NotNull;
 
 public class Fade {
 
@@ -16,7 +17,7 @@ public class Fade {
 	 * @param type Type of fade effect
 	 * @param fadeDuration - duration of fade effect in ticks
 	 */
-	public Fade(FadeType type, int fadeDuration){
+	public Fade(@NotNull FadeType type, int fadeDuration){
 		this.type = type;
 		this.fadeDuration = fadeDuration;
 	}
@@ -53,6 +54,7 @@ public class Fade {
 	 * Returns fade effect type
 	 * @return {@link FadeType}
 	 */
+	@NotNull
 	public FadeType getType() {
 		return type;
 	}
@@ -61,7 +63,7 @@ public class Fade {
 	 * Set fade effect type
 	 * @param type FadeType
 	 */
-	public void setType(FadeType type) {
+	public void setType(@NotNull FadeType type) {
 		this.type = type;
 	}
 

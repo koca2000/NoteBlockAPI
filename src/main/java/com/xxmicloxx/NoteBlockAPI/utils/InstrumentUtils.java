@@ -19,9 +19,9 @@ public class InstrumentUtils {
 	 */
 	public static org.bukkit.Sound getInstrument(byte instrument) {
 		Sound sound = Sound.getByIndex(instrument);
-		if (sound == null || sound.getSound() == null)
+		if (sound == null || sound.getBukkitSound() == null)
 			throw new IllegalArgumentException("Instrument with index " + instrument + " is not available.");
-		return sound.getSound();
+		return sound.getBukkitSound();
 	}
 
 	/**
@@ -82,7 +82,7 @@ public class InstrumentUtils {
 		Sound sound = Sound.getByIndex(instrument);
 		if (sound == null)
 			sound = Sound.NOTE_PIANO;
-		org.bukkit.Sound bukkitSound = sound.getSound();
+		org.bukkit.Sound bukkitSound = sound.getBukkitSound();
 		if (bukkitSound == null)
 			throw new IllegalArgumentException("Instrument is not available in this server's version.");
 

@@ -6,6 +6,7 @@ import com.xxmicloxx.NoteBlockAPI.utils.InstrumentUtils;
 import com.xxmicloxx.NoteBlockAPI.utils.NoteUtils;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Uses panning for individual {@link cz.koca2000.nbs4j.Note} and {@link cz.koca2000.nbs4j.Layer} based on data from nbs file.
@@ -13,16 +14,17 @@ import org.bukkit.entity.Player;
 public class StereoMode extends ChannelMode {
 
     private float maxDistance = 2;
-    private ChannelMode fallbackChannelMode = null;
+    private ChannelMode fallbackChannelMode;
 
+    @Deprecated
     @Override
-    public void play(Player player, Location location, Song song, Layer layer, Note note, SoundCategory soundCategory, float volume, float pitch) {
+    public void play(@NotNull Player player, @NotNull Location location, @NotNull Song song, @NotNull Layer layer, @NotNull Note note, @NotNull SoundCategory soundCategory, float volume, float pitch) {
         if (!song.isStereo() && fallbackChannelMode != null){
             fallbackChannelMode.play(player, location, song, layer, note, soundCategory, volume, pitch);
             return;
         }
 
-        float distance = 0;
+        float distance;
         if (layer.getPanning() == 100){
             distance = (note.getPanning() - 100) * maxDistance;
         } else {
@@ -36,13 +38,14 @@ public class StereoMode extends ChannelMode {
         }
     }
 
+    @Deprecated
     @Override
-    public void play(Player player, Location location, Song song, Layer layer, Note note, SoundCategory soundCategory, float volume, boolean doTranspose) {
+    public void play(@NotNull Player player, @NotNull Location location, @NotNull Song song, @NotNull Layer layer, @NotNull Note note, @NotNull SoundCategory soundCategory, float volume, boolean doTranspose) {
         play(player, location, song.getSong(), layer.getLayer(), note.getNote(), soundCategory, volume, doTranspose);
     }
 
     @Override
-    public void play(Player player, Location location, cz.koca2000.nbs4j.Song song, cz.koca2000.nbs4j.Layer layer, cz.koca2000.nbs4j.Note note, SoundCategory soundCategory, float volume, boolean doTranspose) {
+    public void play(@NotNull Player player, @NotNull Location location, @NotNull cz.koca2000.nbs4j.Song song, @NotNull cz.koca2000.nbs4j.Layer layer, @NotNull cz.koca2000.nbs4j.Note note, @NotNull SoundCategory soundCategory, float volume, boolean doTranspose) {
         if (!song.isStereo() && fallbackChannelMode != null){
             fallbackChannelMode.play(player, location, song, layer, note, soundCategory, volume, doTranspose);
             return;
@@ -93,6 +96,7 @@ public class StereoMode extends ChannelMode {
      * Returns fallback {@link ChannelMode} used when song is not stereo.
      * @return ChannelMode or null when fallback ChannelMode is disabled
      */
+    @NotNull
     public ChannelMode getFallbackChannelMode() {
         return fallbackChannelMode;
     }
@@ -102,7 +106,7 @@ public class StereoMode extends ChannelMode {
      * @param fallbackChannelMode
      * @throws IllegalArgumentException if parameter is instance of StereoMode
      */
-    public void setFallbackChannelMode(ChannelMode fallbackChannelMode) {
+    public void setFallbackChannelMode(@NotNull ChannelMode fallbackChannelMode) {
         if (fallbackChannelMode instanceof StereoMode) throw new IllegalArgumentException("Fallback ChannelMode can't be instance of StereoMode!");
 
         this.fallbackChannelMode = fallbackChannelMode;

@@ -2,13 +2,16 @@ package com.xxmicloxx.NoteBlockAPI.songplayer;
 
 import com.xxmicloxx.NoteBlockAPI.NoteBlockAPI;
 import com.xxmicloxx.NoteBlockAPI.event.PlayerRangeStateChangeEvent;
-import com.xxmicloxx.NoteBlockAPI.model.*;
+import com.xxmicloxx.NoteBlockAPI.model.Playlist;
+import com.xxmicloxx.NoteBlockAPI.model.Song;
+import com.xxmicloxx.NoteBlockAPI.model.SoundCategory;
 import com.xxmicloxx.NoteBlockAPI.utils.CompatibilityUtils;
-import com.xxmicloxx.NoteBlockAPI.utils.InstrumentUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * SongPlayer created at a specified NoteBlock
@@ -18,26 +21,41 @@ public class NoteBlockSongPlayer extends RangeSongPlayer {
 
 	private Block noteBlock;
 
+	@Deprecated
 	public NoteBlockSongPlayer(Song song) {
 		super(song);
 	}
 
-	public NoteBlockSongPlayer(Song song, SoundCategory soundCategory) {
+	@Deprecated
+	public NoteBlockSongPlayer(@NotNull Song song, @NotNull SoundCategory soundCategory) {
 		super(song, soundCategory);
 	}
 
-	public NoteBlockSongPlayer(Playlist playlist, SoundCategory soundCategory) {
+	@Deprecated
+	public NoteBlockSongPlayer(@NotNull Playlist playlist, @NotNull SoundCategory soundCategory) {
 		super(playlist, soundCategory);
 	}
 
-	public NoteBlockSongPlayer(Playlist playlist) {
+	@Deprecated
+	public NoteBlockSongPlayer(@NotNull Playlist playlist) {
 		super(playlist);
+	}
+
+	public NoteBlockSongPlayer(@NotNull cz.koca2000.nbs4j.Song song, @NotNull Block noteBlock) {
+		super(song);
+		this.noteBlock = noteBlock;
+	}
+
+	public NoteBlockSongPlayer(@NotNull Playlist playlist, @NotNull Block noteBlock) {
+		super(playlist);
+		this.noteBlock = noteBlock;
 	}
 
 	/**
 	 * Get the Block this SongPlayer is played at
 	 * @return Block representing a NoteBlock
 	 */
+	@Nullable
 	public Block getNoteBlock() {
 		return noteBlock;
 	}
@@ -45,12 +63,12 @@ public class NoteBlockSongPlayer extends RangeSongPlayer {
 	/**
 	 * Set the Block this SongPlayer is played at
 	 */
-	public void setNoteBlock(Block noteBlock) {
+	public void setNoteBlock(@NotNull Block noteBlock) {
 		this.noteBlock = noteBlock;
 	}
 
 	@Override
-	public void playTick(Player player, int tick) {
+	public void playTick(@NotNull Player player, int tick) {
 		if (noteBlock.getType() != CompatibilityUtils.getNoteBlockMaterial()) {
 			return;
 		}
@@ -94,7 +112,7 @@ public class NoteBlockSongPlayer extends RangeSongPlayer {
 	 * @return ability to hear the current NoteBlockSongPlayer
 	 */	
 	@Override
-	public boolean isInRange(Player player) {
+	public boolean isInRange(@NotNull Player player) {
 		Location loc = noteBlock.getLocation();
 		loc = new Location(loc.getWorld(), loc.getX() + 0.5f, loc.getY() - 0.5f, loc.getZ() + 0.5f);
 		return player.getLocation().distance(loc) <= getDistance();
