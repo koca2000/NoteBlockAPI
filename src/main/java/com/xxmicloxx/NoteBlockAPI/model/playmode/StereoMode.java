@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 public class StereoMode extends ChannelMode {
 
     private float maxDistance = 2;
-    private ChannelMode fallbackChannelMode;
+    private ChannelMode fallbackChannelMode = new MonoStereoMode();
 
     @Deprecated
     @Override
