@@ -22,7 +22,7 @@ public class TimeUtils {
 	 */
 	@NotNull
 	public static String getActualTime(@NotNull String format, @NotNull SongPlayer songPlayer){
-		return getTime(format, songPlayer.getTick(), songPlayer.getSong().getSpeed());
+		return getTime(format, songPlayer.getPlayingSong().getTimeInSecondsAtTick(songPlayer.getTick()));
 	}
 	
 	/**
@@ -42,28 +42,28 @@ public class TimeUtils {
 	 */
 	@NotNull
 	public static String getLength(@NotNull String format, @NotNull SongPlayer songPlayer){
-		return getTime(format, songPlayer.getSong().getLength(), songPlayer.getSong().getSpeed());
+		return getTime(format, songPlayer.getPlayingSong().getSongLengthInSeconds());
 	}
 
 	@NotNull
-	private static String getTime(@NotNull String format, short ticks, float speed){
+	private static String getTime(@NotNull String format, double timeInSeconds){
 		String time = format;
-		long millisTotal = (long) ((ticks / speed) * 1000);
+		long millisTotal = Math.round(timeInSeconds * 1000);
 		
 		long hours = 0;
-		if (time.contains("h")){
+		if (format.contains("h")){
 			hours = millisTotal / (1000 * 60 * 60);
 			millisTotal -= hours * 1000 * 60 * 60;
 		}
 		
 		long minutes = 0;
-		if (time.contains("m")){
+		if (format.contains("m")){
 			minutes = millisTotal / (1000 * 60);
 			millisTotal -= minutes * 1000 * 60;
 		}
 		
 		long seconds = 0;
-		if (time.contains("s")){
+		if (format.contains("s")){
 			seconds = millisTotal / 1000;
 			millisTotal -= seconds * 1000;
 		}
