@@ -3,6 +3,8 @@ package com.xxmicloxx.NoteBlockAPI.songplayer;
 import com.xxmicloxx.NoteBlockAPI.NoteBlockAPI;
 import com.xxmicloxx.NoteBlockAPI.event.*;
 import com.xxmicloxx.NoteBlockAPI.model.*;
+import com.xxmicloxx.NoteBlockAPI.model.fade.IFade;
+import com.xxmicloxx.NoteBlockAPI.model.fade.NoFade;
 import com.xxmicloxx.NoteBlockAPI.model.playmode.ChannelMode;
 import com.xxmicloxx.NoteBlockAPI.model.playmode.MonoMode;
 import org.bukkit.Bukkit;
@@ -31,6 +33,7 @@ public abstract class SongPlayer {
 	protected int actualSong = 0;
 
 	protected short tick = -1;
+	protected double elapsedTimeInSeconds = 0;
 
 	protected boolean playing = false;
 	protected boolean fading = false;
@@ -39,9 +42,16 @@ public abstract class SongPlayer {
 	protected Map<cz.koca2000.nbs4j.Song, Boolean> songQueue = new ConcurrentHashMap<>(); //True if already played
 
 	protected byte volume = 100;
+	@Deprecated
 	protected Fade fadeIn;
+	@Deprecated
 	protected Fade fadeOut;
+	@Deprecated
 	protected Fade fadeTemp = null;
+	protected FadeInstance fadeInInstance;
+	protected FadeInstance fadeOutInstance;
+	protected FadeInstance fadeTempInstance;
+
 	protected SoundCategory soundCategory = SoundCategory.MASTER;
 	protected RepeatMode repeat = RepeatMode.NO;
 	protected ChannelMode channelMode = new MonoMode();
@@ -83,16 +93,18 @@ public abstract class SongPlayer {
 		this.playlist = playlist;
 		plugin = NoteBlockAPI.getAPI();
 
-		fadeIn = new Fade(FadeType.NONE, 60);
-		fadeIn.setFadeStart((byte) 0);
-		fadeIn.setFadeTarget(volume);
-
-		fadeOut = new Fade(FadeType.NONE, 60);
-		fadeOut.setFadeStart(volume);
-		fadeOut.setFadeTarget((byte) 0);
-
 		this.playingSong = playlist.getSong(actualSong);
 		this.song = new Song(playingSong);
+
+		fadeInInstance = new FadeInstance(NoFade.Instance);
+		fadeInInstance.setInitialVolume((byte) 0);
+		fadeInInstance.setTargetVolume((byte) 100);
+		fadeIn = new Fade(fadeInInstance, song.getSpeed());
+
+		fadeOutInstance = new FadeInstance(NoFade.Instance);
+		fadeOutInstance.setInitialVolume((byte) 100);
+		fadeOutInstance.setTargetVolume((byte) 0);
+		fadeOut = new Fade(fadeOutInstance, song.getSpeed());
 	}
 
 	@Deprecated
@@ -144,40 +156,39 @@ public abstract class SongPlayer {
 
 				lock.lock();
 				try {
+					float timeDelta = 1f / playingSong.getTempo(tick);
 					if (fadeTemp != null){
-						if (fadeTemp.isDone()) {
+						if (fadeTempInstance.isDone()) {
 							fadeTemp = null;
 							fading = false;
 							if (!playing) {
 								SongStoppedEvent event = new SongStoppedEvent(this);
 								plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
-								volume = fadeIn.getFadeTarget();
+								volume = fadeInInstance.getTargetVolume();
 								continue;
 							}
-						}else {
-							int fade = fadeTemp.calculateFade();
-							if (fade != -1){
-								volume = (byte) fade;
+
+							if (elapsedTimeInSeconds <  fadeInInstance.getFade().getDurationInSeconds()) {
+								fadeInInstance.setElapsedTime(fadeInInstance.getFade().getDurationInSeconds());
 							}
+
+						} else {
+							volume = fadeTempInstance.calculateVolume(timeDelta);
 						}
-					} else if (tick < fadeIn.getFadeDuration()){
-						int fade = fadeIn.calculateFade();
-						if (fade != -1){
-							volume = (byte) fade;
-						}
-					} else if (tick >= playingSong.getSongLength() - fadeOut.getFadeDuration()){
-						int fade = fadeOut.calculateFade();
-						if (fade != -1){
-							volume = (byte) fade;
-						}
+					} else if (elapsedTimeInSeconds < fadeInInstance.getFade().getDurationInSeconds()){
+						volume = fadeInInstance.calculateVolume(timeDelta);
+					} else if (elapsedTimeInSeconds >= playingSong.getSongLengthInSeconds() - fadeOutInstance.getFade().getDurationInSeconds()){
+						volume = fadeOutInstance.calculateVolume(timeDelta);
 					}
 
+					elapsedTimeInSeconds += timeDelta;
 					tick++;
 					if (tick > playingSong.getSongLength()) {
 						tick = -1;
-						fadeIn.setFadeDone(0);
-						fadeOut.setFadeDone(0);
-						volume = fadeIn.getFadeTarget();
+						elapsedTimeInSeconds = 0;
+						fadeInInstance.setElapsedTime(0);
+						fadeOutInstance.setElapsedTime(0);
+						volume = fadeInInstance.getTargetVolume();
 						if (repeat == RepeatMode.ONE){
 							SongLoopEvent event = new SongLoopEvent(this);
 							plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
@@ -303,22 +314,52 @@ public abstract class SongPlayer {
 	
 	/**
 	 * Returns {@link Fade} for Fade in effect
+	 * @deprecated Use {@link #getFadeInEffect()}
 	 * @return Fade
 	 */
 	@NotNull
+	@Deprecated
 	public Fade getFadeIn(){
 		return fadeIn;
 	}
 
 	/**
 	 * Returns {@link Fade} for Fade out effect
+	 * @deprecated Use {@link #getFadeOutEffect()}
 	 * @return Fade
 	 */
 	@NotNull
+	@Deprecated
 	public Fade getFadeOut(){
 		return fadeOut;
 	}
-	
+
+	/**
+	 * Returns {@link IFade} for Fade in effect
+	 * @return IFade
+	 */
+	@NotNull
+	public IFade getFadeInEffect(){
+		return fadeInInstance.getFade();
+	}
+
+	/**
+	 * Returns {@link IFade} for Fade out effect
+	 * @return IFade
+	 */
+	@NotNull
+	public IFade getFadeOutEffect(){
+		return fadeOutInstance.getFade();
+	}
+
+	public void setFadeInEffect(IFade fadeIn) {
+		fadeInInstance = new FadeInstance(fadeInInstance, fadeIn);
+	}
+
+	public void setFadeOutEffect(IFade fadeOut) {
+		fadeOutInstance = new FadeInstance(fadeOutInstance, fadeOut);
+	}
+
 	/**
 	 * Gets list of current Player UUIDs listening to this SongPlayer
 	 * @return list of Player UUIDs
@@ -331,7 +372,7 @@ public abstract class SongPlayer {
 
 	/**
 	 * Adds a Player to the list of Players listening to this SongPlayer
-	 * @param player
+	 * @param player {@link Player} to be added
 	 */
 	public void addPlayer(@NotNull Player player) {
 		addPlayer(player.getUniqueId());
@@ -426,58 +467,79 @@ public abstract class SongPlayer {
 
 	/**
 	 * Sets whether the SongPlayer is playing
-	 * @param playing
+	 * @param playing true to start the playback; false to stop the playback
 	 */
 	public void setPlaying(boolean playing) {
-		setPlaying(playing, null);
+		setPlaying(playing, NoFade.Instance);
 	}
 
 	/**
 	 * Sets whether the SongPlayer is playing and whether it should fade if previous value was different
-	 * @param playing
-	 * @param doFade
+	 * @param playing true to start the playback; false to stop the playback
+	 * @param doFade whether the fade in or out effect should be used
 	 */
 	public void setPlaying(boolean playing, boolean doFade) {
-		Fade fade = null;
+		IFade fade = NoFade.Instance;
 		if (doFade)
-			fade = (playing ? fadeIn : fadeOut);
+			fade = (playing ? fadeInInstance.getFade() : fadeOutInstance.getFade());
 		setPlaying(playing, fade);
 	}
 
+	/**
+	 * @deprecated Use {@link #setPlaying(boolean, IFade)}
+	 */
+	@Deprecated
 	public void setPlaying(boolean playing, @Nullable Fade fade) {
+		setPlaying(playing, fade != null ? fade.getFadeInstance().getFade() : NoFade.Instance);
+	}
+
+	/**
+	 * Starts or stops the playback with the given fade effect
+	 * @param playing true to start playback; false to stop playback
+	 * @param fade fade effect to use
+	 */
+	public void setPlaying(boolean playing, @NotNull IFade fade) {
 		if (this.playing == playing) return;
 
-		this.playing = playing;
+		lock.lock();
+		try {
+			this.playing = playing;
 
-		if (fade != null && fade.getType() != FadeType.NONE) {
-			fadeTemp = new Fade(fade.getType(), fade.getFadeDuration());
-			fadeTemp.setFadeStart(playing ? 0 : volume);
-			fadeTemp.setFadeTarget(playing ? volume : 0);
-			fading = true;
-		} else {
-			fading = false;
-			fadeTemp = null;
-			volume = fadeIn.getFadeTarget();
-			if (!playing) {
-				SongStoppedEvent event = new SongStoppedEvent(this);
-				plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
+			if (!(fade instanceof NoFade)) {
+				fadeTempInstance = new FadeInstance(fade);
+				fadeTempInstance.setInitialVolume(playing ? 0 : volume);
+				fadeTempInstance.setTargetVolume(playing ? volume : 0);
+				fadeTemp = new Fade(fadeTempInstance, song.getSpeed());
+				fading = true;
+			} else {
+				fading = false;
+				fadeTemp = null;
+				fadeTempInstance = null;
+				volume = fadeInInstance.getTargetVolume();
+				if (!playing) {
+					SongStoppedEvent event = new SongStoppedEvent(this);
+					plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
+				}
+			}
+
+			if (playing) {
+				if (wasStarted && random) {
+					checkPlaylistQueue();
+					actualSong = rng.nextInt(playlist.getCount());
+				}
+				wasStarted = true;
+
+				run();
 			}
 		}
-
-		if (playing) {
-			if (wasStarted && random) {
-				checkPlaylistQueue();
-				actualSong = rng.nextInt(playlist.getCount());
-			}
-			wasStarted = true;
-
-			run();
+		finally {
+			lock.unlock();
 		}
 	}
 
 	/**
 	 * Gets the current tick of this SongPlayer
-	 * @return
+	 * @return current zero-based tick number
 	 */
 	public short getTick() {
 		return tick;
@@ -485,10 +547,11 @@ public abstract class SongPlayer {
 
 	/**
 	 * Sets the current tick of this SongPlayer
-	 * @param tick
+	 * @param tick zero-based tick number
 	 */
 	public void setTick(short tick) {
 		this.tick = tick;
+		elapsedTimeInSeconds = playingSong.getTimeInSecondsAtTick(tick);
 	}
 
 	/**
@@ -543,17 +606,18 @@ public abstract class SongPlayer {
 		}
 		this.volume = volume;
 		
-		fadeIn.setFadeTarget(volume);
-		fadeOut.setFadeStart(volume);
-		if (fadeTemp != null) {
-			if (playing) fadeTemp.setFadeTarget(volume);
-			else fadeTemp.setFadeStart(volume);
+		fadeInInstance.setTargetVolume(volume);
+		fadeOutInstance.setInitialVolume(volume);
+		if (fadeTempInstance != null) {
+			if (playing) fadeTempInstance.setTargetVolume(volume);
+			else fadeTempInstance.setInitialVolume(volume);
 		}
 	}
 
 	/**
 	 * Gets the Song being played by this SongPlayer
-	 * @return
+	 * @deprecated Use {@link #getPlayingSong()}
+	 * @return {@link Song}
 	 */
 	@NotNull
 	@Deprecated
@@ -561,6 +625,10 @@ public abstract class SongPlayer {
 		return new Song(song);
 	}
 
+	/**
+	 * Gets the Song being played
+	 * @return {@link cz.koca2000.nbs4j.Song}
+	 */
 	@NotNull
 	public cz.koca2000.nbs4j.Song getPlayingSong(){
 		return playingSong;
@@ -568,7 +636,7 @@ public abstract class SongPlayer {
 	
 	/**
 	 * Gets the Playlist being played by this SongPlayer
-	 * @return
+	 * @return {@link Playlist}
 	 */
 	@NotNull
 	public Playlist getPlaylist() {
@@ -584,7 +652,7 @@ public abstract class SongPlayer {
 	
 	/**
 	 * Get index of actually played {@link cz.koca2000.nbs4j.Song} in {@link Playlist}
-	 * @return
+	 * @return index of the song in playlist
 	 */
 	public int getPlayedSongIndex(){
 		return actualSong;
@@ -593,7 +661,7 @@ public abstract class SongPlayer {
 	/**
 	 * Start playing {@link cz.koca2000.nbs4j.Song} at specified index in {@link Playlist}
 	 * If there is no {@link cz.koca2000.nbs4j.Song} at this index, {@link SongPlayer} will continue playing current song
-	 * @param index
+	 * @param index index of the song in playlist
 	 */
 	public void playSong(int index){
 		lock.lock();
@@ -603,8 +671,11 @@ public abstract class SongPlayer {
 				song = new Song(playingSong);
 				actualSong = index;
 				tick = -1;
-				fadeIn.setFadeDone(0);
-				fadeOut.setFadeDone(0);
+				elapsedTimeInSeconds = 0;
+				fadeInInstance.setElapsedTime(0);
+				fadeIn.setTempo(song.getSpeed());
+				fadeOutInstance.setElapsedTime(0);
+				fadeOut.setTempo(song.getSpeed());
 			}
 		} finally {
 			lock.unlock();
@@ -618,6 +689,7 @@ public abstract class SongPlayer {
 		lock.lock();
 		try {
 			tick = (short) playingSong.getSongLength();
+			elapsedTimeInSeconds = playingSong.getSongLengthInSeconds();
 		} finally {
 			lock.unlock();
 		}
@@ -635,7 +707,7 @@ public abstract class SongPlayer {
 
 	/**
 	 * Sets the SoundCategory for this SongPlayer
-	 * @param soundCategory
+	 * @param soundCategory {@link SoundCategory}
 	 * @deprecated Use {@link #setSoundCategory(SoundCategory)}
 	 */
 	@Deprecated
@@ -653,7 +725,7 @@ public abstract class SongPlayer {
 
 	/**
 	 * Sets SongPlayer's {@link RepeatMode}
-	 * @param repeatMode
+	 * @param repeatMode one of {@link RepeatMode} values
 	 */
 	public void setRepeatMode(@NotNull RepeatMode repeatMode){
 		this.repeat = repeatMode;
@@ -661,7 +733,7 @@ public abstract class SongPlayer {
 
 	/**
 	 * Gets SongPlayer's {@link RepeatMode}
-	 * @return
+	 * @return {@link RepeatMode}
 	 */
 	@NotNull
 	public RepeatMode getRepeatMode(){
@@ -670,7 +742,7 @@ public abstract class SongPlayer {
 
 	/**
 	 * Sets whether the SongPlayer will choose next song from player randomly
-	 * @param random
+	 * @param random true to choose next song randomly; otherwise, false
 	 */
 	public void setRandom(boolean random){
 		this.random = random;
@@ -678,7 +750,7 @@ public abstract class SongPlayer {
 
 	/**
 	 * Gets whether the SongPlayer will choose next song from player randomly
-	 * @return is random
+	 * @return true if random; otherwise, false
 	 */
 	public boolean isRandom(){
 		return random;

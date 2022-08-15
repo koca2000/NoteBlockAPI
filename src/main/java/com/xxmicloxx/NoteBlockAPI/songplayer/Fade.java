@@ -1,101 +1,125 @@
 package com.xxmicloxx.NoteBlockAPI.songplayer;
 
 import com.xxmicloxx.NoteBlockAPI.model.FadeType;
-import com.xxmicloxx.NoteBlockAPI.utils.Interpolator;
+import com.xxmicloxx.NoteBlockAPI.model.fade.LinearFade;
+import com.xxmicloxx.NoteBlockAPI.model.fade.NoFade;
 import org.jetbrains.annotations.NotNull;
 
+@Deprecated
 public class Fade {
 
-	private FadeType type;
-	private byte fadeStart;
-	private byte fadeTarget;
-	private int fadeDuration;
-	private int fadeDone = 0;
+	private FadeInstance fade;
+	private double tempo;
 	
 	/**
 	 * Create new fade effect
 	 * @param type Type of fade effect
 	 * @param fadeDuration - duration of fade effect in ticks
 	 */
+	@Deprecated
 	public Fade(@NotNull FadeType type, int fadeDuration){
-		this.type = type;
-		this.fadeDuration = fadeDuration;
+		// Assumes that most common tempo is close to 10 tps
+		fade = new FadeInstance(type == FadeType.LINEAR ? new LinearFade(fadeDuration / 10d) : NoFade.Instance);
+		tempo = 10;
 	}
-	
+
+	Fade(@NotNull FadeInstance fadeInstance, double songTempo){
+		fade = fadeInstance;
+		tempo = songTempo;
+	}
+
+	@Deprecated
 	protected byte calculateFade() {
-		switch (type){
-			case LINEAR:
-				if (fadeDone == fadeDuration) {
-					return -1; // no fade today
-				}
-				double targetVolume = Interpolator.interpLinear(
-						new double[]{0, fadeStart, fadeDuration, fadeTarget}, fadeDone);
-				fadeDone++;
-				return (byte) targetVolume;
-			default:
-				fadeDone++;
-				return -1;
-		}
+		if (fade.isDone())
+			return -1;
+		return fade.calculateVolume(0);
 	}
 
+	@Deprecated
 	protected int getFadeDone() {
-		return fadeDone;
+		return (int) Math.round(fade.getElapsedTime() / tempo);
 	}
 
+	@Deprecated
 	protected void setFadeStart(byte fadeStart) {
-		this.fadeStart = fadeStart;
+		fade.setInitialVolume(fadeStart);
 	}
 
+	@Deprecated
 	protected void setFadeTarget(byte fadeTarget) {
-		this.fadeTarget = fadeTarget;
+		fade.setTargetVolume(fadeTarget);
 	}
 
 	/**
 	 * Returns fade effect type
 	 * @return {@link FadeType}
 	 */
+	@Deprecated
 	@NotNull
 	public FadeType getType() {
-		return type;
+		return fade.getFade() instanceof LinearFade ? FadeType.LINEAR : FadeType.NONE;
 	}
 
 	/**
 	 * Set fade effect type
 	 * @param type FadeType
 	 */
+	@Deprecated
 	public void setType(@NotNull FadeType type) {
-		this.type = type;
+		FadeInstance newFade = new FadeInstance(type == FadeType.LINEAR ? new LinearFade(fade.getFade().getDurationInSeconds()) : NoFade.Instance);
+		newFade.setInitialVolume(fade.getInitialVolume());
+		newFade.setElapsedTime(fade.getElapsedTime());
+		newFade.setTargetVolume(fade.getTargetVolume());
+		fade = newFade;
 	}
 
 	/**
 	 * Returns duration of fade effect
 	 * @return duration in ticks
 	 */
+	@Deprecated
 	public int getFadeDuration() {
-		return fadeDuration;
+		return (int) Math.round(fade.getFade().getDurationInSeconds() / tempo);
 	}
 
 	/**
 	 * Set fade effect duration
 	 * @param fadeDuration duration in ticks
 	 */
+	@Deprecated
 	public void setFadeDuration(int fadeDuration) {
-		this.fadeDuration = fadeDuration;
+		FadeInstance newFade = new FadeInstance(getType() == FadeType.LINEAR ? new LinearFade(fadeDuration) : NoFade.Instance);
+		newFade.setInitialVolume(fade.getInitialVolume());
+		newFade.setElapsedTime(fade.getElapsedTime());
+		newFade.setTargetVolume(fade.getTargetVolume());
+		fade = newFade;
 	}
 
+	@Deprecated
 	protected byte getFadeStart() {
-		return fadeStart;
+		return fade.getInitialVolume();
 	}
 
+	@Deprecated
 	protected byte getFadeTarget() {
-		return fadeTarget;
-	}
-	
-	protected void setFadeDone(int fadeDone){
-		this.fadeDone = fadeDone;
+		return fade.getTargetVolume();
 	}
 
+	@Deprecated
+	protected void setFadeDone(int fadeDone){
+		this.fade.setElapsedTime(fadeDone * tempo);
+	}
+
+	void setTempo(double tempo){
+		this.tempo = tempo;
+	}
+
+	FadeInstance getFadeInstance(){
+		return fade;
+	}
+
+	@Deprecated
 	public boolean isDone(){
-	    return fadeDone >= fadeDuration;
+	    return fade.isDone();
     }
 }
