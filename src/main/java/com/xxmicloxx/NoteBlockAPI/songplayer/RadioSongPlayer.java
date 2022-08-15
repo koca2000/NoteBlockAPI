@@ -7,6 +7,7 @@ import com.xxmicloxx.NoteBlockAPI.model.Song;
 import com.xxmicloxx.NoteBlockAPI.model.SoundCategory;
 import com.xxmicloxx.NoteBlockAPI.model.playmode.ChannelMode;
 import com.xxmicloxx.NoteBlockAPI.model.playmode.MonoMode;
+import com.xxmicloxx.NoteBlockAPI.model.playmode.StereoMode;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -19,24 +20,29 @@ public class RadioSongPlayer extends SongPlayer {
 	@Deprecated
 	public RadioSongPlayer(@NotNull Song song) {
 		super(song);
+		channelMode = new StereoMode();
 	}
 
 	@Deprecated
 	public RadioSongPlayer(@NotNull Song song, @NotNull SoundCategory soundCategory) {
 		super(song, soundCategory);
+		channelMode = new StereoMode();
 	}
 
 	@Deprecated
 	public RadioSongPlayer(@NotNull Playlist playlist, @NotNull SoundCategory soundCategory) {
 		super(playlist, soundCategory);
+		channelMode = new StereoMode();
 	}
 
 	public RadioSongPlayer(@NotNull cz.koca2000.nbs4j.Song song) {
 		super(song);
+		channelMode = new StereoMode();
 	}
 
 	public RadioSongPlayer(@NotNull Playlist playlist) {
 		super(playlist);
+		channelMode = new StereoMode();
 	}
 
 	@Override
@@ -57,8 +63,8 @@ public class RadioSongPlayer extends SongPlayer {
 	}
 
 	/**
-	 * Sets how will be {@link cz.koca2000.nbs4j.Note} played to {@link Player} (eg. mono or stereo). Default is {@link MonoMode}.
-	 * @param mode
+	 * Sets how will be {@link cz.koca2000.nbs4j.Note} played to {@link Player} (eg. mono or stereo). Default is {@link StereoMode}.
+	 * @param mode {@link ChannelMode} that will handle playback
 	 */
 	public void setChannelMode(@NotNull ChannelMode mode){
 	    channelMode = mode;
