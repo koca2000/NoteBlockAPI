@@ -9,12 +9,15 @@ import com.xxmicloxx.NoteBlockAPI.model.playmode.ChannelMode;
 import com.xxmicloxx.NoteBlockAPI.model.playmode.MonoMode;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Cancellable;
+import org.bukkit.event.Event;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -32,8 +35,8 @@ public abstract class SongPlayer {
 	protected Playlist playlist;
 	protected int actualSong = 0;
 
-	protected short tick = -1;
-	protected double elapsedTimeInSeconds = 0;
+	protected short tick = 0;
+	private double elapsedTimeInSeconds = 0;
 
 	protected boolean playing = false;
 	protected boolean fading = false;
@@ -150,152 +153,197 @@ public abstract class SongPlayer {
 			while (playing || fading) {
 				long startTime = System.currentTimeMillis();
 
-				if (NoteBlockAPI.getAPI().isDisabling()){
+				if (NoteBlockAPI.getAPI().isDisabling()) {
 					break;
 				}
 
 				lock.lock();
 				try {
-					float timeDelta = 1f / playingSong.getTempo(tick);
-					if (fadeTemp != null){
-						if (fadeTempInstance.isDone()) {
-							fadeTemp = null;
-							fading = false;
-							if (!playing) {
-								SongStoppedEvent event = new SongStoppedEvent(this);
-								plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
-								volume = fadeInInstance.getTargetVolume();
-								continue;
-							}
+					if (tick < 0)
+						tick = 0;
 
-							if (elapsedTimeInSeconds <  fadeInInstance.getFade().getDurationInSeconds()) {
-								fadeInInstance.setElapsedTime(fadeInInstance.getFade().getDurationInSeconds());
-							}
-
-						} else {
-							volume = fadeTempInstance.calculateVolume(timeDelta);
-						}
-					} else if (elapsedTimeInSeconds < fadeInInstance.getFade().getDurationInSeconds()){
-						volume = fadeInInstance.calculateVolume(timeDelta);
-					} else if (elapsedTimeInSeconds >= playingSong.getSongLengthInSeconds() - fadeOutInstance.getFade().getDurationInSeconds()){
-						volume = fadeOutInstance.calculateVolume(timeDelta);
-					}
-
-					elapsedTimeInSeconds += timeDelta;
-					tick++;
-					if (tick > playingSong.getSongLength()) {
-						tick = -1;
-						elapsedTimeInSeconds = 0;
-						fadeInInstance.setElapsedTime(0);
-						fadeOutInstance.setElapsedTime(0);
-						volume = fadeInInstance.getTargetVolume();
-						if (repeat == RepeatMode.ONE){
-							SongLoopEvent event = new SongLoopEvent(this);
-							plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
-
-							if (!event.isCancelled()) {
-								continue;
-							}
-						} else {
-							if (random) {
-								songQueue.put(playingSong, true);
-								checkPlaylistQueue();
-								ArrayList<cz.koca2000.nbs4j.Song> left = new ArrayList<>();
-								for (cz.koca2000.nbs4j.Song s : songQueue.keySet()) {
-									if (!songQueue.get(s)) {
-										left.add(s);
-									}
-								}
-
-								if (left.size() == 0) {
-									left.addAll(songQueue.keySet());
-									songQueue.replaceAll((song, played) -> false);
-									playingSong = left.get(rng.nextInt(left.size()));
-									song = new Song(playingSong);
-									actualSong = playlist.getIndex(playingSong);
-									if (repeat == RepeatMode.ALL) {
-										SongLoopEvent event = new SongLoopEvent(this);
-										plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
-
-										if (!event.isCancelled()) {
-											continue;
-										}
-									}
-								} else {
-									playingSong = left.get(rng.nextInt(left.size()));
-									song = new Song(playingSong);
-									actualSong = playlist.getIndex(playingSong);
-
-									SongNextEvent event = new SongNextEvent(this);
-									plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
-									continue;
-								}
-							} else {
-								if (playlist.hasNext(actualSong)) {
-									actualSong++;
-									playingSong = playlist.getSong(actualSong);
-									song = new Song(playingSong);
-									SongNextEvent event = new SongNextEvent(this);
-									plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
-									continue;
-								} else {
-									actualSong = 0;
-									playingSong = playlist.getSong(actualSong);
-									song = new Song(playingSong);
-									if (repeat == RepeatMode.ALL) {
-										SongLoopEvent event = new SongLoopEvent(this);
-										plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
-
-										if (!event.isCancelled()) {
-											continue;
-										}
-									}
-								}
-							}
-						}
-						playing = false;
-						SongEndEvent event = new SongEndEvent(this);
-						plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
+					if (tick >= playingSong.getSongLength()) {
+						onSongEnded();
 						continue;
 					}
-					try {
-						for (UUID uuid : playerList.keySet()) {
-							Player player = Bukkit.getPlayer(uuid);
-							if (player == null) {
-								// offline...
-								continue;
-							}
-							playTick(player, tick);
-						}
-					}
-					catch (Exception e){
-						Bukkit.getLogger().severe("An error occurred during the playback of song "
-								+ (song != null ?
-								"(author: " + playingSong.getMetadata().getAuthor() + ", title: " + playingSong.getMetadata().getTitle() + ")"
-								: "null"));
-						e.printStackTrace();
-					}
+
+					double timeDelta = 1f / playingSong.getTempo(tick);
+					if (!processFade(tick != 0 ? timeDelta : 0))
+						continue;
+
+					playActualTick();
+
+					tick++;
+					elapsedTimeInSeconds += timeDelta;
 				} catch (Exception e) {
-					Bukkit.getLogger().severe("An error occurred during the playback of song "
-							+ (song != null ?
-									"(author: " + playingSong.getMetadata().getAuthor() + ", title: " + playingSong.getMetadata().getTitle() + ")"
-									: "null"));
-					e.printStackTrace();
+					printExceptionDuringPlayback(e);
 				} finally {
 					lock.unlock();
 				}
 
 				long duration = System.currentTimeMillis() - startTime;
-				float delayMillis = (20 / playingSong.getTempo(tick)) * 50;
-				if (duration < delayMillis) {
-					try {
-						Thread.sleep((long) (delayMillis - duration));
-					} catch (InterruptedException e) {
-						// do nothing
+				waitForNextTick(duration);
+			}
+		});
+	}
+
+	/**
+	 * Handles the fading during the tick
+	 * @param timeDelta Time between ticks
+	 * @return true if the tick processing should continue; otherwise, false
+	 */
+	private boolean processFade(double timeDelta) {
+		if (fadeTemp != null) {
+			if (fadeTempInstance.isDone()) {
+				fadeTemp = null;
+				fading = false;
+				if (!playing) {
+					callEvent(new SongStoppedEvent(this));
+					volume = fadeInInstance.getTargetVolume();
+					return false;
+				}
+
+				if (elapsedTimeInSeconds < fadeInInstance.getFade().getDurationInSeconds()) {
+					fadeInInstance.setElapsedTime(fadeInInstance.getFade().getDurationInSeconds());
+				}
+			} else {
+				volume = fadeTempInstance.calculateVolume(timeDelta);
+			}
+		} else if (elapsedTimeInSeconds < fadeInInstance.getFade().getDurationInSeconds()) {
+			volume = fadeInInstance.calculateVolume(timeDelta);
+		} else if (elapsedTimeInSeconds >= playingSong.getSongLengthInSeconds() - fadeOutInstance.getFade().getDurationInSeconds()) {
+			volume = fadeOutInstance.calculateVolume(timeDelta);
+		}
+		return true;
+	}
+
+	private void onSongEnded() {
+		resetState();
+		if (repeat == RepeatMode.ONE && callCancellableEvent(new SongLoopEvent(this))) {
+			return;
+		} else {
+			if (random) {
+				songQueue.put(playingSong, true);
+				checkPlaylistQueue();
+
+				Collection<cz.koca2000.nbs4j.Song> left = new ArrayList<>();
+				for (Map.Entry<cz.koca2000.nbs4j.Song, Boolean> entry : songQueue.entrySet()) {
+					if (!entry.getValue()) {
+						left.add(entry.getKey());
+					}
+				}
+
+				if (left.size() == 0) {
+					left = songQueue.keySet();
+					songQueue.replaceAll((song, played) -> false);
+					playSong(rng.nextInt(left.size()));
+					if (repeat == RepeatMode.ALL && callCancellableEvent(new SongLoopEvent(this))) {
+						return;
+					}
+				} else {
+					playSong(rng.nextInt(left.size()));
+
+					callEvent(new SongNextEvent(this));
+					return;
+				}
+			} else {
+				if (playlist.hasNext(actualSong)) {
+					playSong(actualSong + 1);
+					callEvent(new SongNextEvent(this));
+					return;
+				} else {
+					playSong(0);
+					if (repeat == RepeatMode.ALL && callCancellableEvent(new SongLoopEvent(this))) {
+						return;
 					}
 				}
 			}
-		});
+		}
+		playing = false;
+		callEvent(new SongEndEvent(this));
+	}
+
+	private void resetState(){
+		tick = 0;
+		elapsedTimeInSeconds = 0;
+		fadeInInstance.setElapsedTime(0);
+		fadeIn.setTempo(song.getSpeed());
+		fadeOutInstance.setElapsedTime(0);
+		fadeOut.setTempo(song.getSpeed());
+		volume = fadeInInstance.getTargetVolume();
+	}
+
+	private void playActualTick() {
+		try {
+			for (UUID uuid : playerList.keySet()) {
+				Player player = Bukkit.getPlayer(uuid);
+				if (player == null) {
+					// offline...
+					continue;
+				}
+				playTick(player, tick);
+			}
+		}
+		catch (Exception e){
+			printExceptionDuringPlayback(e);
+		}
+	}
+
+	private void waitForNextTick(long durationOfExecution) {
+		float delayMillis = 1000f / playingSong.getTempo(tick);
+		if (durationOfExecution < delayMillis) {
+			try {
+				Thread.sleep((long) (delayMillis - durationOfExecution));
+			} catch (InterruptedException e) {
+				// do nothing
+			}
+		}
+	}
+
+	/**
+	 * Calls event implementing {@link Cancellable} interface and returns whether it was not cancelled.
+	 * @param event event to be called
+	 * @return true if the event was not cancelled; false, otherwise
+	 * @param <T> Event type
+	 */
+	private <T extends Event & Cancellable> boolean callCancellableEvent(@NotNull T event) {
+		callEvent(event);
+
+		return !event.isCancelled();
+	}
+
+	/**
+	 * Calls the event and waits for the end of its execution.
+	 * @param event event to be called
+	 */
+	private void callEvent(@NotNull Event event) {
+		lock.lock();
+		Condition condition = lock.newCondition();
+		try {
+			plugin.doSync(() -> {
+				lock.lock();
+				try {
+					Bukkit.getPluginManager().callEvent(event);
+					condition.signal();
+				}
+				finally {
+					lock.unlock();
+				}
+			});
+			condition.await();
+		} catch (InterruptedException ignored) {
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	private void printExceptionDuringPlayback(@NotNull Exception e){
+		Bukkit.getLogger().severe("An error occurred during the playback of song "
+				+ (playingSong != null ?
+				"(author: '" + playingSong.getMetadata().getAuthor() + "', title: '" + playingSong.getMetadata().getTitle() + "')"
+				: "'null'")
+		);
+		e.printStackTrace();
 	}
 
 	private void checkPlaylistQueue(){
@@ -445,7 +493,7 @@ public abstract class SongPlayer {
 
 	/**
 	 * SongPlayer will destroy itself
-	 * @deprecated Stop playback and set tick to -1. It doesn't really destroy anything anymore.
+	 * @deprecated Stop playback and set tick to 0. It doesn't really destroy anything anymore.
 	 */
 	public void destroy() {
 		SongDestroyingEvent event = new SongDestroyingEvent(this);
@@ -454,7 +502,7 @@ public abstract class SongPlayer {
 			return;
 		}
 		playing = false;
-		setTick((short) -1);
+		setTick((short) 0);
 	}
 
 	/**
@@ -550,6 +598,8 @@ public abstract class SongPlayer {
 	 * @param tick zero-based tick number
 	 */
 	public void setTick(short tick) {
+		if (tick < 0)
+			tick = 0;
 		this.tick = tick;
 		elapsedTimeInSeconds = playingSong.getTimeInSecondsAtTick(tick);
 	}
@@ -670,12 +720,7 @@ public abstract class SongPlayer {
 				playingSong = playlist.getSong(index);
 				song = new Song(playingSong);
 				actualSong = index;
-				tick = -1;
-				elapsedTimeInSeconds = 0;
-				fadeInInstance.setElapsedTime(0);
-				fadeIn.setTempo(song.getSpeed());
-				fadeOutInstance.setElapsedTime(0);
-				fadeOut.setTempo(song.getSpeed());
+				resetState();
 			}
 		} finally {
 			lock.unlock();
