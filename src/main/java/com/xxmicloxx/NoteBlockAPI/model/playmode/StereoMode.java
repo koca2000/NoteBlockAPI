@@ -26,7 +26,7 @@ public class StereoMode extends ChannelMode {
 
         float distance;
         if (layer.getPanning() == 100){
-            distance = (note.getPanning() - 100) * maxDistance;
+            distance = ((note.getPanning() - 100) / 100f) * maxDistance;
         } else {
             distance = ((layer.getPanning() - 100 + note.getPanning() - 100) / 200f) * maxDistance;
         }
@@ -55,7 +55,7 @@ public class StereoMode extends ChannelMode {
 
         float distance;
         if (layer.getPanning() == cz.koca2000.nbs4j.Layer.NEUTRAL_PANNING){
-            distance = note.getPanning() * maxDistance;
+            distance = (note.getPanning() / 100f) * maxDistance;
         } else {
             distance = ((layer.getPanning() + note.getPanning()) / 200f) * maxDistance;
         }
