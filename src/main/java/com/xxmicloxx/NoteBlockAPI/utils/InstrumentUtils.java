@@ -54,7 +54,7 @@ public class InstrumentUtils {
 		if(key < 9) name += "_-2";
 		else if(key < 33) name += "_-1";
 		else if(key >= 57 && key < 81) name += "_1";
-		else if(key < 105) name += "_2";
+		else if(key >= 81 && key < 105) name += "_2";
 		return name;
 	}
 
