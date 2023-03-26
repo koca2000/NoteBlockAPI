@@ -15,8 +15,6 @@ import java.util.Map;
 @Deprecated
 public class Song implements Cloneable {
 
-	private File path;
-
 	private final cz.koca2000.nbs4j.Song song;
 
 	/**
@@ -25,7 +23,6 @@ public class Song implements Cloneable {
 	 */
 	public Song(@NotNull Song other) {
 		this.song = new cz.koca2000.nbs4j.Song(other.song);
-		path = other.getPath();
 	}
 
 	/**
@@ -128,7 +125,6 @@ public class Song implements Cloneable {
 				short songHeight, final short length, @NotNull String title, @NotNull String author, @NotNull String originalAuthor,
 				@NotNull String description, @Nullable File path, int firstCustomInstrumentIndex, @NotNull CustomInstrument[] customInstruments, boolean isStereo) {
 
-		this.path = path;
 		song = new cz.koca2000.nbs4j.Song()
 				.setLength(length)
 				.setTempoChange(-1, speed)
@@ -138,7 +134,8 @@ public class Song implements Cloneable {
 				.setTitle(title)
 				.setAuthor(author)
 				.setOriginalAuthor(originalAuthor)
-				.setDescription(description);
+				.setDescription(description)
+				.setSourceFile(path);
 
 		for (Map.Entry<Integer, Layer> entry : layerHashMap.entrySet()){
 			int index = entry.getKey();
@@ -230,7 +227,7 @@ public class Song implements Cloneable {
 	 */
 	@Nullable
 	public File getPath() {
-		return path;
+		return song.getMetadata().getSourceFile();
 	}
 
 	/**

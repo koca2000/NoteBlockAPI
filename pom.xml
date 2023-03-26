@@ -45,7 +45,7 @@
 		<dependency>
 			<groupId>com.github.koca2000</groupId>
 			<artifactId>NBS4j</artifactId>
-			<version>-SNAPSHOT</version>
+			<version>1.3.0</version>
 			<scope>compile</scope>
 		</dependency>
         <dependency>
