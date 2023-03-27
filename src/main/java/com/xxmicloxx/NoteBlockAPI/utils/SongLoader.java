@@ -40,7 +40,9 @@ public class SongLoader {
     @Nullable
     public static Song loadSong(@NotNull Path path){
         try {
-            return loadSongInternal(Files.newInputStream(path));
+            Song song = loadSongInternal(Files.newInputStream(path));
+            song.getMetadata().setSourceFile(path.toFile());
+            return song;
         }
         catch (SongCorruptedException e){
             Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.RED + "Song is corrupted: " + path.getFileName());
