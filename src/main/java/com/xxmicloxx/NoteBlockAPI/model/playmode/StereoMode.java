@@ -24,7 +24,7 @@ public class StereoMode extends ChannelMode {
 
         float distance = 0;
         if (layer.getPanning() == 100){
-            distance = (note.getPanning() - 100) * maxDistance;
+            distance = ((note.getPanning() - 100) / 100f) * maxDistance;
         } else {
             distance = ((layer.getPanning() - 100 + note.getPanning() - 100) / 200f) * maxDistance;
         }
@@ -56,7 +56,7 @@ public class StereoMode extends ChannelMode {
 
         float distance = 0;
         if (layer.getPanning() == 100){
-            distance = (note.getPanning() - 100) * maxDistance;
+            distance = ((note.getPanning() - 100) / 100f) * maxDistance;
         } else {
             distance = ((layer.getPanning() - 100 + note.getPanning() - 100) / 200f) * maxDistance;
         }
