@@ -85,13 +85,7 @@ public class CompatibilityUtils {
 	}
 
 	private static Class<?> getSoundParameterClass(Class<?> sound) {
-		if (sound == String.class) {
-			return String.class;
-		} else if (Sound.class.isInterface()) {
-			return sound.isEnum() ? sound : Sound.class;
-		} else {
-			return Sound.class;
-		}
+		return Sound.class.isAssignableFrom(sound) ? Sound.class : sound;
 	}
 
 	/**
