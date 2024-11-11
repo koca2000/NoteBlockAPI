@@ -62,18 +62,30 @@ public class CompatibilityUtils {
 		return soundCategoryClass;
 	}
 
-	private static Method getPlaySoundMethod(Class sound, boolean soundcategory) throws ClassNotFoundException, NoSuchMethodException {
-		Method method = playSoundMethod.get(sound.getName() + soundcategory);
-		if (method == null){
-			if (soundcategory) {
-				method = Player.class.getMethod("playSound", Location.class, sound,
+	private static Method getPlaySoundMethod(Class<?> sound, boolean soundCategory)
+			throws ClassNotFoundException, NoSuchMethodException {
+		String cacheKey = sound.getName() + soundCategory;
+		Method method = playSoundMethod.get(cacheKey);
+
+		if (method == null) {
+			//determine whether sound is an enum (pre 1.21.3) or an interface (post 1.21.3)
+			Class<?> soundParameter = getSoundParameterClass(sound);
+
+			if (soundCategory) {
+				method = Player.class.getMethod("playSound", Location.class, soundParameter,
 						getSoundCategoryClass(), float.class, float.class);
 			} else {
-				method = Player.class.getMethod("playSound", Location.class, sound, float.class, float.class);
+				method = Player.class.getMethod("playSound", Location.class, soundParameter,
+						float.class, float.class);
 			}
-			playSoundMethod.put(sound.getName() + soundcategory, method);
+
+			playSoundMethod.put(cacheKey, method);
 		}
 		return method;
+	}
+
+	private static Class<?> getSoundParameterClass(Class<?> sound) {
+		return Sound.class.isAssignableFrom(sound) ? Sound.class : sound;
 	}
 
 	/**
