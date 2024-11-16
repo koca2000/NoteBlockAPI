@@ -17,5 +17,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           javadoc-branch: gh-pages
           java-version: 8
-          target-folder: javadoc/snapshot 
+          javadoc-source-folder: target/reports/apidocs
+          target-folder: javadoc/snapshot
           project: maven
