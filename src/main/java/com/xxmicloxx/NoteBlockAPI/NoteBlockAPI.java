@@ -1,6 +1,7 @@
 package com.xxmicloxx.NoteBlockAPI;
 
 import com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer;
+import com.xxmicloxx.NoteBlockAPI.songplayer.SongTicker;
 import com.xxmicloxx.NoteBlockAPI.utils.MathUtils;
 import com.xxmicloxx.NoteBlockAPI.utils.Updater;
 import org.bstats.bukkit.Metrics;
@@ -135,7 +136,7 @@ public class NoteBlockAPI extends JavaPlugin {
 	@Override
 	public void onEnable() {
 		plugin = this;
-		
+
 		for (Plugin pl : getServer().getPluginManager().getPlugins()){
 			if (pl.getDescription().getDepend().contains("NoteBlockAPI") || pl.getDescription().getSoftDepend().contains("NoteBlockAPI")){
 				dependentPlugins.put(pl, false);
@@ -212,14 +213,11 @@ public class NoteBlockAPI extends JavaPlugin {
 			worker.getThread().interrupt();
 		}
 		NoteBlockPlayerMain.plugin.onDisable();
+		SongTicker.shutdown();
 	}
 
 	public void doSync(Runnable runnable) {
 		getServer().getScheduler().runTask(this, runnable);
-	}
-
-	public void doAsync(Runnable runnable) {
-		getServer().getScheduler().runTaskAsynchronously(this, runnable);
 	}
 
 	public boolean isDisabling() {
