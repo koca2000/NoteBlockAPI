@@ -12,7 +12,7 @@ jobs:
       contents: write
     steps:
       - name: Deploy JavaDoc
-        uses: MathieuSoysal/Javadoc-publisher.yml@v2.5.0
+        uses: MathieuSoysal/Javadoc-publisher.yml@v3.0.2
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           javadoc-branch: gh-pages
