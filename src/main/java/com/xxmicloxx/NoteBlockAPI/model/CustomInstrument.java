@@ -21,7 +21,7 @@ public class CustomInstrument {
 		this.index = index;
 		this.name = name;
 		this.soundFileName = soundFileName.replaceAll(".ogg", "");
-		if (this.soundFileName.equalsIgnoreCase("pling")){
+		if (this.soundFileName.equalsIgnoreCase("pling") || this.soundFileName.equalsIgnoreCase("block.note_block.pling")) {
 			this.sound = Sound.NOTE_PLING.bukkitSound();
 		}
 	}
