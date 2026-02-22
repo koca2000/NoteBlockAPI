@@ -15,8 +15,6 @@ import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scheduler.BukkitWorker;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -151,27 +149,18 @@ public class NoteBlockAPI extends JavaPlugin {
 			
 			@Override
 			public void run() {
-				Plugin[] plugins = getServer().getPluginManager().getPlugins();
-		        Type[] types = new Type[]{PlayerRangeStateChangeEvent.class, SongDestroyingEvent.class, SongEndEvent.class, SongStoppedEvent.class };
-		        for (Plugin plugin : plugins) {
-		            ArrayList<RegisteredListener> rls = HandlerList.getRegisteredListeners(plugin);
-		            for (RegisteredListener rl : rls) {
-		                Method[] methods = rl.getListener().getClass().getDeclaredMethods();
-		                for (Method m : methods) {
-		                    Type[] params = m.getParameterTypes();
-		                    param:
-		                    for (Type paramType : params) {
-		                    	for (Type type : types){
-		                    		if (paramType.equals(type)) {
-		                    			dependentPlugins.put(plugin, true);
-		                    			break param;
-		                    		}
-		                    	}
-		                    }
-		                }
-
-		            }
-		        }
+				for (RegisteredListener rl : PlayerRangeStateChangeEvent.getHandlerList().getRegisteredListeners()) {
+					dependentPlugins.put(rl.getPlugin(), true);
+				}
+				for (RegisteredListener rl : SongDestroyingEvent.getHandlerList().getRegisteredListeners()) {
+					dependentPlugins.put(rl.getPlugin(), true);
+				}
+				for (RegisteredListener rl : SongEndEvent.getHandlerList().getRegisteredListeners()) {
+					dependentPlugins.put(rl.getPlugin(), true);
+				}
+				for (RegisteredListener rl : SongStoppedEvent.getHandlerList().getRegisteredListeners()) {
+					dependentPlugins.put(rl.getPlugin(), true);
+				}
 		        
 		        metrics.addCustomChart(new DrilldownPie("deprecated", () -> {
 			        Map<String, Map<String, Integer>> map = new HashMap<>();
