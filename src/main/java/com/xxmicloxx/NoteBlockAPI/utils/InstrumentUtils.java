@@ -99,6 +99,14 @@ public class InstrumentUtils {
 			case 15:
 				//noinspection SpellCheckingInspection
 				return "minecraft:block.note_block.pling";
+            case 16:
+                return "minecraft:block.note_block.trumpet";
+            case 17:
+                return "minecraft:block.note_block.trumpet_exposed";
+            case 18:
+                return "minecraft:block.note_block.trumpet_weathered";
+            case 19:
+                return "minecraft:block.note_block.trumpet_oxidized";
 			default:
 				return "minecraft:block.note_block.harp";
 		}
@@ -145,10 +153,18 @@ public class InstrumentUtils {
 				return Sound.getFromBukkitName("BLOCK_NOTE_BLOCK_BANJO").name();
 			case 15:
 				return Sound.getFromBukkitName("BLOCK_NOTE_BLOCK_PLING").name();
+            case 16:
+                return Sound.getFromBukkitName("BLOCK_NOTE_BLOCK_TRUMPET").name();
+            case 17:
+                return Sound.getFromBukkitName("BLOCK_NOTE_BLOCK_TRUMPET_EXPOSED").name();
+            case 18:
+                return Sound.getFromBukkitName("BLOCK_NOTE_BLOCK_TRUMPET_WEATHERED").name();
+            case 19:
+                return Sound.getFromBukkitName("BLOCK_NOTE_BLOCK_TRUMPET_OXIDIZED").name();
 			default:
 				return Sound.getFromBukkitName("BLOCK_NOTE_BLOCK_HARP").name();
 		}
-}
+    }
 
 	/**
 	 * Returns the name of the org.bukkit.Instrument enum for the current server version
@@ -167,43 +183,62 @@ public class InstrumentUtils {
 				return Instrument.SNARE_DRUM;
 			case 4:
 				return Instrument.STICKS;
-			default: {
-				if (CompatibilityUtils.getServerVersion() >= 0.0112f) {
-					switch (instrument) {
-						case 5:
-							return Instrument.valueOf("GUITAR");
-						case 6:
-							return Instrument.valueOf("FLUTE");
-						case 7:
-							return Instrument.valueOf("BELL");
-						case 8:
-							return Instrument.valueOf("CHIME");
-						case 9:
-							return Instrument.valueOf("XYLOPHONE");
-						default: {
-							if (CompatibilityUtils.getServerVersion() >= 0.0114f) {
-								switch (instrument) {
-									case 10:
-										return Instrument.valueOf("IRON_XYLOPHONE");
-									case 11:
-										return Instrument.valueOf("COW_BELL");
-									case 12:
-										return Instrument.valueOf("DIDGERIDOO");
-									case 13:
-										return Instrument.valueOf("BIT");
-									case 14:
-										return Instrument.valueOf("BANJO");
-									case 15:
-										return Instrument.valueOf("PLING");
-								}
-							}
-							return Instrument.PIANO;
-						}
-					}
-				}
-				return Instrument.PIANO;
-			}
+            default:
+                // Not in this version
 		}
+
+        if (CompatibilityUtils.getServerVersion() >= 0.0112F) {
+            switch (instrument) {
+                case 5:
+                    return Instrument.valueOf("GUITAR");
+                case 6:
+                    return Instrument.valueOf("FLUTE");
+                case 7:
+                    return Instrument.valueOf("BELL");
+                case 8:
+                    return Instrument.valueOf("CHIME");
+                case 9:
+                    return Instrument.valueOf("XYLOPHONE");
+                default:
+                    // Not in this version
+            }
+        }
+
+        if (CompatibilityUtils.getServerVersion() >= 0.0114F) {
+            switch (instrument) {
+                case 10:
+                    return Instrument.valueOf("IRON_XYLOPHONE");
+                case 11:
+                    return Instrument.valueOf("COW_BELL");
+                case 12:
+                    return Instrument.valueOf("DIDGERIDOO");
+                case 13:
+                    return Instrument.valueOf("BIT");
+                case 14:
+                    return Instrument.valueOf("BANJO");
+                case 15:
+                    return Instrument.valueOf("PLING");
+                default:
+                    // Not in this version
+            }
+        }
+
+        if (CompatibilityUtils.getServerVersion() >= 0.2601F) {
+            switch (instrument) {
+                case 16:
+                    return Instrument.valueOf("TRUMPET");
+                case 17:
+                    return Instrument.valueOf("TRUMPET_EXPOSED");
+                case 18:
+                    return Instrument.valueOf("TRUMPET_WEATHERED");
+                case 19:
+                    return Instrument.valueOf("TRUMPET_OXIDIZED");
+                default:
+                    // Not in this version
+            }
+        }
+
+        return Instrument.PIANO;
 	}
 
 	/**
@@ -221,10 +256,14 @@ public class InstrumentUtils {
 	 * @return index where an instrument can be added
 	 */
 	public static byte getCustomInstrumentFirstIndex() {
-		if (CompatibilityUtils.getServerVersion() >= 0.0114f) {
+        float serverVersion = CompatibilityUtils.getServerVersion();
+        if (serverVersion >= 0.2601f) {
+            return 20;
+        }
+		if (serverVersion >= 0.0114f) {
 			return 16;
 		}
-		if (CompatibilityUtils.getServerVersion() >= 0.0112f) {
+		if (serverVersion >= 0.0112f) {
 			return 10;
 		}
 		return 5;

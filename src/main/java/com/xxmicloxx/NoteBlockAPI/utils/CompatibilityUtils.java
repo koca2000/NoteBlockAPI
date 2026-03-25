@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -26,6 +27,7 @@ public class CompatibilityUtils {
 	private static HashMap<String, Method> playSoundMethod = new HashMap<>();
 
 	private static float serverVersion = -1;
+    private static List<CustomInstrument> customInstrumentsForDefaultInstruments = null;
 
 	/**
 	 * Gets NMS class from given name
@@ -225,13 +227,14 @@ public class CompatibilityUtils {
 	}
 
 	/**
-	 * Return list of instuments which were added in specified version
+	 * Return list of instruments which were added in specified version
 	 * @param serverVersion 1.12 = 0.0112f, 1.14 = 0.0114f,...
-	 * @return list of custom instruments, if no instuments were added in specified version returns empty list
+	 * @return list of custom instruments, if no instruments were added in specified version returns empty list
 	 */
 	public static ArrayList<CustomInstrument> getVersionCustomInstruments(float serverVersion){
 		ArrayList<CustomInstrument> instruments = new ArrayList<>();
-		if (serverVersion == 0.0112f){
+        float epsilon = 0.0001F;
+		if (Math.abs(serverVersion - 0.0112f) < epsilon){
 			instruments.add(new CustomInstrument((byte) 0, "Guitar", "block.note_block.guitar.ogg"));
 			instruments.add(new CustomInstrument((byte) 0, "Flute", "block.note_block.flute.ogg"));
 			instruments.add(new CustomInstrument((byte) 0, "Bell", "block.note_block.bell.ogg"));
@@ -240,7 +243,7 @@ public class CompatibilityUtils {
 			return instruments;
 		}
 
-		if (serverVersion == 0.0114f){
+		if (Math.abs(serverVersion - 0.0114f) < epsilon){
 			instruments.add(new CustomInstrument((byte) 0, "Iron Xylophone", "block.note_block.iron_xylophone.ogg"));
 			instruments.add(new CustomInstrument((byte) 0, "Cow Bell", "block.note_block.cow_bell.ogg"));
 			instruments.add(new CustomInstrument((byte) 0, "Didgeridoo", "block.note_block.didgeridoo.ogg"));
@@ -249,6 +252,14 @@ public class CompatibilityUtils {
 			instruments.add(new CustomInstrument((byte) 0, "Pling", "block.note_block.pling.ogg"));
 			return instruments;
 		}
+
+        if (Math.abs(serverVersion - 0.2601f) < epsilon){
+            instruments.add(new CustomInstrument((byte) 0, "Trumpet", "block.note_block.trumpet.ogg"));
+            instruments.add(new CustomInstrument((byte) 0, "Exposed Trumpet", "block.note_block.trumpet_exposed.ogg"));
+            instruments.add(new CustomInstrument((byte) 0, "Weathered Trumpet", "block.note_block.trumpet_weathered.ogg"));
+            instruments.add(new CustomInstrument((byte) 0, "Oxidized Trumpet", "block.note_block.trumpet_oxidized.ogg"));
+            return instruments;
+        }
 		return instruments;
 	}
 
@@ -260,18 +271,20 @@ public class CompatibilityUtils {
 	public static ArrayList<CustomInstrument> getVersionCustomInstrumentsForSong(int firstCustomInstrumentIndex){
 		ArrayList<CustomInstrument> instruments = new ArrayList<>();
 
-		if (getServerVersion() < 0.0112f){
-			if (firstCustomInstrumentIndex == 10) {
-				instruments.addAll(getVersionCustomInstruments(0.0112f));
-			} else if (firstCustomInstrumentIndex == 16){
-				instruments.addAll(getVersionCustomInstruments(0.0112f));
-				instruments.addAll(getVersionCustomInstruments(0.0114f));
-			}
-		} else if (getServerVersion() < 0.0114f){
-			if (firstCustomInstrumentIndex == 16){
-				instruments.addAll(getVersionCustomInstruments(0.0114f));
-			}
-		}
+        if (customInstrumentsForDefaultInstruments == null) {
+            customInstrumentsForDefaultInstruments = new ArrayList<>();
+            customInstrumentsForDefaultInstruments.addAll(getVersionCustomInstruments(0.0112f));
+            customInstrumentsForDefaultInstruments.addAll(getVersionCustomInstruments(0.0114f));
+            customInstrumentsForDefaultInstruments.addAll(getVersionCustomInstruments(0.2601f));
+        }
+
+        byte serverFirstCustomInstrumentIndex = InstrumentUtils.getCustomInstrumentFirstIndex();
+        for (int i = serverFirstCustomInstrumentIndex; i < firstCustomInstrumentIndex; i++) {
+            int customInstrumentIndex = i - 5;
+            if (customInstrumentIndex < customInstrumentsForDefaultInstruments.size()) {
+                instruments.add(customInstrumentsForDefaultInstruments.get(customInstrumentIndex));
+            }
+        }
 
 		return instruments;
 	}
