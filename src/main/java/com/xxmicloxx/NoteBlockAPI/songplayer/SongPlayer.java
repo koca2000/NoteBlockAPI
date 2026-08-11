@@ -49,7 +49,6 @@ public abstract class SongPlayer {
 	private final Random rng = new Random();
 	private final PlaybackClock playbackClock = new PlaybackClock();
 	private BukkitTask playbackTask;
-	private long lastPlaybackNanos;
 
 	protected NoteBlockAPI plugin;
 
@@ -313,12 +312,7 @@ public abstract class SongPlayer {
 	 * Starts this SongPlayer
 	 */
 	private void start() {
-		lastPlaybackNanos = System.nanoTime();
 		playbackTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
-			long currentNanos = System.nanoTime();
-			double elapsedSeconds = (currentNanos - lastPlaybackNanos) / 1_000_000_000.0;
-			lastPlaybackNanos = currentNanos;
-
 			lock.lock();
 			try {
 				if (destroyed || NoteBlockAPI.getAPI().isDisabling()){
@@ -331,8 +325,8 @@ public abstract class SongPlayer {
 					return;
 				}
 
-				int ticksToPlay = playbackClock.advance(elapsedSeconds, song.getSpeed());
-				// High-tempo songs and server delays may require multiple song ticks in one server tick.
+				int ticksToPlay = playbackClock.advance(song.getSpeed());
+				// High-tempo songs may require multiple song ticks in one server tick.
 				while (ticksToPlay-- > 0 && !destroyed && (playing || fading)) {
 					playSongTick();
 				}
@@ -664,7 +658,6 @@ public abstract class SongPlayer {
 
 		if (playing) {
 			playbackClock.reset();
-			lastPlaybackNanos = System.nanoTime();
 		}
 		this.playing = playing;
 		if (fade != null && fade.getType() != FadeType.NONE) {
@@ -700,7 +693,6 @@ public abstract class SongPlayer {
 	public void setTick(short tick) {
 		this.tick = tick;
 		playbackClock.reset();
-		lastPlaybackNanos = System.nanoTime();
 		CallUpdate("tick", tick);
 	}
 
@@ -821,7 +813,6 @@ public abstract class SongPlayer {
 				actualSong = index;
 				tick = -1;
 				playbackClock.reset();
-				lastPlaybackNanos = System.nanoTime();
 				fadeIn.setFadeDone(0);
 				fadeOut.setFadeDone(0);
 				CallUpdate("song", song);
@@ -919,15 +910,16 @@ public abstract class SongPlayer {
 
 	static final class PlaybackClock {
 
+		private static final double SERVER_TICKS_PER_SECOND = 20.0;
 		private static final double ROUNDING_EPSILON = 1.0e-9;
 		private double pendingTicks;
 
-		int advance(double elapsedSeconds, float ticksPerSecond) {
-			if (elapsedSeconds <= 0 || ticksPerSecond <= 0) {
+		int advance(float ticksPerSecond) {
+			if (ticksPerSecond <= 0) {
 				return 0;
 			}
 
-			pendingTicks += elapsedSeconds * ticksPerSecond;
+			pendingTicks += ticksPerSecond / SERVER_TICKS_PER_SECOND;
 			int ticksToPlay = (int) Math.floor(pendingTicks + ROUNDING_EPSILON);
 			pendingTicks -= ticksToPlay;
 			return ticksToPlay;

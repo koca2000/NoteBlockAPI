@@ -18,28 +18,29 @@ public class PlaybackClockTest {
 		SongPlayer.PlaybackClock clock = new SongPlayer.PlaybackClock();
 		int playedTicks = 0;
 		for (int serverTick = 0; serverTick < 2000; serverTick++) {
-			playedTicks += clock.advance(0.05, 31.86f);
+			playedTicks += clock.advance(31.86f);
 		}
 
 		assertEquals(3186, playedTicks);
 	}
 
 	@Test
-	public void catchesUpAllSongTicksAfterDelayedServerTick() {
+	public void playsExactlyOneSongTickPerServerTickAtTwentyTicksPerSecond() {
 		SongPlayer.PlaybackClock clock = new SongPlayer.PlaybackClock();
-
-		assertEquals(8, clock.advance(0.2, 40.0f));
+		for (int serverTick = 0; serverTick < 100; serverTick++) {
+			assertEquals(1, clock.advance(20.0f));
+		}
 	}
 
 	@Test
 	public void resetDiscardsPausedFractionWithoutSkippingFutureTicks() {
 		SongPlayer.PlaybackClock clock = new SongPlayer.PlaybackClock();
-		assertEquals(0, clock.advance(0.01, 31.86f));
+		assertEquals(0, clock.advance(10.0f));
 		clock.reset();
 
 		int playedTicks = 0;
 		for (int serverTick = 0; serverTick < 20; serverTick++) {
-			playedTicks += clock.advance(0.05, 20.0f);
+			playedTicks += clock.advance(20.0f);
 		}
 		assertEquals(20, playedTicks);
 	}
@@ -48,7 +49,7 @@ public class PlaybackClockTest {
 		SongPlayer.PlaybackClock clock = new SongPlayer.PlaybackClock();
 		int playedTicks = 0;
 		for (int serverTick = 0; serverTick < 20; serverTick++) {
-			playedTicks += clock.advance(0.05, tempo);
+			playedTicks += clock.advance(tempo);
 		}
 		assertEquals(expectedTicks, playedTicks);
 	}
