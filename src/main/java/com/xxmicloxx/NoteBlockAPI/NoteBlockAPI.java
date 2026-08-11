@@ -204,7 +204,11 @@ public class NoteBlockAPI extends JavaPlugin {
 	}
 
 	public void doSync(Runnable runnable) {
-		getServer().getScheduler().runTask(this, runnable);
+		if (Bukkit.isPrimaryThread()) {
+			runnable.run();
+		} else {
+			getServer().getScheduler().runTask(this, runnable);
+		}
 	}
 
 	public void doAsync(Runnable runnable) {

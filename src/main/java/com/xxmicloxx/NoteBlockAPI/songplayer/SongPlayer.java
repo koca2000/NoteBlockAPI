@@ -7,6 +7,7 @@ import com.xxmicloxx.NoteBlockAPI.model.playmode.ChannelMode;
 import com.xxmicloxx.NoteBlockAPI.model.playmode.MonoMode;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -46,6 +47,9 @@ public abstract class SongPlayer {
 
 	private final Lock lock = new ReentrantLock();
 	private final Random rng = new Random();
+	private final PlaybackClock playbackClock = new PlaybackClock();
+	private BukkitTask playbackTask;
+	private long lastPlaybackNanos;
 
 	protected NoteBlockAPI plugin;
 
@@ -309,15 +313,27 @@ public abstract class SongPlayer {
 	 * Starts this SongPlayer
 	 */
 	private void start() {
-		plugin.doAsync(() -> {
-			while (!destroyed) {
-				long startTime = System.currentTimeMillis();
-				lock.lock();
-				try {
-					if (destroyed || NoteBlockAPI.getAPI().isDisabling()){
-						break;
-					}
+		lastPlaybackNanos = System.nanoTime();
+		playbackTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+			long currentNanos = System.nanoTime();
+			double elapsedSeconds = (currentNanos - lastPlaybackNanos) / 1_000_000_000.0;
+			lastPlaybackNanos = currentNanos;
 
+			lock.lock();
+			try {
+				if (destroyed || NoteBlockAPI.getAPI().isDisabling()){
+					playbackTask.cancel();
+					return;
+				}
+
+				if (!playing && !fading) {
+					playbackClock.reset();
+					return;
+				}
+
+				int ticksToPlay = playbackClock.advance(elapsedSeconds, song.getSpeed());
+				// High-tempo songs and server delays may require multiple song ticks in one server tick.
+				while (ticksToPlay-- > 0 && !destroyed) {
 					if (playing || fading) {
 						if (fadeTemp != null){
 							if (fadeTemp.isDone()) {
@@ -430,51 +446,35 @@ public abstract class SongPlayer {
 							continue;
 						}
 						CallUpdate("tick", tick);
-						
-						plugin.doSync(() -> {
-							try {
-								for (UUID uuid : playerList.keySet()) {
-									Player player = Bukkit.getPlayer(uuid);
-									if (player == null) {
-										// offline...
-										continue;
-									}
-									playTick(player, tick);
+
+						try {
+							for (UUID uuid : playerList.keySet()) {
+								Player player = Bukkit.getPlayer(uuid);
+								if (player == null) {
+									// offline...
+									continue;
 								}
-							} catch (Exception e){
-								Bukkit.getLogger().severe("An error occurred during the playback of song "
-										+ (song != null ?
-										song.getPath() + " (" + song.getAuthor() + " - " + song.getTitle() + ")"
-										: "null"));
-								e.printStackTrace();
+								playTick(player, tick);
 							}
-						});
-					}
-				} catch (Exception e) {
-					Bukkit.getLogger().severe("An error occurred during the playback of song "
-							+ (song != null ?
+						} catch (Exception e){
+							Bukkit.getLogger().severe("An error occurred during the playback of song "
+									+ (song != null ?
 									song.getPath() + " (" + song.getAuthor() + " - " + song.getTitle() + ")"
 									: "null"));
-					e.printStackTrace();
-				} finally {
-					lock.unlock();
-				}
-
-				if (destroyed) {
-					break;
-				}
-
-				long duration = System.currentTimeMillis() - startTime;
-				float delayMillis = song.getDelay() * 50;
-				if (duration < delayMillis) {
-					try {
-						Thread.sleep((long) (delayMillis - duration));
-					} catch (InterruptedException e) {
-						// do nothing
+							e.printStackTrace();
+						}
 					}
 				}
+			} catch (Exception e) {
+				Bukkit.getLogger().severe("An error occurred during the playback of song "
+						+ (song != null ?
+							song.getPath() + " (" + song.getAuthor() + " - " + song.getTitle() + ")"
+							: "null"));
+				e.printStackTrace();
+			} finally {
+				lock.unlock();
 			}
-		});
+		}, 0L, 1L);
 	}
 
 	private void checkPlaylistQueue(){
@@ -606,6 +606,9 @@ public abstract class SongPlayer {
 			}
 			destroyed = true;
 			playing = false;
+			if (playbackTask != null) {
+				playbackTask.cancel();
+			}
 			setTick((short) -1);
 			CallUpdate("destroyed", destroyed);
 			CallUpdate("playing", playing);
@@ -642,6 +645,10 @@ public abstract class SongPlayer {
 	public void setPlaying(boolean playing, Fade fade) {
 		if (this.playing == playing) return;
 
+		if (playing) {
+			playbackClock.reset();
+			lastPlaybackNanos = System.nanoTime();
+		}
 		this.playing = playing;
 		if (fade != null && fade.getType() != FadeType.NONE) {
 			fadeTemp = new Fade(fade.getType(), fade.getFadeDuration());
@@ -675,6 +682,8 @@ public abstract class SongPlayer {
 	 */
 	public void setTick(short tick) {
 		this.tick = tick;
+		playbackClock.reset();
+		lastPlaybackNanos = System.nanoTime();
 		CallUpdate("tick", tick);
 	}
 
@@ -794,6 +803,8 @@ public abstract class SongPlayer {
 				song = playlist.get(index);
 				actualSong = index;
 				tick = -1;
+				playbackClock.reset();
+				lastPlaybackNanos = System.nanoTime();
 				fadeIn.setFadeDone(0);
 				fadeOut.setFadeDone(0);
 				CallUpdate("song", song);
