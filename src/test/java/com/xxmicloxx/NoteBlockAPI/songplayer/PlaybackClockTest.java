@@ -15,7 +15,7 @@ public class PlaybackClockTest {
 
 	@Test
 	public void preservesFractionalTempoOverTime() {
-		PlaybackClock clock = new PlaybackClock();
+		SongPlayer.PlaybackClock clock = new SongPlayer.PlaybackClock();
 		int playedTicks = 0;
 		for (int serverTick = 0; serverTick < 2000; serverTick++) {
 			playedTicks += clock.advance(0.05, 31.86f);
@@ -26,14 +26,14 @@ public class PlaybackClockTest {
 
 	@Test
 	public void catchesUpAllSongTicksAfterDelayedServerTick() {
-		PlaybackClock clock = new PlaybackClock();
+		SongPlayer.PlaybackClock clock = new SongPlayer.PlaybackClock();
 
 		assertEquals(8, clock.advance(0.2, 40.0f));
 	}
 
 	@Test
 	public void resetDiscardsPausedFractionWithoutSkippingFutureTicks() {
-		PlaybackClock clock = new PlaybackClock();
+		SongPlayer.PlaybackClock clock = new SongPlayer.PlaybackClock();
 		assertEquals(0, clock.advance(0.01, 31.86f));
 		clock.reset();
 
@@ -45,7 +45,7 @@ public class PlaybackClockTest {
 	}
 
 	private void assertTicksPlayedAfterOneSecond(float tempo, int expectedTicks) {
-		PlaybackClock clock = new PlaybackClock();
+		SongPlayer.PlaybackClock clock = new SongPlayer.PlaybackClock();
 		int playedTicks = 0;
 		for (int serverTick = 0; serverTick < 20; serverTick++) {
 			playedTicks += clock.advance(0.05, tempo);
