@@ -430,9 +430,9 @@ public abstract class SongPlayer {
 		songQueue.put(song, true);
 		checkPlaylistQueue();
 		ArrayList<Song> left = new ArrayList<>();
-		for (Song candidate : songQueue.keySet()) {
-			if (!songQueue.get(candidate)) {
-				left.add(candidate);
+		for (Map.Entry<Song, Boolean> entry : songQueue.entrySet()) {
+			if (Boolean.FALSE.equals(entry.getValue())) {
+				left.add(entry.getKey());
 			}
 		}
 
