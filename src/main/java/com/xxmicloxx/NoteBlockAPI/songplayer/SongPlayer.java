@@ -7,6 +7,7 @@ import com.xxmicloxx.NoteBlockAPI.model.playmode.ChannelMode;
 import com.xxmicloxx.NoteBlockAPI.model.playmode.MonoMode;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -46,6 +47,8 @@ public abstract class SongPlayer {
 
 	private final Lock lock = new ReentrantLock();
 	private final Random rng = new Random();
+	private final PlaybackClock playbackClock = new PlaybackClock();
+	private BukkitTask playbackTask;
 
 	protected NoteBlockAPI plugin;
 
@@ -309,172 +312,180 @@ public abstract class SongPlayer {
 	 * Starts this SongPlayer
 	 */
 	private void start() {
-		plugin.doAsync(() -> {
-			while (!destroyed) {
-				long startTime = System.currentTimeMillis();
-				lock.lock();
-				try {
-					if (destroyed || NoteBlockAPI.getAPI().isDisabling()){
-						break;
-					}
-
-					if (playing || fading) {
-						if (fadeTemp != null){
-							if (fadeTemp.isDone()) {
-								fadeTemp = null;
-								fading = false;
-								if (!playing) {
-									SongStoppedEvent event = new SongStoppedEvent(this);
-									plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
-									volume = fadeIn.getFadeTarget();
-									continue;
-								}
-							}else {
-								int fade = fadeTemp.calculateFade();
-								if (fade != -1){
-									volume = (byte) fade;
-								}
-							}
-						} else if (tick < fadeIn.getFadeDuration()){
-							int fade = fadeIn.calculateFade();
-							if (fade != -1){
-								volume = (byte) fade;
-							}
-							CallUpdate("fadeDone", fadeIn.getFadeDone());
-						} else if (tick >= song.getLength() - fadeOut.getFadeDuration()){
-							int fade = fadeOut.calculateFade();
-							if (fade != -1){
-								volume = (byte) fade;
-							}
-						}
-						
-						tick++;
-						if (tick > song.getLength()) {
-							tick = -1;
-							fadeIn.setFadeDone(0);
-							CallUpdate("fadeDone", fadeIn.getFadeDone());
-							fadeOut.setFadeDone(0);
-							volume = fadeIn.getFadeTarget();
-							if (repeat == RepeatMode.ONE){
-								SongLoopEvent event = new SongLoopEvent(this);
-								plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
-
-								if (!event.isCancelled()) {
-									continue;
-								}
-							} else {
-								if (random) {
-									songQueue.put(song, true);
-									checkPlaylistQueue();
-									ArrayList<Song> left = new ArrayList<>();
-									for (Song s : songQueue.keySet()) {
-										if (!songQueue.get(s)) {
-											left.add(s);
-										}
-									}
-
-									if (left.size() == 0) {
-										left.addAll(songQueue.keySet());
-										for (Song s : songQueue.keySet()) {
-											songQueue.put(s, false);
-										}
-										song = left.get(rng.nextInt(left.size()));
-										actualSong = playlist.getIndex(song);
-										CallUpdate("song", song);
-										if (repeat == RepeatMode.ALL) {
-											SongLoopEvent event = new SongLoopEvent(this);
-											plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
-
-											if (!event.isCancelled()) {
-												continue;
-											}
-										}
-									} else {
-										song = left.get(rng.nextInt(left.size()));
-										actualSong = playlist.getIndex(song);
-
-										CallUpdate("song", song);
-										SongNextEvent event = new SongNextEvent(this);
-										plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
-										continue;
-									}
-								} else {
-									if (playlist.hasNext(actualSong)) {
-										actualSong++;
-										song = playlist.get(actualSong);
-										CallUpdate("song", song);
-										SongNextEvent event = new SongNextEvent(this);
-										plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
-										continue;
-									} else {
-										actualSong = 0;
-										song = playlist.get(actualSong);
-										CallUpdate("song", song);
-										if (repeat == RepeatMode.ALL) {
-											SongLoopEvent event = new SongLoopEvent(this);
-											plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
-
-											if (!event.isCancelled()) {
-												continue;
-											}
-										}
-									}
-								}
-							}
-							playing = false;
-							SongEndEvent event = new SongEndEvent(this);
-							plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
-							if (autoDestroy) {
-								destroy();
-							}
-							continue;
-						}
-						CallUpdate("tick", tick);
-						
-						plugin.doSync(() -> {
-							try {
-								for (UUID uuid : playerList.keySet()) {
-									Player player = Bukkit.getPlayer(uuid);
-									if (player == null) {
-										// offline...
-										continue;
-									}
-									playTick(player, tick);
-								}
-							} catch (Exception e){
-								Bukkit.getLogger().severe("An error occurred during the playback of song "
-										+ (song != null ?
-										song.getPath() + " (" + song.getAuthor() + " - " + song.getTitle() + ")"
-										: "null"));
-								e.printStackTrace();
-							}
-						});
-					}
-				} catch (Exception e) {
-					Bukkit.getLogger().severe("An error occurred during the playback of song "
-							+ (song != null ?
-									song.getPath() + " (" + song.getAuthor() + " - " + song.getTitle() + ")"
-									: "null"));
-					e.printStackTrace();
-				} finally {
-					lock.unlock();
+		playbackTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+			lock.lock();
+			try {
+				if (destroyed || NoteBlockAPI.getAPI().isDisabling()){
+					playbackTask.cancel();
+					return;
 				}
 
-				if (destroyed) {
-					break;
+				if (!playing && !fading) {
+					playbackClock.reset();
+					return;
 				}
 
-				long duration = System.currentTimeMillis() - startTime;
-				float delayMillis = song.getDelay() * 50;
-				if (duration < delayMillis) {
-					try {
-						Thread.sleep((long) (delayMillis - duration));
-					} catch (InterruptedException e) {
-						// do nothing
-					}
+				int ticksToPlay = playbackClock.advance(song.getSpeed());
+				// High-tempo songs may require multiple song ticks in one server tick.
+				while (ticksToPlay-- > 0 && !destroyed && (playing || fading)) {
+					playSongTick();
 				}
+			} catch (Exception e) {
+				Bukkit.getLogger().severe("An error occurred during the playback of song "
+						+ (song != null ?
+							song.getPath() + " (" + song.getAuthor() + " - " + song.getTitle() + ")"
+							: "null"));
+				e.printStackTrace();
+			} finally {
+				lock.unlock();
 			}
-		});
+		}, 0L, 1L);
+	}
+
+	private void playSongTick() {
+		if (!updateFade()) {
+			tick++;
+			if (tick > song.getLength()) {
+				handleSongEnd();
+			} else {
+				CallUpdate("tick", tick);
+				playCurrentTickForPlayers();
+			}
+		}
+	}
+
+	private boolean updateFade() {
+		boolean skipTick = false;
+		if (fadeTemp != null){
+			if (fadeTemp.isDone()) {
+				fadeTemp = null;
+				fading = false;
+				if (!playing) {
+					SongStoppedEvent event = new SongStoppedEvent(this);
+					plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
+					volume = fadeIn.getFadeTarget();
+					skipTick = true;
+				}
+			} else {
+				applyFadeVolume(fadeTemp.calculateFade());
+			}
+		} else if (tick < fadeIn.getFadeDuration()){
+			applyFadeVolume(fadeIn.calculateFade());
+			CallUpdate("fadeDone", fadeIn.getFadeDone());
+		} else if (tick >= song.getLength() - fadeOut.getFadeDuration()){
+			applyFadeVolume(fadeOut.calculateFade());
+		}
+		return skipTick;
+	}
+
+	private void applyFadeVolume(int fade) {
+		if (fade != -1){
+			volume = (byte) fade;
+		}
+	}
+
+	private void handleSongEnd() {
+		tick = -1;
+		fadeIn.setFadeDone(0);
+		CallUpdate("fadeDone", fadeIn.getFadeDone());
+		fadeOut.setFadeDone(0);
+		volume = fadeIn.getFadeTarget();
+
+		if (!prepareFollowingSong()) {
+			playing = false;
+			SongEndEvent event = new SongEndEvent(this);
+			plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
+			if (autoDestroy) {
+				destroy();
+			}
+		}
+	}
+
+	private boolean prepareFollowingSong() {
+		boolean continuePlaying = false;
+		if (repeat == RepeatMode.ONE){
+			continuePlaying = callSongLoopEvent();
+		} else if (random) {
+			continuePlaying = selectRandomSong();
+		} else if (playlist.hasNext(actualSong)) {
+			selectSong(actualSong + 1);
+			callSongNextEvent();
+			continuePlaying = true;
+		} else {
+			selectSong(0);
+			if (repeat == RepeatMode.ALL) {
+				continuePlaying = callSongLoopEvent();
+			}
+		}
+		return continuePlaying;
+	}
+
+	private boolean selectRandomSong() {
+		songQueue.put(song, true);
+		checkPlaylistQueue();
+		ArrayList<Song> left = new ArrayList<>();
+		for (Map.Entry<Song, Boolean> entry : songQueue.entrySet()) {
+			if (Boolean.FALSE.equals(entry.getValue())) {
+				left.add(entry.getKey());
+			}
+		}
+
+		boolean continuePlaying;
+		if (left.isEmpty()) {
+			left.addAll(songQueue.keySet());
+			for (Song candidate : songQueue.keySet()) {
+				songQueue.put(candidate, false);
+			}
+			selectSong(left.get(rng.nextInt(left.size())));
+			continuePlaying = repeat == RepeatMode.ALL && callSongLoopEvent();
+		} else {
+			selectSong(left.get(rng.nextInt(left.size())));
+			callSongNextEvent();
+			continuePlaying = true;
+		}
+		return continuePlaying;
+	}
+
+	private void selectSong(int index) {
+		song = playlist.get(index);
+		actualSong = index;
+		CallUpdate("song", song);
+	}
+
+	private void selectSong(Song selectedSong) {
+		song = selectedSong;
+		actualSong = playlist.getIndex(song);
+		CallUpdate("song", song);
+	}
+
+	private boolean callSongLoopEvent() {
+		SongLoopEvent event = new SongLoopEvent(this);
+		plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
+		return !event.isCancelled();
+	}
+
+	private void callSongNextEvent() {
+		SongNextEvent event = new SongNextEvent(this);
+		plugin.doSync(() -> Bukkit.getPluginManager().callEvent(event));
+	}
+
+	private void playCurrentTickForPlayers() {
+		try {
+			for (UUID uuid : playerList.keySet()) {
+				Player player = Bukkit.getPlayer(uuid);
+				if (player == null) {
+					// offline...
+					continue;
+				}
+				playTick(player, tick);
+			}
+		} catch (Exception e){
+			Bukkit.getLogger().severe("An error occurred during the playback of song "
+					+ (song != null ?
+					song.getPath() + " (" + song.getAuthor() + " - " + song.getTitle() + ")"
+					: "null"));
+			e.printStackTrace();
+		}
 	}
 
 	private void checkPlaylistQueue(){
@@ -606,6 +617,9 @@ public abstract class SongPlayer {
 			}
 			destroyed = true;
 			playing = false;
+			if (playbackTask != null) {
+				playbackTask.cancel();
+			}
 			setTick((short) -1);
 			CallUpdate("destroyed", destroyed);
 			CallUpdate("playing", playing);
@@ -642,6 +656,9 @@ public abstract class SongPlayer {
 	public void setPlaying(boolean playing, Fade fade) {
 		if (this.playing == playing) return;
 
+		if (playing) {
+			playbackClock.reset();
+		}
 		this.playing = playing;
 		if (fade != null && fade.getType() != FadeType.NONE) {
 			fadeTemp = new Fade(fade.getType(), fade.getFadeDuration());
@@ -675,6 +692,7 @@ public abstract class SongPlayer {
 	 */
 	public void setTick(short tick) {
 		this.tick = tick;
+		playbackClock.reset();
 		CallUpdate("tick", tick);
 	}
 
@@ -794,6 +812,7 @@ public abstract class SongPlayer {
 				song = playlist.get(index);
 				actualSong = index;
 				tick = -1;
+				playbackClock.reset();
 				fadeIn.setFadeDone(0);
 				fadeOut.setFadeDone(0);
 				CallUpdate("song", song);
@@ -887,6 +906,28 @@ public abstract class SongPlayer {
 
 	public ChannelMode getChannelMode(){
 		return channelMode;
+	}
+
+	static final class PlaybackClock {
+
+		private static final double SERVER_TICKS_PER_SECOND = 20.0;
+		private static final double ROUNDING_EPSILON = 1.0e-9;
+		private double pendingTicks;
+
+		int advance(float ticksPerSecond) {
+			if (ticksPerSecond <= 0) {
+				return 0;
+			}
+
+			pendingTicks += ticksPerSecond / SERVER_TICKS_PER_SECOND;
+			int ticksToPlay = (int) Math.floor(pendingTicks + ROUNDING_EPSILON);
+			pendingTicks -= ticksToPlay;
+			return ticksToPlay;
+		}
+
+		void reset() {
+			pendingTicks = 0;
+		}
 	}
 
 	void CallUpdate(String key, Object value){

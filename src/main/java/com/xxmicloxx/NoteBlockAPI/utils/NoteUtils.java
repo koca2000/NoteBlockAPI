@@ -44,7 +44,7 @@ public class NoteUtils {
     public static float getPitchInOctave(byte key, short pitch) {
         // Apply pitch to key
         key = applyPitchToKey(key, pitch);
-        pitch %= 100;
+        pitch = (short) Math.floorMod(pitch, 100);
 
         // -15 base_-2
         // 9 base_-1
@@ -62,7 +62,7 @@ public class NoteUtils {
     }
 
     public static byte applyPitchToKey(byte key, short pitch) {
-        key += pitch / 100;
+        key += Math.floorDiv(pitch, 100);
         return key;
     }
 
