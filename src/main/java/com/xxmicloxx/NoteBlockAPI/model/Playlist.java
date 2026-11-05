@@ -15,6 +15,8 @@ public class Playlist {
 		checkNull(songs);
 		this.songs.addAll(Arrays.asList(songs));
 	}
+
+	public Playlist(){}
 	
 	/**
 	 * Add array of {@link Song} to playlist
